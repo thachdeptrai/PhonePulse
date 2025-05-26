@@ -60,4 +60,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata:2.7.0")
 // Material UI
     implementation("com.google.android.material:material:1.11.0")
+    // Okhpt
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
 }

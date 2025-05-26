@@ -1,4 +1,7 @@
 package com.phoneapp.phonepulse.utils;
+import android.app.Application;
+import dagger.hilt.android.HiltAndroidApp;
 
-public class MyApplication {
+@HiltAndroidApp
+public class MyApplication extends Application{
 }
