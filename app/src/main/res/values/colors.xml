@@ -2,5 +2,12 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-
+    <color name="primary_blue">#667eea</color>
+    <color name="primary_purple">#764ba2</color>
+    <color name="accent_pink">#f093fb</color>
+    <color name="white_40">#66FFFFFF</color>
+    <color name="white_60">#99FFFFFF</color>
+    <color name="white_80">#CCFFFFFF</color>
+    <color name="progress_start">#00D4AA</color>
+    <color name="progress_end">#00A8FF</color>
 </resources>
