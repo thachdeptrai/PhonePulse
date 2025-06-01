@@ -1,10 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.auth.LoginActivity">
+    android:background="#1C1B3A">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <ImageView
+        android:id="@+id/logoImageView"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/icon"
+        android:contentDescription="PhonePulse Logo"
+        />
+
+    <!-- Logo Text -->
+    <TextView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Come Find What’s Yours"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_below="@id/logoImageView"
+        android:layout_marginTop="16dp"
+        android:layout_centerHorizontal="true" />
+
+    <!-- Slogan -->
+    <TextView
+        android:id="@+id/slogan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your Choice, Your Style, Your Shop"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:layout_below="@id/logo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp" />
+
+    <!-- Rewards Title -->
+    <TextView
+        android:id="@+id/rewards"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PhonePulse"
+        android:textColor="@android:color/white"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:layout_below="@id/slogan"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="4dp" />
+
+    <!-- Email Input -->
+    <EditText
+        android:id="@+id/edEmail"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="24dp"
+        android:layout_below="@id/rewards"
+        android:background="@drawable/bg_input_field"
+        android:drawableLeft="@drawable/ic_person"
+        android:drawablePadding="12dp"
+        android:hint="Email"
+        android:padding="12dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#BBBBBB" />
+
+    <!-- Password Input -->
+    <EditText
+        android:id="@+id/edPassWord"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="10dp"
+        android:layout_below="@id/edEmail"
+        android:background="@drawable/bg_input_field"
+        android:drawableLeft="@drawable/ic_pass"
+        android:drawablePadding="12dp"
+        android:hint="Password"
+        android:inputType="textPassword"
+        android:padding="12dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#BBBBBB" />
+
+    <!-- Sign In Button -->
+    <Button
+        android:id="@+id/btnLogin"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="20dp"
+        android:layout_below="@id/edPassWord"
+        android:text="SIGN IN"
+        android:layout_marginBottom="20dp"
+        android:textAllCaps="true"
+        android:textColor="#FFFFFF"
+        android:background="#2D2C5D" />
+    <LinearLayout
+        android:id="@+id/socialLoginLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_below="@id/btnLogin">
+
+        <!-- Google -->
+        <ImageButton
+            android:id="@+id/btnGoogle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/bg_circle_white"
+            android:src="@drawable/ic_gg"
+            android:scaleType="centerInside"
+            android:contentDescription="Google Login" />
+
+        <!-- Facebook -->
+        <ImageButton
+            android:id="@+id/btnFacebook"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/bg_circle_white"
+            android:src="@drawable/ic_fb"
+            android:scaleType="centerInside"
+            android:contentDescription="Facebook Login" />
+    </LinearLayout>
+    <Button
+        android:id="@+id/btnRegister"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Create a New Account"
+        android:textColor="#FFFFFF"
+        android:background="@android:color/transparent"
+        android:textSize="16sp"
+        android:layout_below="@+id/socialLoginLayout"
+        android:layout_gravity="center_horizontal" />
+
+</RelativeLayout>
