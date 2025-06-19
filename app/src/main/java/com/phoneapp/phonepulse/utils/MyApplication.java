@@ -1,4 +1,5 @@
 package com.phoneapp.phonepulse.utils;
+
 import android.app.Application;
 import dagger.hilt.android.HiltAndroidApp;
 
