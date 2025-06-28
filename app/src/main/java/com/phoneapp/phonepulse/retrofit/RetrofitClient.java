@@ -1,22 +1,31 @@
 package com.phoneapp.phonepulse.retrofit;
 
-import android.content.Context;
+import com.phoneapp.phonepulse.data.api.ApiService;
+import com.phoneapp.phonepulse.utils.Constants;
 
-import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    private static final String BASE_URL = "https://localhost:5000/"; // TODO: thay bằng URL thực tế
     private static Retrofit retrofit = null;
 
     public static Retrofit getClient(String token) {
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+
+        // Cấu hình timeout
+        httpClient.connectTimeout(30, TimeUnit.SECONDS);
+        httpClient.readTimeout(30, TimeUnit.SECONDS);
+        httpClient.writeTimeout(30, TimeUnit.SECONDS);
+
+        // Thêm logging interceptor để debug
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        httpClient.addInterceptor(loggingInterceptor);
 
         // Nếu có token -> gắn header Authorization
         if (token != null && !token.isEmpty()) {
@@ -24,6 +33,19 @@ public class RetrofitClient {
                 Request original = chain.request();
                 Request.Builder requestBuilder = original.newBuilder()
                         .header("Authorization", "Bearer " + token)
+                        .header("Content-Type", "application/json")
+                        .header("Accept", "application/json")
+                        .method(original.method(), original.body());
+                Request request = requestBuilder.build();
+                return chain.proceed(request);
+            });
+        } else {
+            // Thêm headers cho request không cần token
+            httpClient.addInterceptor(chain -> {
+                Request original = chain.request();
+                Request.Builder requestBuilder = original.newBuilder()
+                        .header("Content-Type", "application/json")
+                        .header("Accept", "application/json")
                         .method(original.method(), original.body());
                 Request request = requestBuilder.build();
                 return chain.proceed(request);
@@ -32,7 +54,7 @@ public class RetrofitClient {
 
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL + "/") // đảm bảo có dấu "/" cuối
+                    .baseUrl(Constants.BASE_URL)
                     .addConverterFactory(GsonConverterFactory.create())
                     .client(httpClient.build())
                     .build();
@@ -41,7 +63,6 @@ public class RetrofitClient {
         return retrofit;
     }
 
-    // Tạo ApiService có thể sử dụng từ bất kỳ đâu
     public static ApiService getApiService(String token) {
         return getClient(token).create(ApiService.class);
     }

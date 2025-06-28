@@ -20,6 +20,8 @@ import androidx.core.view.ViewPropertyAnimatorCompat;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.ui.auth.LoginActivity;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
 public class SplashActivity extends AppCompatActivity {
 
     private static final int SPLASH_DURATION = 3000; // 3 seconds
@@ -195,8 +197,4 @@ public class SplashActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
 }

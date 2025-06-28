@@ -1,11 +1,13 @@
-package com.phoneapp.phonepulse.request;
+package com.phoneapp.phonepulse.data.api;
+
+import com.phoneapp.phonepulse.repository.LoginResponse;
 
 public class ApiResponse<T> {
     private boolean success;
     private String message;
     private T data;
-
     public ApiResponse() {}
+
 
     public boolean isSuccess() {
         return success;

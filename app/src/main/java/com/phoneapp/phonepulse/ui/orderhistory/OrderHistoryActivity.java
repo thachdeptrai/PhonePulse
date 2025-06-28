@@ -10,6 +10,9 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.phoneapp.phonepulse.R;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class OrderHistoryActivity extends AppCompatActivity {
 
     @Override

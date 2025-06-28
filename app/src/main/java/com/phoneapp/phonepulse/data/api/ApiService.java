@@ -1,9 +1,7 @@
-package com.phoneapp.phonepulse.retrofit;
+package com.phoneapp.phonepulse.data.api;
 
-import com.phoneapp.phonepulse.data.network.Order;
-import com.phoneapp.phonepulse.data.network.Product;
-import com.phoneapp.phonepulse.data.network.User;
 import com.phoneapp.phonepulse.models.*;
+import com.phoneapp.phonepulse.repository.LoginResponse;
 import com.phoneapp.phonepulse.request.*;
 
 import java.util.List;
@@ -16,10 +14,10 @@ public interface ApiService {
 
     // ========== AUTH ==========
     @POST("/api/users/register")
-    Call<ApiResponse<User>> register(@Body RegisterRequest body);
+    Call<ApiResponse> register(@Body RegisterRequest body);
 
     @POST("/api/users/login")
-    Call<LoginResponse> login(@Body LoginRequest body);
+    Call<ApiResponse<LoginResponse>> login(@Body LoginRequest body);
 
     @POST("/api/users/logout")
     Call<ApiResponse> logout(@Header("Authorization") String token);

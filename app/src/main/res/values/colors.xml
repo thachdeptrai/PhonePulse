@@ -11,10 +11,28 @@
     <color name="progress_start">#00D4AA</color>
     <color name="progress_end">#00A8FF</color>
 
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#FF6B00</color>
+    <color name="colorAccent">#FF6B00</color>
 
-    <color name="colorAccent">#FF4081</color>
+    <!-- Shopee Colors -->
+    <color name="shopee_orange">#FF6B00</color>
+    <color name="shopee_orange_dark">#E65100</color>
+    <color name="shopee_orange_light">#FFB74D</color>
+    <color name="shopee_red">#E74C3C</color>
+
+    <!-- Text Colors -->
+    <color name="text_light">#CCCCCC</color>
+
+    <!-- Background Colors -->
+    <color name="background_light">#F5F5F5</color>
+    <color name="background_white">#FFFFFF</color>
+    <color name="background_gray">#E0E0E0</color>
+
+    <!-- Status Colors -->
+    <color name="success_green">#4CAF50</color>
+    <color name="warning_yellow">#FFC107</color>
+    <color name="error_red">#F44336</color>
+    <color name="info_blue">#2196F3</color>
     <color name="colorBackground">#FFFFFF</color>
     <color name="colorTextPrimary">#212121</color>
     <color name="colorTextSecondary">#757575</color>

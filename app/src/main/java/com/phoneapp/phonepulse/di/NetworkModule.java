@@ -2,6 +2,7 @@ package com.phoneapp.phonepulse.di;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.data.network.AuthInterceptor;
 import com.phoneapp.phonepulse.utils.Constants;
 
@@ -61,6 +62,11 @@ public class NetworkModule {
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())      // Hỗ trợ RxJava
                 .client(okHttpClient)                                           // Thiết lập client đã cấu hình (gồm interceptors)
                 .build();
+    }
+    @Singleton
+    @Provides
+    public static ApiService provideApiService(Retrofit retrofit) {
+        return retrofit.create(ApiService.class);
     }
 
 }

@@ -1,8 +1,13 @@
 package com.phoneapp.phonepulse.models;
 
+import com.google.gson.annotations.SerializedName;
+
 public class ProductImage {
+    @SerializedName("_id")
     private String _id;
+    @SerializedName("product_id")
     private String productId;
+    @SerializedName("image_url")
     private String imageUrl;
 
     public String getId() { return _id; }

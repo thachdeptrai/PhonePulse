@@ -1,6 +1,7 @@
-package com.phoneapp.phonepulse.request;
+package com.phoneapp.phonepulse.repository;
 
-import com.phoneapp.phonepulse.data.network.User;
+
+import com.phoneapp.phonepulse.models.User;
 
 public class LoginResponse {
     private String token;

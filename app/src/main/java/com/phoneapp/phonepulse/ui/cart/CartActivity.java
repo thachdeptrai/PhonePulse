@@ -15,6 +15,9 @@ import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.ui.checkout.CheckoutActivity;
 import com.phoneapp.phonepulse.ui.product.ProductDetailActivity;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class CartActivity extends AppCompatActivity {
 
     @Override

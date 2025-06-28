@@ -1,11 +1,9 @@
 package com.phoneapp.phonepulse.repository;
 
-import com.phoneapp.phonepulse.data.network.User;
-import com.phoneapp.phonepulse.request.ApiResponse;
+import com.phoneapp.phonepulse.data.api.ApiService;
+import com.phoneapp.phonepulse.data.api.ApiResponse;
 import com.phoneapp.phonepulse.request.LoginRequest;
-import com.phoneapp.phonepulse.request.LoginResponse;
 import com.phoneapp.phonepulse.request.RegisterRequest;
-import com.phoneapp.phonepulse.retrofit.ApiService;
 
 import retrofit2.Call;
 
@@ -16,12 +14,13 @@ public class AuthRepository {
         this.apiService = apiService;
     }
 
-    public Call<LoginResponse> login(LoginRequest request) {
+    public Call<ApiResponse<LoginResponse>> login(LoginRequest request) {
         return apiService.login(request);
     }
 
-    public Call<ApiResponse<User>> register(RegisterRequest request) {
+    public Call<ApiResponse> register(RegisterRequest request) {
         return apiService.register(request);
     }
+
 }
 

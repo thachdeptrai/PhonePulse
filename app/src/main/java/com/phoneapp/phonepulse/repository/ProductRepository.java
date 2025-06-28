@@ -1,7 +1,7 @@
 package com.phoneapp.phonepulse.repository;
 
+import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.models.Product;
-import com.phoneapp.phonepulse.retrofit.ApiService;
 
 import java.util.List;
 

@@ -1,42 +1,85 @@
 package com.phoneapp.phonepulse.models;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Product {
-    private int id;
+    @SerializedName("_id")
+    private String id;
+
+    @SerializedName("product_name")
     private String name;
-    private int brand_id;
-    private int price;
-    private int discount;
-    private String image_url;
-    private String specs_json;
-    private int stock;
-    private String created_at; // có thể dùng Date
+
+    @SerializedName("description")
+    private String description;
+
+    @SerializedName("category_id")
+    private Category category;
+    @SerializedName("variant_id")
+    private Variant variantId;
+
+    @SerializedName("created_date")
+    private String createdDate;
+
+    @SerializedName("modified_date")
+    private String modifiedDate;
+    @SerializedName("discount")
+    // Optional: nếu chưa có discount, thì mặc định là 0
+    private int discount = 0;
+    @SerializedName("productimage_id")
+    private ProductImage productImage;
 
     // Getters and Setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public Variant getVariantId() {
+        return variantId;
+    }
+    public void setVariantId(Variant variantId) {
+        this.variantId = variantId;
+    }
+    public ProductImage getProductImage() {
+        return productImage;
+    }
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    public Category getCategory() {
+        return category;
+    }
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+    public String getCreatedDate() {
+        return createdDate;
+    }
+    public void setCreatedDate(String createdDate) {
+        this.createdDate = createdDate;
+    }
+    public String getModifiedDate() {
+        return modifiedDate;
+    }
+    public void setModifiedDate(String modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
+    public int getDiscount() {
+        return discount;
+    }
+    public void setDiscount(int discount) {
+        this.discount = discount;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public int getBrand_id() { return brand_id; }
-    public void setBrand_id(int brand_id) { this.brand_id = brand_id; }
-
-    public int getPrice() { return price; }
-    public void setPrice(int price) { this.price = price; }
-
-    public int getDiscount() { return discount; }
-    public void setDiscount(int discount) { this.discount = discount; }
-
-    public String getImage_url() { return image_url; }
-    public void setImage_url(String image_url) { this.image_url = image_url; }
-
-    public String getSpecs_json() { return specs_json; }
-    public void setSpecs_json(String specs_json) { this.specs_json = specs_json; }
-
-    public int getStock() { return stock; }
-    public void setStock(int stock) { this.stock = stock; }
-
-    public String getCreated_at() { return created_at; }
-    public void setCreated_at(String created_at) { this.created_at = created_at; }
 }
 
