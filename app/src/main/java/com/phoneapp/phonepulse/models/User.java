@@ -1,38 +1,95 @@
-package com.phoneapp.phonepulse.data.network;
+package com.phoneapp.phonepulse.models;
 
 public class User {
-    private int id;
-    private String name;
+    private String _id;
     private String email;
-    private String password_hash;
+    private String fullname;
     private String phone;
-    private String avatar_url;
-    private boolean is_admin;
-    private String created_at; // có thể dùng Date
+    private String avatar;       // đường dẫn ảnh (URL)
+    private String role;         // ví dụ: "user", "admin"
+    private boolean is_verified; // đã xác minh chưa
+    private boolean status;      // trạng thái hoạt động
+    private String createdAt;    // thời gian tạo (ISO string)
+    private String updatedAt;    // thời gian cập nhật
 
-    // Getters and Setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    // Getters & Setters
+    public String get_id() {
+        return _id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void set_id(String _id) {
+        this._id = _id;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getEmail() {
+        return email;
+    }
 
-    public String getPassword_hash() { return password_hash; }
-    public void setPassword_hash(String password_hash) { this.password_hash = password_hash; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
+    public String getFullname() {
+        return fullname;
+    }
 
-    public String getAvatar_url() { return avatar_url; }
-    public void setAvatar_url(String avatar_url) { this.avatar_url = avatar_url; }
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
+    }
 
-    public boolean isIs_admin() { return is_admin; }
-    public void setIs_admin(boolean is_admin) { this.is_admin = is_admin; }
+    public String getPhone() {
+        return phone;
+    }
 
-    public String getCreated_at() { return created_at; }
-    public void setCreated_at(String created_at) { this.created_at = created_at; }
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public boolean isIs_verified() {
+        return is_verified;
+    }
+
+    public void setIs_verified(boolean is_verified) {
+        this.is_verified = is_verified;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }
-

@@ -4,7 +4,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1C1B3A">
+    android:background="#1C1B3A"
+    tools:context=".ui.auth.RegisterActivity">
 
     <!-- Logo -->
     <ImageView
@@ -42,7 +43,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp" />
 
-    <!-- Rewards Title -->
+    <!-- Title -->
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
@@ -69,7 +70,8 @@
         android:hint="Full Name"
         android:padding="12dp"
         android:textColor="#FFFFFF"
-        android:textColorHint="#BBBBBB" />
+        android:textColorHint="#BBBBBB"
+        android:inputType="textPersonName" />
 
     <!-- Email -->
     <EditText
@@ -86,41 +88,75 @@
         android:padding="12dp"
         android:textColor="#FFFFFF"
         android:textColorHint="#BBBBBB"
-        tools:ignore="DuplicateClickableBoundsCheck" />
+        android:inputType="textEmailAddress" />
 
     <!-- Password -->
-    <EditText
-        android:id="@+id/rgPass"
+    <RelativeLayout
+        android:id="@+id/passLayout"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="12dp"
         android:layout_below="@id/rgEmail"
-        android:background="@drawable/bg_input_field"
-        android:drawableLeft="@drawable/ic_pass"
-        android:drawablePadding="12dp"
-        android:hint="Password"
-        android:inputType="textPassword"
-        android:padding="12dp"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#BBBBBB" />
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="12dp">
+
+        <EditText
+            android:id="@+id/rgPass"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_input_field"
+            android:drawableLeft="@drawable/ic_pass"
+            android:drawablePadding="12dp"
+            android:hint="Password"
+            android:padding="12dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#BBBBBB"
+            android:inputType="textPassword" />
+
+        <ImageView
+            android:id="@+id/showHidePass"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/mat"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="12dp"
+            android:clickable="true"
+            android:focusable="true" />
+    </RelativeLayout>
 
     <!-- Confirm Password -->
-    <EditText
-        android:id="@+id/rgConPass"
+    <RelativeLayout
+        android:id="@+id/conPassLayout"
         android:layout_width="match_parent"
         android:layout_height="48dp"
+        android:layout_below="@id/passLayout"
         android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="12dp"
-        android:layout_below="@id/rgPass"
-        android:background="@drawable/bg_input_field"
-        android:drawableLeft="@drawable/ic_pass"
-        android:drawablePadding="12dp"
-        android:hint="Confirm Password"
-        android:inputType="textPassword"
-        android:padding="12dp"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#BBBBBB" />
+        android:layout_marginTop="12dp">
+
+        <EditText
+            android:id="@+id/rgConPass"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_input_field"
+            android:drawableLeft="@drawable/ic_pass"
+            android:drawablePadding="12dp"
+            android:hint="Confirm Password"
+            android:padding="12dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#BBBBBB"
+            android:inputType="textPassword" />
+
+        <ImageView
+            android:id="@+id/showHideConPass"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/mat"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="12dp"
+            android:clickable="true"
+            android:focusable="true" />
+    </RelativeLayout>
 
     <!-- Register Button -->
     <Button
@@ -129,7 +165,7 @@
         android:layout_height="48dp"
         android:layout_marginHorizontal="32dp"
         android:layout_marginTop="20dp"
-        android:layout_below="@id/rgConPass"
+        android:layout_below="@id/conPassLayout"
         android:text="SIGN UP"
         android:textAllCaps="true"
         android:textColor="#FFFFFF"
@@ -147,5 +183,4 @@
         android:layout_below="@+id/btnRg"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp" />
-
 </RelativeLayout>

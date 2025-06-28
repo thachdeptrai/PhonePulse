@@ -43,15 +43,7 @@
                 android:textSize="14sp" />
 
             <!-- Danh sách sản phẩm -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_product_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:paddingTop="8dp"
-                android:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                android:spanCount="2"
-                android:clipToPadding="false" />
+
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

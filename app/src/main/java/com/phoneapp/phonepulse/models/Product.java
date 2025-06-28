@@ -1,4 +1,4 @@
-package com.phoneapp.phonepulse.data.network;
+package com.phoneapp.phonepulse.models;
 
 public class Product {
     private int id;
