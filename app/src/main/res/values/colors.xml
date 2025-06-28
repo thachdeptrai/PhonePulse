@@ -19,4 +19,15 @@
     <color name="colorTextPrimary">#212121</color>
     <color name="colorTextSecondary">#757575</color>
     <color name="colorButton">#4CAF50</color>
+
+    <color name="gradient_text">#BB86FC</color>
+    <color name="primary_purple_light">#BB86FC</color>
+    <color name="background_dark">#1A1A2E</color>
+    <color name="card_background">#252545</color>
+    <color name="input_background">#1E1E42</color>
+    <color name="input_focused">#2A2A50</color>
+    <color name="border_color">#444466</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#CCCCCC</color>
+    <color name="text_hint">#888888</color>
 </resources>

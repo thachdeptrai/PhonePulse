@@ -3,6 +3,7 @@ package com.phoneapp.phonepulse.di;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.phoneapp.phonepulse.data.network.AuthInterceptor;
+import com.phoneapp.phonepulse.utils.Constants;
 
 import java.util.concurrent.TimeUnit;
 
@@ -22,7 +23,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 @InstallIn(SingletonComponent.class)
 public class NetworkModule {
 
-    private static final String BASE_URL = "Link Api";
 
     @Singleton
     @Provides
@@ -56,7 +56,7 @@ public class NetworkModule {
     @Provides
     public static Retrofit provideRetrofit(Gson gson, OkHttpClient okHttpClient) {
         return new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(Constants.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))         // Sử dụng Gson để parse JSON
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())      // Hỗ trợ RxJava
                 .client(okHttpClient)                                           // Thiết lập client đã cấu hình (gồm interceptors)
