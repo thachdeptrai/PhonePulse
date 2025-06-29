@@ -94,6 +94,18 @@
                 android:textColor="#666666"
                 android:layout_marginTop="4dp" />
 
+            <!-- Button Add to Cart -->
+            <Button
+                android:id="@+id/btn_add_to_cart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Thêm vào giỏ"
+                android:textSize="14sp"
+                android:backgroundTint="#FF6B00"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="4dp" />
+
         </LinearLayout>
 
     </LinearLayout>
