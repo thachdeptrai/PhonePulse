@@ -48,4 +48,9 @@
     <color name="text_primary">#FFFFFF</color>
     <color name="text_secondary">#CCCCCC</color>
     <color name="text_hint">#888888</color>
+
+    <color name="green">#4CAF50</color>
+    <color name="orange">#FF9800</color>
+    <color name="gray">#757575</color>
+    <color name="red">#F44336</color>
 </resources>
