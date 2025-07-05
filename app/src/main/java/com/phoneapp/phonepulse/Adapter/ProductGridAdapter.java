@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.models.Product;
+import com.phoneapp.phonepulse.models.Variant;
 import com.phoneapp.phonepulse.ui.product.ProductDetailActivity;
 import com.phoneapp.phonepulse.utils.Constants;
 
@@ -57,6 +58,7 @@ public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.
         notifyDataSetChanged();
     }
 
+
     class ProductViewHolder extends RecyclerView.ViewHolder {
         private CardView cardProduct;
         private ImageView ivProductImage;
@@ -80,21 +82,27 @@ public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.
 
         public void bind(Product product) {
             // Load product image
-            Glide.with(context)
-                    .load(product.getProductImage().getImageUrl())
-                    .placeholder(R.drawable.placeholder_product)
-                    .error(R.drawable.placeholder_product)
-                    .into(ivProductImage);
+            if (product.getProductImage() != null && product.getProductImage().getImageUrl() != null) {
+                Glide.with(context)
+                        .load(product.getProductImage().getImageUrl())
+                        .placeholder(R.drawable.placeholder_product)
+                        .error(R.drawable.placeholder_product)
+                        .into(ivProductImage);
+            } else {
+                ivProductImage.setImageResource(R.drawable.placeholder_product);
+            }
 
             // Set product name
             tvProductName.setText(product.getName());
 
             // Calculate and display prices
-            double originalPrice = product.getVariantId().getPrice();
+            double originalPrice = 0;
+            if (product.getVariantId() != null) {
+                originalPrice = product.getVariantId().getPrice();
+            }
             int discount = product.getDiscount();
 
             if (discount > 0) {
-                // Show discount
                 tvDiscountPercent.setVisibility(View.VISIBLE);
                 tvOriginalPrice.setVisibility(View.VISIBLE);
 
@@ -104,10 +112,8 @@ public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.
                 tvDiscountPrice.setText("₫" + numberFormat.format(Math.round(discountedPrice)));
                 tvDiscountPercent.setText("-" + discount + "%");
 
-                // Strike through original price
                 tvOriginalPrice.setPaintFlags(tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
             } else {
-                // No discount
                 tvDiscountPercent.setVisibility(View.GONE);
                 tvOriginalPrice.setVisibility(View.GONE);
                 tvDiscountPrice.setText("₫" + numberFormat.format(originalPrice));
@@ -122,9 +128,9 @@ public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.
                 Intent intent = new Intent(context, ProductDetailActivity.class);
                 intent.putExtra(Constants.PRODUCT_ID, product.getId());
                 context.startActivity(intent);
-                //log product id
                 Log.d("ProductGridAdapter", "Clicked product ID: " + product.getId());
             });
         }
+
     }
 }
