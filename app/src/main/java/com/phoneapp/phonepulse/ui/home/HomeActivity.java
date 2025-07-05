@@ -162,31 +162,21 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private void filterProducts(String keyword) {
-        if (keyword.isEmpty()) {
-            productGridAdapter.updateProducts(allProducts); // Trống thì hiển thị lại toàn bộ
-            return;
-        }
+    private void filterProducts(String query) {
+        List<Product> filteredList = new ArrayList<>();
 
-        Call<List<Product>> call = apiService.searchProducts(keyword);
-        call.enqueue(new Callback<List<Product>>() {
-            @Override
-            public void onResponse(Call<List<Product>> call, Response<List<Product>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Product> results = response.body();
-                    productGridAdapter.updateProducts(results);
-                } else {
-                    Log.e(TAG, "Search failed: " + response.code());
+        if (query.isEmpty()) {
+            filteredList.addAll(allProducts);
+        } else {
+            for (Product product : allProducts) {
+                if (product.getName().toLowerCase().contains(query.toLowerCase())) {
+                    filteredList.add(product);
                 }
             }
+        }
 
-            @Override
-            public void onFailure(Call<List<Product>> call, Throwable t) {
-                Log.e(TAG, "Search error: " + t.getMessage());
-            }
-        });
+        productGridAdapter.updateProducts(filteredList);
     }
-
 
     private void showError(String message) {
         runOnUiThread(() -> Toast.makeText(this, message, Toast.LENGTH_SHORT).show());

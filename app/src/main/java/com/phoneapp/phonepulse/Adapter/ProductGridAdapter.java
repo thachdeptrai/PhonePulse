@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.models.Product;
-import com.phoneapp.phonepulse.models.Variant;
 import com.phoneapp.phonepulse.ui.product.ProductDetailActivity;
 import com.phoneapp.phonepulse.utils.Constants;
 
@@ -53,11 +52,10 @@ public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.
         return productList.size();
     }
 
-    public void updateProducts(List<Product> newList) {
-        this.productList = newList;
+    public void updateProducts(List<Product> newProducts) {
+        this.productList = newProducts;
         notifyDataSetChanged();
     }
-
 
     class ProductViewHolder extends RecyclerView.ViewHolder {
         private CardView cardProduct;
@@ -81,63 +79,52 @@ public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.
         }
 
         public void bind(Product product) {
-            // Lấy ảnh: dùng hàm safe
-            String imageUrl = product.getImageUrlSafe();
-            if (imageUrl != null && !imageUrl.isEmpty()) {
-                Glide.with(context)
-                        .load(imageUrl)
-                        .placeholder(R.drawable.placeholder_product)
-                        .error(R.drawable.placeholder_product)
-                        .into(ivProductImage);
-            } else {
-                Glide.with(context)
-                        .load(R.drawable.placeholder_product)
-                        .into(ivProductImage);
-            }
+            // Load product image
+            Glide.with(context)
+                    .load(product.getProductImage().getImageUrl())
+                    .placeholder(R.drawable.placeholder_product)
+                    .error(R.drawable.placeholder_product)
+                    .into(ivProductImage);
 
-            // Tên sản phẩm
+            // Set product name
             tvProductName.setText(product.getName());
 
-            // Xử lý giá: phải check null variant
-            Variant variant = product.getVariantId();
-            if (variant == null) {
-                Log.w("ProductGridAdapter", "Product variant null: " + product.getName());
-                tvDiscountPrice.setText("₫0");
-                tvOriginalPrice.setVisibility(View.GONE);
-                tvDiscountPercent.setVisibility(View.GONE);
+            // Calculate and display prices
+            double originalPrice = product.getVariantId().getPrice();
+            int discount = product.getDiscount();
+
+            if (discount > 0) {
+                // Show discount
+                tvDiscountPercent.setVisibility(View.VISIBLE);
+                tvOriginalPrice.setVisibility(View.VISIBLE);
+
+                double discountedPrice = originalPrice * (100 - discount) / 100;
+
+                tvOriginalPrice.setText("₫" + numberFormat.format(Math.round(originalPrice)));
+                tvDiscountPrice.setText("₫" + numberFormat.format(Math.round(discountedPrice)));
+                tvDiscountPercent.setText("-" + discount + "%");
+
+                // Strike through original price
+                tvOriginalPrice.setPaintFlags(tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
             } else {
-                double originalPrice = variant.getPrice();
-                int discount = product.getDiscount();
-
-                if (discount > 0) {
-                    double discountedPrice = originalPrice * (100 - discount) / 100;
-                    tvOriginalPrice.setText("₫" + numberFormat.format(Math.round(originalPrice)));
-                    tvDiscountPrice.setText("₫" + numberFormat.format(Math.round(discountedPrice)));
-                    tvDiscountPercent.setText("-" + discount + "%");
-
-                    tvDiscountPercent.setVisibility(View.VISIBLE);
-                    tvOriginalPrice.setVisibility(View.VISIBLE);
-                    tvOriginalPrice.setPaintFlags(tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
-                } else {
-                    tvDiscountPercent.setVisibility(View.GONE);
-                    tvOriginalPrice.setVisibility(View.GONE);
-                    tvDiscountPrice.setText("₫" + numberFormat.format(originalPrice));
-                }
+                // No discount
+                tvDiscountPercent.setVisibility(View.GONE);
+                tvOriginalPrice.setVisibility(View.GONE);
+                tvDiscountPrice.setText("₫" + numberFormat.format(originalPrice));
             }
 
-            // Hiển thị số lượng bán demo
+            // Show sold count (random for demo - replace with actual data)
             int soldCount = (int) (Math.random() * 1000);
             tvSold.setText("Đã bán " + soldCount);
 
-            // Click → mở chi tiết
+            // Click listener
             cardProduct.setOnClickListener(v -> {
                 Intent intent = new Intent(context, ProductDetailActivity.class);
                 intent.putExtra(Constants.PRODUCT_ID, product.getId());
                 context.startActivity(intent);
+                //log product id
                 Log.d("ProductGridAdapter", "Clicked product ID: " + product.getId());
             });
         }
-
-
     }
 }
