@@ -44,6 +44,12 @@ public interface ApiService {
     @GET("/api/products/{id}")
     Call<Product> getProductById(@Path("id") String id);
 
+    @GET("/api/products/search")
+    Call<List<Product>> searchProducts(@Query("name") String keyword);
+
+
+
+
 
     // ========== CATEGORY ==========
     @GET("/api/categories")
