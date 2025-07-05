@@ -1,5 +1,6 @@
 package com.phoneapp.phonepulse.ui.home;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,6 +21,7 @@ import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.models.Product;
 import com.phoneapp.phonepulse.retrofit.RetrofitClient;
+import com.phoneapp.phonepulse.ui.search.SearchActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -98,19 +100,15 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void setupSearchFunction() {
-        etSearchProduct.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterProducts(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
+        etSearchProduct.setFocusable(false); // Không cho nhập trong Home
+        etSearchProduct.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, SearchActivity.class);
+            startActivity(intent);
         });
+
     }
+
+
 
     private void initApiService() {
         apiService = RetrofitClient.getApiService(null);
