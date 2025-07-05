@@ -22,7 +22,8 @@ public interface ApiService {
     @POST("/api/users/logout")
     Call<ApiResponse> logout(@Header("Authorization") String token);
 
-
+    @POST("api/auth/login-google")
+    Call<LoginResponse> socialLogin(@Body SocialLoginRequest body);
     // ========== PROFILE ==========
     @GET("/api/users/profile")
     Call<User> getProfile(@Header("Authorization") String token);
@@ -40,10 +41,10 @@ public interface ApiService {
     // ========== PRODUCT ==========
     @GET("/api/products")
     Call<List<Product>> getAllProducts();
-
     @GET("/api/products/{id}")
     Call<Product> getProductById(@Path("id") String id);
-
+    @GET("/api/products/search")
+    Call<List<Product>> searchProducts(@Query("name") String keyword);
 
     // ========== CATEGORY ==========
     @GET("/api/categories")

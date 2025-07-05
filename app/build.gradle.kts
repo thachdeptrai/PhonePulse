@@ -1,5 +1,6 @@
 plugins {
-    alias(libs.plugins.android.application)
+    id("com.android.application")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -68,8 +69,11 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     // Okhpt
     implementation ("com.squareup.okhttp3:logging-interceptor:4.12.0")
-
-
-
-
+// Google
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+// G2
+    implementation("com.google.code.gson:gson:2.10.1")
+// // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
+    implementation("com.google.firebase:firebase-analytics")
 }

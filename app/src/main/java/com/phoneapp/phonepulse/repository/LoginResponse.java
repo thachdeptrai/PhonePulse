@@ -1,33 +1,26 @@
 package com.phoneapp.phonepulse.repository;
 
-
 import com.phoneapp.phonepulse.models.User;
 
 public class LoginResponse {
+    private boolean success;
+    private String message;
     private String token;
     private User user;
 
-    public LoginResponse() {}
+    public boolean isSuccess() {
+        return success;
+    }
 
-    public LoginResponse(String token, User user) {
-        this.token = token;
-        this.user = user;
+    public String getMessage() {
+        return message;
     }
 
     public String getToken() {
         return token;
     }
 
-    public void setToken(String token) {
-        this.token = token;
-    }
-
     public User getUser() {
         return user;
     }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
 }
-

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1017838440430",
+    "project_id": "phonepulse-f31db",
+    "storage_bucket": "phonepulse-f31db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1017838440430:android:ecf1ef5d2ffe99cb5348ff",
+        "android_client_info": {
+          "package_name": "com.phoneapp.phonepulse"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1017838440430-2di1gp3b3foc93oqoui09kbscmgtrt1t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.phoneapp.phonepulse",
+            "certificate_hash": "b91ebbabb219407c420e6f7b885bd516cf2289b5"
+          }
+        },
+        {
+          "client_id": "1017838440430-9nc0771j67mroe29lhgdhi6b87aaame3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvJ15hwG6_mUhI6jKS42qXYhtFw7STwm8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1017838440430-9nc0771j67mroe29lhgdhi6b87aaame3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
