@@ -1,9 +1,11 @@
 package com.phoneapp.phonepulse.ui.auth;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -21,7 +23,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private EditText edFullName, edEmail, edPhone, edPassword, edConfirmPassword;
     private CheckBox cbTerms;
-    private Button btnRegister;
+    private Button btnRegister, btnLogin;
     private ProgressBar progressBar;
     private ApiService apiService;
 
@@ -37,6 +39,10 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Ánh xạ views
         initViews();
+
+        btnLogin.setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
+        });
 
         // Sự kiện đăng ký
         btnRegister.setOnClickListener(view -> {
@@ -54,6 +60,7 @@ public class RegisterActivity extends AppCompatActivity {
         edConfirmPassword = findViewById(R.id.edConfirmPassword);
         cbTerms = findViewById(R.id.cbTerms);
         btnRegister = findViewById(R.id.btnRegister);
+        btnLogin = findViewById(R.id.btnLogin);
         progressBar = new ProgressBar(this);
     }
 

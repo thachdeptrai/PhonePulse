@@ -9,55 +9,44 @@
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/gradient_background"
-        android:padding="24dp">
-
+        android:padding="16dp">
         <!-- Top Container with Logo -->
         <LinearLayout
             android:id="@+id/logoContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="8dp"
             android:gravity="center"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="32dp">
 
             <!-- Logo with shadow effect -->
             <FrameLayout
-                android:layout_width="140dp"
-                android:layout_height="140dp"
+                android:layout_width="160dp"
+                android:layout_height="120dp"
                 android:layout_gravity="center">
-
-                <!-- Shadow layer -->
-                <View
-                    android:layout_width="140dp"
-                    android:layout_height="140dp"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginTop="4dp"
-                    android:background="@drawable/logo_shadow"
-                    android:alpha="0.3" />
 
                 <!-- Main logo -->
                 <ImageView
                     android:id="@+id/logoImageView"
-                    android:layout_width="140dp"
-                    android:layout_height="140dp"
+                    android:layout_width="160dp"
+                    android:layout_height="160dp"
                     android:src="@drawable/icon"
                     android:scaleType="centerInside"
-                    android:elevation="4dp"
+                    android:elevation="8dp"
                     android:contentDescription="PhonePulse Logo" />
             </FrameLayout>
 
             <!-- Main Title with gradient text effect -->
             <TextView
-                android:id="@+id/appTitle"
+                android:id="@+id/rewards"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="PhonePulse"
                 style="@style/TitleText"
-                android:layout_marginTop="12dp" />
-
+                android:textColor="#7716EF"
+                android:layout_marginTop="3dp" />
             <!-- Registration Title -->
             <TextView
                 android:id="@+id/registerTitle"
@@ -209,13 +198,13 @@
                     android:layout_width="0dp"
                     android:layout_height="1dp"
                     android:layout_weight="1"
-                    android:background="#444444" />
+                    android:background="@color/accent_pink" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="OR SIGN UP WITH"
-                    android:textColor="#888888"
+                    android:textColor="@color/accent_pink"
                     android:textSize="12sp"
                     android:paddingHorizontal="16dp" />
 
@@ -223,7 +212,7 @@
                     android:layout_width="0dp"
                     android:layout_height="1dp"
                     android:layout_weight="1"
-                    android:background="#444444" />
+                    android:background="@color/accent_pink" />
             </LinearLayout>
 
             <!-- Social Registration -->
