@@ -1,6 +1,7 @@
 package com.phoneapp.phonepulse.models;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.List; // Import List
 
 public class Product {
 
@@ -14,10 +15,10 @@ public class Product {
     private String description;
 
     @SerializedName("category_id")
-    private Category category;
+    private Category category; // Assuming Category model exists and is correctly mapped
 
-    @SerializedName("variant_id")
-    private Variant variant;
+    @SerializedName("variants") // Phải khớp với tên trường 'variants' mà backend trả về
+    private List<Variant> variants; // Bây giờ là một DANH SÁCH các biến thể
 
     @SerializedName("created_date")
     private String createdDate;
@@ -28,8 +29,8 @@ public class Product {
     @SerializedName("discount")
     private Integer discount;
 
-    @SerializedName("productimage_id")
-    private ProductImage productImage;
+    @SerializedName("productimage_id") // Assuming productimage_id field holds a ProductImage object
+    private ProductImage productImage; // Assuming ProductImage model exists
 
     // ===================== Getters - Setters ==================== //
 
@@ -65,12 +66,14 @@ public class Product {
         this.category = category;
     }
 
-    public Variant getVariant() {
-        return variant;
+    // Getter cho danh sách biến thể
+    public List<Variant> getVariants() {
+        return variants;
     }
 
-    public void setVariant(Variant variant) {
-        this.variant = variant;
+    // Setter cho danh sách biến thể
+    public void setVariants(List<Variant> variants) {
+        this.variants = variants;
     }
 
     public String getCreatedDate() {
@@ -108,22 +111,24 @@ public class Product {
     // ===================== Tiện ích ==================== //
 
     /**
-     * Lấy giá bán từ Variant, nếu chưa có Variant trả về 0
+     * Lấy giá bán từ Variant ĐẦU TIÊN trong danh sách, nếu không có biến thể trả về 0.
+     * Lưu ý: Nếu sản phẩm có nhiều biến thể, phương thức này chỉ lấy giá của biến thể đầu tiên.
      */
     public double getPrice() {
-        if (variant != null) {
-            return variant.getPrice();
+        if (variants != null && !variants.isEmpty()) {
+            return variants.get(0).getPrice(); // Lấy giá từ biến thể đầu tiên
         }
-        return 0;
+        return 0; // Trả về 0 nếu không có biến thể
     }
 
     /**
-     * Lấy ID của Variant để xử lý giỏ hàng
+     * Lấy ID của Variant ĐẦU TIÊN để xử lý giỏ hàng, nếu không có biến thể trả về null.
+     * Lưu ý: Nếu sản phẩm có nhiều biến thể, phương thức này chỉ lấy ID của biến thể đầu tiên.
      */
     public String getVariantId() {
-        if (variant != null) {
-            return variant.getId();
+        if (variants != null && !variants.isEmpty()) {
+            return variants.get(0).getId(); // Lấy ID từ biến thể đầu tiên
         }
-        return null;
+        return null; // Trả về null nếu không có biến thể
     }
 }

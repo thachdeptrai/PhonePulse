@@ -43,6 +43,17 @@
                 android:ellipsize="end"
                 android:textSize="16sp"/>
 
+            <!-- TextView mới cho chi tiết biến thể -->
+            <TextView
+                android:id="@+id/tv_variant_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Màu: Xanh, Kích thước: 256GB"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="14sp"
+                android:layout_marginTop="2dp"
+                android:visibility="gone" /> <!-- Mặc định ẩn, sẽ hiển thị khi có dữ liệu -->
+
             <TextView
                 android:id="@+id/tv_product_price"
                 android:layout_width="wrap_content"
@@ -88,7 +99,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Nút xóa -->
+        <!-- Nút xóa (nếu có) -->
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

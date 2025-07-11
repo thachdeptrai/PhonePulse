@@ -1,8 +1,9 @@
-// com.phoneapp.phonepulse.request.CartItem.java (or com.phoneapp.phonepulse.models.CartItem.java if it's a model)
-package com.phoneapp.phonepulse.request; // Or adjust to models package if preferred
+// com.phoneapp.phonepulse.request.CartItem.java
+package com.phoneapp.phonepulse.request;
 
 import com.google.gson.annotations.SerializedName;
 import com.phoneapp.phonepulse.models.Product; // Assuming this model exists
+import com.phoneapp.phonepulse.models.Variant; // Assuming this model exists, adjust package if different
 
 public class CartItem {
     @SerializedName("_id")
@@ -12,13 +13,12 @@ public class CartItem {
     private Product product;
 
     @SerializedName("variant") // Assuming your backend embeds the full variant object
-    private com.phoneapp.phonepulse.models.Variant variant; // Full Variant object
+    private Variant variant; // Full Variant object
 
     @SerializedName("quantity")
     private int quantity;
 
-    // You might also have a 'price' or 'totalPrice' here if the backend calculates it for the item
-    // private double itemPrice;
+    // --- Getters and Setters ---
 
     public String getId() {
         return id;
@@ -36,11 +36,11 @@ public class CartItem {
         this.product = product;
     }
 
-    public com.phoneapp.phonepulse.models.Variant getVariant() {
+    public Variant getVariant() {
         return variant;
     }
 
-    public void setVariant(com.phoneapp.phonepulse.models.Variant variant) {
+    public void setVariant(Variant variant) {
         this.variant = variant;
     }
 
@@ -52,13 +52,29 @@ public class CartItem {
         this.quantity = quantity;
     }
 
-    // Consider adding a method to get the effective price of this item
+    // --- NEW: Methods to get Product ID and Variant ID from the embedded objects ---
+    // Make sure your Product and Variant models have a getId() method that returns their _id
+    public String getProductId() {
+        return (product != null) ? product.getId() : null;
+    }
+
+    public String getVariantId() {
+        return (variant != null) ? variant.getId() : null;
+    }
+
+    // Phương thức tiện ích để tính tổng giá của mục (từ CartItem ban đầu)
+    // Phương thức này có thể bị ảnh hưởng nếu giá được fetch riêng.
+    // Bạn nên tính tổng giá trong CartDisplayItem sau khi có đủ thông tin.
+    // Nếu bạn muốn giữ lại logic này ở đây, hãy đảm bảo Variant object có price.
     public double getItemTotalPrice() {
-        if (product != null && variant != null) {
+        if (variant != null) {
             return variant.getPrice() * quantity;
-        } else if (product != null) { // Fallback if variant isn't always present
+        }
+        // Fallback to product price if variant is null but product exists and has a price.
+        // This is less accurate for variants but prevents 0.0 if variant is missing.
+        else if (product != null) {
             return product.getPrice() * quantity;
         }
-        return 0.0;
+        return 0.0; // Trả về 0 nếu không có thông tin giá
     }
 }

@@ -2,7 +2,7 @@ package com.phoneapp.phonepulse.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Paint; // Import this for strikethrough
+import android.graphics.Paint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +35,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.ProductViewHolder> {
-    private static final String TAG = "ProductGridAdapter"; // For consistent logging
+    private static final String TAG = "ProductGridAdapter";
 
     private Context context;
     private List<Product> productList;
@@ -46,7 +46,7 @@ public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.
         this.context = context;
         this.productList = productList;
         this.numberFormat = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
-        // Khởi tạo ApiService với token
+        // Khởi tạo ApiService một lần trong constructor
         this.apiService = RetrofitClient.getApiService(Constants.getToken(context));
     }
 
@@ -96,20 +96,17 @@ public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.
         }
 
         public void bind(Product product) {
-            // Load Product Image (assuming product.getImageUrl() or similar exists)
-            // If product.getCategory().getIcon() is truly the product image URL:
+
             Glide.with(context)
-                    .load(product.getCategory() != null ? product.getCategory().getIcon() : "")
+                    .load(product.getCategory() != null ? product.getCategory().getIcon() : "") // Xem xét lại nguồn ảnh này, có thể nên dùng ProductImage
                     .placeholder(R.drawable.placeholder_product)
                     .error(R.drawable.placeholder_product)
                     .into(ivProductImage);
 
-            // Set Product Name
             tvProductName.setText(product.getName());
 
-            // Get actual price and discount from the product object
-            double price = product.getPrice(); // Sử dụng giá thực tế từ Product model
-            int discount = product.getDiscount(); // Sử dụng chiết khấu thực tế từ Product model
+            double price = product.getPrice(); // Bây giờ sẽ lấy giá từ biến thể đầu tiên
+            int discount = product.getDiscount();
 
             if (discount > 0) {
                 tvDiscountPercent.setVisibility(View.VISIBLE);
@@ -121,43 +118,44 @@ public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.
                 tvDiscountPrice.setText("₫" + numberFormat.format(discountedPrice));
                 tvDiscountPercent.setText("-" + discount + "%");
 
-                // Gạch ngang giá gốc
                 tvOriginalPrice.setPaintFlags(tvOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             } else {
                 tvDiscountPercent.setVisibility(View.GONE);
                 tvOriginalPrice.setVisibility(View.GONE);
                 tvDiscountPrice.setText("₫" + numberFormat.format(price));
-                tvOriginalPrice.setPaintFlags(tvOriginalPrice.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG)); // Remove strikethrough if no discount
+                tvOriginalPrice.setPaintFlags(tvOriginalPrice.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
             }
 
-            // Set Sold Count (using a random number for demo, replace with actual product.getSoldCount() if available)
-            // Nếu Product có trường sold_count, bạn sẽ dùng: product.getSoldCount()
-            int soldCount = (int) (Math.random() * 500);
+            int soldCount = (int) (Math.random() * 500); // Tạm thời
             tvSold.setText("Đã bán " + soldCount);
 
-            // Handle Product Click (Go to Product Detail)
             cardProduct.setOnClickListener(v -> {
                 Intent intent = new Intent(context, ProductDetailActivity.class);
                 intent.putExtra(Constants.PRODUCT_ID, product.getId());
                 context.startActivity(intent);
             });
 
-            // Handle Add to Cart Button Click
             btnAddToCart.setOnClickListener(v -> {
-                // Check if user is logged in (token exists)
                 String currentToken = Constants.getToken(context);
                 if (currentToken == null || currentToken.isEmpty()) {
                     Toast.makeText(context, "Vui lòng đăng nhập để mua hàng", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                // Temporary empty variantId - update if your products have variants
-                String variantId = "";
-                // If you have a specific variant selected, set it here, e.g., product.getDefaultVariantId()
-                // Or you would typically select a variant on the product detail page.
+                // LẤY variantId TỪ BIẾN THỂ ĐẦU TIÊN trong danh sách variants
+                String variantId = product.getVariantId();
 
-                // Create CartRequest object with product data
+                // KIỂM TRA ĐỂ ĐẢM BẢO variantId KHÔNG NULL HOẶC RỖNG
+                if (variantId == null || variantId.isEmpty()) {
+                    Log.e(TAG, "Product " + product.getName() + " (ID: " + product.getId() + ") does not have a valid variantId from its variants list.");
+                    Toast.makeText(context, "Không thể thêm sản phẩm này vào giỏ hàng vì không có biến thể khả dụng.", Toast.LENGTH_LONG).show();
+                    return; // Ngăn không cho gửi request với variantId không hợp lệ
+                }
+
+                // Tạo CartRequest object với product data
                 CartRequest request = new CartRequest(product.getId(), variantId, 1); // Quantity is 1 for direct add
+
+                Log.d(TAG, "Sending to API: Product ID=" + product.getId() + ", Variant ID=" + variantId + ", Quantity=" + 1);
 
                 // Make API call to add product to cart
                 apiService.addToCart(currentToken, request).enqueue(new Callback<ApiResponse>() {
@@ -165,7 +163,7 @@ public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.
                     public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                         if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                             Toast.makeText(context, "Đã thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
-                            Log.d(TAG, "Added product to cart: " + product.getName() + ", ID: " + product.getId());
+                            Log.d(TAG, "Added product to cart: " + product.getName() + ", ID: " + product.getId() + ", Variant ID: " + variantId);
                         } else {
                             String errorBody = "";
                             try {
@@ -176,13 +174,13 @@ public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.
                                 Log.e(TAG, "Error reading error body: " + e.getMessage());
                             }
                             Log.e(TAG, "Failed to add to cart. Code: " + response.code() + ", Message: " + response.message() + ", Error Body: " + errorBody);
-                            Toast.makeText(context, "Lỗi thêm vào giỏ hàng: " + response.message(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Lỗi thêm vào giỏ hàng: " + response.message() + " " + errorBody, Toast.LENGTH_LONG).show();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<ApiResponse> call, Throwable t) {
-                        Log.e(TAG, "Network error during add to cart: " + t.getMessage(), t); // Log full stack trace
+                        Log.e(TAG, "Network error during add to cart: " + t.getMessage(), t);
                         Toast.makeText(context, "Lỗi kết nối mạng khi thêm giỏ hàng. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
                     }
                 });

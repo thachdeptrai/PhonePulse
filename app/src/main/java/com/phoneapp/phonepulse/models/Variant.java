@@ -4,15 +4,15 @@ import com.google.gson.annotations.SerializedName;
 
 public class Variant {
     @SerializedName("_id")
-    private String id;  // đổi tên biến thành id cho thống nhất
+    private String id;  // Đổi tên biến thành id cho thống nhất
 
     @SerializedName("product_id")
     private String productId;
 
-    @SerializedName("color_id")
+    @SerializedName("color_id") // Đây là một đối tượng Color, không phải String
     private Color colorId;
 
-    @SerializedName("size_id")
+    @SerializedName("size_id") // Đây là một đối tượng Size, không phải String
     private Size sizeId;
 
     @SerializedName("price")

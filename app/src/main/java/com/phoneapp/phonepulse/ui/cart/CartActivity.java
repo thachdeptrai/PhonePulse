@@ -1,4 +1,3 @@
-// com.phoneapp.phonepulse.ui.cart.CartActivity.java
 package com.phoneapp.phonepulse.ui.cart;
 
 import android.content.Intent;
@@ -8,7 +7,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar; // Add ProgressBar
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,16 +23,18 @@ import com.phoneapp.phonepulse.Adapter.CartAdapter;
 import com.phoneapp.phonepulse.Adapter.ProductGridAdapter;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.models.Product;
-import com.phoneapp.phonepulse.request.CartItem; // This is the CartItem from the backend response
+// Xóa import CartItem cũ vì CartActivity sẽ làm việc với CartDisplayItem
+// import com.phoneapp.phonepulse.request.CartItem;
+import com.phoneapp.phonepulse.request.CartDisplayItem;
 import com.phoneapp.phonepulse.ui.home.HomeActivity;
-import com.phoneapp.phonepulse.viewmodel.CartViewModel; // Import CartViewModel
+import com.phoneapp.phonepulse.viewmodel.CartViewModel;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class CartActivity extends AppCompatActivity implements CartAdapter.CartItemActionCallback { // Implement the interface
+public class CartActivity extends AppCompatActivity implements CartAdapter.CartItemActionCallback {
 
     private Toolbar toolbarCart;
     private RecyclerView rvCartItems;
@@ -45,14 +46,14 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
     private LinearLayout emptyCartView;
     private Button btnShopNow;
     private LinearLayout cartActionBar;
-    private ProgressBar progressBar; // Added ProgressBar
+    private ProgressBar progressBar;
 
     private CartAdapter cartAdapter;
     private ProductGridAdapter recommendationAdapter;
-    private List<Product> recommendationList; // No need for cartItemList here, ViewModel manages it
+    private List<Product> recommendationList;
 
     private CartViewModel cartViewModel;
-    private NumberFormat numberFormat; // For formatting total price
+    private NumberFormat numberFormat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,30 +75,30 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
         emptyCartView = findViewById(R.id.empty_cart_view);
         btnShopNow = findViewById(R.id.btn_shop_now);
         cartActionBar = findViewById(R.id.cart_action_bar);
-        progressBar = findViewById(R.id.progressBar); // Assuming you have a ProgressBar in your layout
+        progressBar = findViewById(R.id.progressBar);
 
         // --- Setup ViewModel ---
         CartViewModel.Factory factory = new CartViewModel.Factory(getApplication());
         cartViewModel = new ViewModelProvider(this, factory).get(CartViewModel.class);
 
         // --- Setup Cart RecyclerView ---
-        // Pass an empty list initially, ViewModel will update it
+        // Truyền một danh sách CartDisplayItem rỗng ban đầu
         cartAdapter = new CartAdapter(this, new ArrayList<>(), this); // Pass 'this' as callback
         rvCartItems.setLayoutManager(new LinearLayoutManager(this));
         rvCartItems.setAdapter(cartAdapter);
 
         // --- Setup Recommendation RecyclerView ---
         recommendationList = new ArrayList<>();
-        // TODO: You'll need to fetch real recommendations from another ViewModel/Repository
         recommendationAdapter = new ProductGridAdapter(this, recommendationList);
         rvRecommendations.setLayoutManager(new GridLayoutManager(this, 2));
         rvRecommendations.setAdapter(recommendationAdapter);
 
         // --- Observe ViewModel LiveData ---
-        cartViewModel.getCartItems().observe(this, cartItems -> {
-            cartAdapter.setCartItems(cartItems); // Update adapter with new data
-            updateCartTotal(cartItems); // Update total price
-            checkEmptyCartState(cartItems); // Check empty state based on observed data
+        // LiveData bây giờ sẽ là List<CartDisplayItem>
+        cartViewModel.getCartItems().observe(this, cartDisplayItems -> { // <-- THAY ĐỔI Ở ĐÂY
+            cartAdapter.setCartItems(cartDisplayItems); // Update adapter with new data
+            updateCartTotal(cartDisplayItems); // Update total price
+            checkEmptyCartState(cartDisplayItems); // Check empty state based on observed data
         });
 
         cartViewModel.getError().observe(this, errorMessage -> {
@@ -108,12 +109,10 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
 
         cartViewModel.getIsLoading().observe(this, isLoading -> {
             progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-            // Optionally, disable other UI elements when loading
             rvCartItems.setAlpha(isLoading ? 0.5f : 1.0f);
             rvRecommendations.setAlpha(isLoading ? 0.5f : 1.0f);
             btnCheckout.setEnabled(!isLoading);
         });
-
 
         // --- Button Listeners ---
         btnShopNow.setOnClickListener(v -> {
@@ -127,9 +126,6 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
         cartViewModel.fetchCart();
     }
 
-    /**
-     * Thiết lập Toolbar làm ActionBar và cấu hình nút quay lại và tiêu đề.
-     */
     private void setupToolbar() {
         setSupportActionBar(toolbarCart);
         if (getSupportActionBar() != null) {
@@ -140,7 +136,8 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
         toolbarCart.setNavigationOnClickListener(v -> onBackPressed());
     }
 
-    private void checkEmptyCartState(List<CartItem> currentCartItems) {
+    // Thay đổi tham số sang List<CartDisplayItem>
+    private void checkEmptyCartState(List<com.phoneapp.phonepulse.request.CartDisplayItem> currentCartItems) { // <-- THAY ĐỔI Ở ĐÂY
         if (currentCartItems == null || currentCartItems.isEmpty()) {
             emptyCartView.setVisibility(View.VISIBLE);
             rvCartItems.setVisibility(View.GONE);
@@ -154,11 +151,12 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
         }
     }
 
-    private void updateCartTotal(List<CartItem> cartItems) {
+    // Thay đổi tham số sang List<CartDisplayItem>
+    private void updateCartTotal(List<CartDisplayItem> cartItems) { // <-- THAY ĐỔI Ở ĐÂY
         double total = 0;
         if (cartItems != null) {
-            for (CartItem item : cartItems) {
-                total += item.getItemTotalPrice(); // Use the helper method in CartItem
+            for (CartDisplayItem item : cartItems) { // <-- Lặp qua CartDisplayItem
+                total += item.getItemTotalPrice(); // Use the helper method in CartDisplayItem
             }
         }
         tvTotalPrice.setText("₫" + numberFormat.format(total));
@@ -166,12 +164,12 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
 
     // --- CartAdapter.CartItemActionCallback Implementations ---
     @Override
-    public void onQuantityChanged(CartItem item, int newQuantity) {
+    public void onQuantityChanged(CartDisplayItem item, int newQuantity) { // <-- THAY ĐỔI Ở ĐÂY
         cartViewModel.updateCartItemQuantity(item, newQuantity);
     }
 
     @Override
-    public void onRemoveItem(CartItem item) {
+    public void onRemoveItem(CartDisplayItem item) { // <-- THAY ĐỔI Ở ĐÂY
         cartViewModel.removeCartItem(item);
     }
 

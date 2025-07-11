@@ -1,8 +1,9 @@
 package com.phoneapp.phonepulse.repository;
 
+import com.phoneapp.phonepulse.Response.CartDataResponse;
 import com.phoneapp.phonepulse.data.api.ApiResponse;
 import com.phoneapp.phonepulse.data.api.ApiService;
-import com.phoneapp.phonepulse.request.CartItem;
+import com.phoneapp.phonepulse.request.CartItem; // Vẫn cần cho LiveData và Adapter
 import com.phoneapp.phonepulse.request.CartRequest;
 
 import retrofit2.Call;
@@ -19,9 +20,9 @@ public class CartRepository {
     /**
      * Lấy giỏ hàng
      * @param token Bearer token (raw token, "Bearer " prefix added here)
-     * @return Call<ApiResponse<List<CartItem>>>
+     * @return Call<ApiResponse<CartDataResponse>>
      */
-    public Call<ApiResponse<List<CartItem>>> getCart(String token) { // <-- CORRECTED RETURN TYPE HERE
+    public Call<ApiResponse<CartDataResponse>> getCart(String token) { // <--- THAY ĐỔI Ở ĐÂY
         return apiService.getCart("Bearer " + token);
     }
 
@@ -51,7 +52,7 @@ public class CartRepository {
      * @param request thông tin sản phẩm cần xóa
      * @return Call<ApiResponse>
      */
-    public Call<ApiResponse> removeFromCart(String token, CartRequest request) {
-        return apiService.removeFromCart("Bearer " + token, request);
+    public Call<ApiResponse> removeCartItem(String token, CartRequest request) {
+        return apiService.removeCartItem("Bearer " + token, request);
     }
 }

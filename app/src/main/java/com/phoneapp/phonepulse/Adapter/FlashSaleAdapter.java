@@ -91,7 +91,7 @@ public class FlashSaleAdapter extends RecyclerView.Adapter<FlashSaleAdapter.Flas
             double price = 0;
             int stock = 0;
 
-            Variant variant = product.getVariant();
+            Variant variant = (Variant) product.getVariants();
             if (variant != null) {
                 price = variant.getPrice();
                 stock = variant.getQuantity();

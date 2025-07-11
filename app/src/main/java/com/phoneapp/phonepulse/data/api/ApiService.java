@@ -1,5 +1,6 @@
 package com.phoneapp.phonepulse.data.api;
 
+import com.phoneapp.phonepulse.Response.CartDataResponse;
 import com.phoneapp.phonepulse.models.*;
 import com.phoneapp.phonepulse.repository.LoginResponse;
 import com.phoneapp.phonepulse.request.*;
@@ -81,17 +82,18 @@ public interface ApiService {
 
 
     // ========== CART ==========
+    // ========== CART ==========\
     @GET("/api/cart")
-    Call<ApiResponse<List<CartItem>>> getCart(@Header("Authorization") String token); // Note: returns List<CartItem> wrapped in ApiResponse
+    Call<ApiResponse<CartDataResponse>> getCart(@Header("Authorization") String token); // <--- THAY ĐỔI Ở ĐÂY
 
     @POST("/api/cart")
-    Call<ApiResponse> addToCart(@Header("Authorization") String token, @Body CartRequest body);
+    Call<ApiResponse> addToCart(@Header("Authorization") String token, @Body CartRequest request);
 
     @PUT("/api/cart")
-    Call<ApiResponse> updateCart(@Header("Authorization") String token, @Body CartRequest body);
+    Call<ApiResponse> updateCart(@Header("Authorization") String token, @Body CartRequest request);
 
-    @HTTP(method = "DELETE", path = "/api/cart", hasBody = true)
-    Call<ApiResponse> removeFromCart(@Header("Authorization") String token, @Body CartRequest body);
+    @DELETE("/api/cart")
+    Call<ApiResponse> removeCartItem(@Header("Authorization") String token, @Body CartRequest request);
 
 
     // ========== ORDER ==========
