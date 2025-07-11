@@ -1,6 +1,6 @@
 package com.phoneapp.phonepulse.request;
 
-public class OrderRequest {
+public class    OrderRequest {
     private String shippingAddress;
     private String phone;
     private String voucherCode; // Optional

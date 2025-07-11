@@ -3,6 +3,7 @@ package com.phoneapp.phonepulse.models;
 import com.google.gson.annotations.SerializedName;
 
 public class Product {
+
     @SerializedName("_id")
     private String id;
 
@@ -16,7 +17,7 @@ public class Product {
     private Category category;
 
     @SerializedName("variant_id")
-    private Variant variantId;
+    private Variant variant;
 
     @SerializedName("created_date")
     private String createdDate;
@@ -25,45 +26,104 @@ public class Product {
     private String modifiedDate;
 
     @SerializedName("discount")
-    private int discount = 0;
+    private Integer discount;
 
     @SerializedName("productimage_id")
     private ProductImage productImage;
 
-    // ✅ Hàm an toàn để lấy image URL
-    public String getImageUrlSafe() {
-        if (productImage != null && productImage.getImageUrl() != null) {
-            return productImage.getImageUrl();
-        } else {
-            return null; // hoặc return ảnh mặc định
-        }
+    // ===================== Getters - Setters ==================== //
+
+    public String getId() {
+        return id;
     }
 
-    // Getters and Setters
-    public Variant getVariantId() { return variantId; }
-    public void setVariantId(Variant variantId) { this.variantId = variantId; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public ProductImage getProductImage() { return productImage; }
-    public void setProductImage(ProductImage productImage) { this.productImage = productImage; }
+    public String getName() {
+        return name;
+    }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getDescription() {
+        return description;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public Category getCategory() { return category; }
-    public void setCategory(Category category) { this.category = category; }
+    public Category getCategory() {
+        return category;
+    }
 
-    public String getCreatedDate() { return createdDate; }
-    public void setCreatedDate(String createdDate) { this.createdDate = createdDate; }
+    public void setCategory(Category category) {
+        this.category = category;
+    }
 
-    public String getModifiedDate() { return modifiedDate; }
-    public void setModifiedDate(String modifiedDate) { this.modifiedDate = modifiedDate; }
+    public Variant getVariant() {
+        return variant;
+    }
 
-    public int getDiscount() { return discount; }
-    public void setDiscount(int discount) { this.discount = discount; }
+    public void setVariant(Variant variant) {
+        this.variant = variant;
+    }
+
+    public String getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(String createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public String getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(String modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
+
+    public int getDiscount() {
+        return discount != null ? discount : 0;
+    }
+
+    public void setDiscount(Integer discount) {
+        this.discount = discount;
+    }
+
+    public ProductImage getProductImage() {
+        return productImage;
+    }
+
+    public void setProductImage(ProductImage productImage) {
+        this.productImage = productImage;
+    }
+
+    // ===================== Tiện ích ==================== //
+
+    /**
+     * Lấy giá bán từ Variant, nếu chưa có Variant trả về 0
+     */
+    public double getPrice() {
+        if (variant != null) {
+            return variant.getPrice();
+        }
+        return 0;
+    }
+
+    /**
+     * Lấy ID của Variant để xử lý giỏ hàng
+     */
+    public String getVariantId() {
+        if (variant != null) {
+            return variant.getId();
+        }
+        return null;
+    }
 }

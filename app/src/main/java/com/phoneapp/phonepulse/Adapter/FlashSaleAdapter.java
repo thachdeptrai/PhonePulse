@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.models.Product;
+import com.phoneapp.phonepulse.models.Variant;
 import com.phoneapp.phonepulse.ui.product.ProductDetailActivity;
 
 import java.text.NumberFormat;
@@ -23,9 +24,10 @@ import java.util.List;
 import java.util.Locale;
 
 public class FlashSaleAdapter extends RecyclerView.Adapter<FlashSaleAdapter.FlashSaleViewHolder> {
-    private Context context;
+
+    private final Context context;
     private List<Product> flashSaleProducts;
-    private NumberFormat numberFormat;
+    private final NumberFormat numberFormat;
 
     public FlashSaleAdapter(Context context, List<Product> flashSaleProducts) {
         this.context = context;
@@ -48,20 +50,23 @@ public class FlashSaleAdapter extends RecyclerView.Adapter<FlashSaleAdapter.Flas
 
     @Override
     public int getItemCount() {
-        return flashSaleProducts.size();
+        return flashSaleProducts != null ? flashSaleProducts.size() : 0;
+    }
+
+    public void updateData(List<Product> newList) {
+        this.flashSaleProducts = newList;
+        notifyDataSetChanged();
     }
 
     class FlashSaleViewHolder extends RecyclerView.ViewHolder {
-        private CardView cardFlashSale;
-        private ImageView ivFlashSaleImage;
-        private TextView tvFlashSalePrice;
-        private TextView tvFlashSaleDiscount;
-        private ProgressBar progressSold;
-        private TextView tvSoldCount;
+
+        private final CardView cardFlashSale;
+        private final ImageView ivFlashSaleImage;
+        private final TextView tvFlashSalePrice, tvFlashSaleDiscount, tvSoldCount;
+        private final ProgressBar progressSold;
 
         public FlashSaleViewHolder(@NonNull View itemView) {
             super(itemView);
-
             cardFlashSale = itemView.findViewById(R.id.card_flash_sale);
             ivFlashSaleImage = itemView.findViewById(R.id.iv_flash_sale_image);
             tvFlashSalePrice = itemView.findViewById(R.id.tv_flash_sale_price);
@@ -71,30 +76,40 @@ public class FlashSaleAdapter extends RecyclerView.Adapter<FlashSaleAdapter.Flas
         }
 
         public void bind(Product product) {
-            // Load product image
-            Glide.with(context)
-                    .load(product.getProductImage().getImageUrl())
-                    .placeholder(R.drawable.placeholder_product)
-                    .error(R.drawable.placeholder_product)
-                    .into(ivFlashSaleImage);
 
-            // Calculate discounted price
-            int originalPrice = product.getDiscount();
-            int discount = product.getDiscount();
-            int discountedPrice = originalPrice * (100 - discount) / 100;
+            // Load image
+            if (product.getProductImage() != null) {
+                Glide.with(context)
+                        .load(product.getProductImage().getImageUrl())
+                        .placeholder(R.drawable.placeholder_product)
+                        .error(R.drawable.placeholder_product)
+                        .into(ivFlashSaleImage);
+            }
+
+            // Giá và giảm giá
+            int discountPercent = product.getDiscount();
+            double price = 0;
+            int stock = 0;
+
+            Variant variant = product.getVariant();
+            if (variant != null) {
+                price = variant.getPrice();
+                stock = variant.getQuantity();
+            }
+
+            double discountedPrice = price * (100 - discountPercent) / 100;
 
             tvFlashSalePrice.setText("₫" + numberFormat.format(discountedPrice));
-            tvFlashSaleDiscount.setText("-" + discount + "%");
+            tvFlashSaleDiscount.setText("-" + discountPercent + "%");
 
-            // Simulate sold progress (replace with actual data)
-            int totalStock = product.getVariantId().getQuantity();
-            int soldCount = (int) (Math.random() * totalStock * 0.7); // Random sold count
-            int progress = totalStock > 0 ? (soldCount * 100) / totalStock : 0;
+            // Tiến trình đã bán
+            int soldCount = (int) (Math.random() * stock * 0.7); // Dữ liệu demo
+            int progress = stock > 0 ? (soldCount * 100) / stock : 0;
 
             progressSold.setProgress(progress);
             tvSoldCount.setText("Đã bán " + soldCount);
 
-            // Click listener
+            // Click sang Product Detail
             cardFlashSale.setOnClickListener(v -> {
                 Intent intent = new Intent(context, ProductDetailActivity.class);
                 intent.putExtra("product_id", product.getId());

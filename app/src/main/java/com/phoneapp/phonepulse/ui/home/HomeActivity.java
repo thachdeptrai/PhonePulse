@@ -5,7 +5,10 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,7 +24,8 @@ import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.models.Product;
 import com.phoneapp.phonepulse.retrofit.RetrofitClient;
-import com.phoneapp.phonepulse.ui.search.SearchActivity;
+import com.phoneapp.phonepulse.ui.cart.CartActivity;
+import com.phoneapp.phonepulse.ui.product.ProductDetailActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +53,8 @@ public class HomeActivity extends AppCompatActivity {
     private List<Product> allProducts = new ArrayList<>();
     private List<Product> flashSaleProducts = new ArrayList<>();
     private List<String> bannerImages = new ArrayList<>();
+    private LinearLayout Linea_DienThoai ;
+    private ImageView rvCartItems;
 
     // API Service
     private ApiService apiService;
@@ -71,6 +77,9 @@ public class HomeActivity extends AppCompatActivity {
         vpBanner = findViewById(R.id.vp_banner);
         rvFlashSale = findViewById(R.id.rv_flash_sale);
         rvProductList = findViewById(R.id.rv_product_list);
+        Linea_DienThoai = findViewById(R.id.Linea_DienThoai);
+        rvCartItems = findViewById(R.id.rvCartItems);
+
     }
 
     private void setupRecyclerViews() {
@@ -85,6 +94,13 @@ public class HomeActivity extends AppCompatActivity {
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
         rvProductList.setLayoutManager(gridLayoutManager);
         rvProductList.setAdapter(productGridAdapter);
+        rvCartItems.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(HomeActivity.this, CartActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void setupViewPager() {
@@ -100,15 +116,19 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void setupSearchFunction() {
-        etSearchProduct.setFocusable(false); // Không cho nhập trong Home
-        etSearchProduct.setOnClickListener(v -> {
-            Intent intent = new Intent(HomeActivity.this, SearchActivity.class);
-            startActivity(intent);
+        etSearchProduct.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterProducts(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
         });
-
     }
-
-
 
     private void initApiService() {
         apiService = RetrofitClient.getApiService(null);

@@ -6,8 +6,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -15,8 +17,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.phoneapp.phonepulse.R;
+import com.phoneapp.phonepulse.data.api.ApiResponse;
+import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.models.Product;
-import com.phoneapp.phonepulse.models.Variant;
+import com.phoneapp.phonepulse.request.CartRequest;
+import com.phoneapp.phonepulse.retrofit.RetrofitClient;
 import com.phoneapp.phonepulse.ui.product.ProductDetailActivity;
 import com.phoneapp.phonepulse.utils.Constants;
 
@@ -24,15 +29,21 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.ProductViewHolder> {
     private Context context;
     private List<Product> productList;
     private NumberFormat numberFormat;
+    private ApiService apiService;
 
     public ProductGridAdapter(Context context, List<Product> productList) {
         this.context = context;
         this.productList = productList;
         this.numberFormat = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
+        this.apiService = RetrofitClient.getApiService(Constants.getToken(context));
     }
 
     @NonNull
@@ -44,8 +55,7 @@ public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
-        Product product = productList.get(position);
-        holder.bind(product);
+        holder.bind(productList.get(position));
     }
 
     @Override
@@ -58,7 +68,6 @@ public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.
         notifyDataSetChanged();
     }
 
-
     class ProductViewHolder extends RecyclerView.ViewHolder {
         private CardView cardProduct;
         private ImageView ivProductImage;
@@ -67,6 +76,7 @@ public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.
         private TextView tvDiscountPrice;
         private TextView tvDiscountPercent;
         private TextView tvSold;
+        private Button btnAddToCart;
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -78,59 +88,75 @@ public class ProductGridAdapter extends RecyclerView.Adapter<ProductGridAdapter.
             tvDiscountPrice = itemView.findViewById(R.id.tv_discount_price);
             tvDiscountPercent = itemView.findViewById(R.id.tv_discount_percent);
             tvSold = itemView.findViewById(R.id.tv_sold);
+            btnAddToCart = itemView.findViewById(R.id.btn_add_to_cart);
         }
 
         public void bind(Product product) {
-            // Load product image
-            if (product.getProductImage() != null && product.getProductImage().getImageUrl() != null) {
-                Glide.with(context)
-                        .load(product.getProductImage().getImageUrl())
-                        .placeholder(R.drawable.placeholder_product)
-                        .error(R.drawable.placeholder_product)
-                        .into(ivProductImage);
-            } else {
-                ivProductImage.setImageResource(R.drawable.placeholder_product);
-            }
+            Glide.with(context)
+                    .load(product.getCategory() != null ? product.getCategory().getIcon() : "")
+                    .placeholder(R.drawable.placeholder_product)
+                    .error(R.drawable.placeholder_product)
+                    .into(ivProductImage);
 
-            // Set product name
             tvProductName.setText(product.getName());
 
-            // Calculate and display prices
-            double originalPrice = 0;
-            if (product.getVariantId() != null) {
-                originalPrice = product.getVariantId().getPrice();
-            }
-            int discount = product.getDiscount();
+            double price = 1000000;
+            int discount = 0;
 
             if (discount > 0) {
                 tvDiscountPercent.setVisibility(View.VISIBLE);
                 tvOriginalPrice.setVisibility(View.VISIBLE);
 
-                double discountedPrice = originalPrice * (100 - discount) / 100;
+                double discountedPrice = price * (100 - discount) / 100;
 
-                tvOriginalPrice.setText("₫" + numberFormat.format(Math.round(originalPrice)));
-                tvDiscountPrice.setText("₫" + numberFormat.format(Math.round(discountedPrice)));
+                tvOriginalPrice.setText("₫" + numberFormat.format(price));
+                tvDiscountPrice.setText("₫" + numberFormat.format(discountedPrice));
                 tvDiscountPercent.setText("-" + discount + "%");
 
                 tvOriginalPrice.setPaintFlags(tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
             } else {
                 tvDiscountPercent.setVisibility(View.GONE);
                 tvOriginalPrice.setVisibility(View.GONE);
-                tvDiscountPrice.setText("₫" + numberFormat.format(originalPrice));
+                tvDiscountPrice.setText("₫" + numberFormat.format(price));
             }
 
-            // Show sold count (random for demo - replace with actual data)
-            int soldCount = (int) (Math.random() * 1000);
+            int soldCount = (int) (Math.random() * 500);
             tvSold.setText("Đã bán " + soldCount);
 
-            // Click listener
             cardProduct.setOnClickListener(v -> {
                 Intent intent = new Intent(context, ProductDetailActivity.class);
                 intent.putExtra(Constants.PRODUCT_ID, product.getId());
                 context.startActivity(intent);
-                Log.d("ProductGridAdapter", "Clicked product ID: " + product.getId());
             });
-        }
 
+            btnAddToCart.setOnClickListener(v -> {
+                if (Constants.getToken(context) == null || Constants.getToken(context).isEmpty()) {
+                    Toast.makeText(context, "Vui lòng đăng nhập để mua hàng", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                String variantId = ""; // Tạm thời để trống vì sản phẩm demo chưa có biến thể
+
+                CartRequest request = new CartRequest(product.getId(), variantId, 1);
+
+                apiService.addToCart(Constants.getToken(context), request).enqueue(new Callback<ApiResponse>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                            Toast.makeText(context, "Đã thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(context, "Lỗi thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ApiResponse> call, Throwable t) {
+                        Toast.makeText(context, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.e("AddToCart", t.getMessage());
+                    }
+                });
+            });
+
+        }
     }
 }

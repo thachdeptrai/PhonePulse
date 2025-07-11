@@ -219,7 +219,7 @@
                 android:text="Thêm vào giỏ"
                 android:textColor="@android:color/white"
                 android:textSize="12sp"
-                android:backgroundTint="#FF6B00"
+                    android:backgroundTint="#FF6B00"
                 android:textAllCaps="false" />
 
         </LinearLayout>

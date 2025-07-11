@@ -4,33 +4,65 @@ import com.google.gson.annotations.SerializedName;
 
 public class Variant {
     @SerializedName("_id")
-    private String _id;
+    private String id;  // đổi tên biến thành id cho thống nhất
+
     @SerializedName("product_id")
     private String productId;
+
     @SerializedName("color_id")
     private Color colorId;
+
     @SerializedName("size_id")
     private Size sizeId;
+
     @SerializedName("price")
     private double price;
+
     @SerializedName("quantity")
     private int quantity;
 
-    public String getId() { return _id; }
-    public void setId(String _id) { this._id = _id; }
+    public Variant() {
+    }
 
-    public String getProductId() { return productId; }
-    public void setProductId(String productId) { this.productId = productId; }
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public Color getColorId() { return colorId; }
-    public void setColorId(Color color) { this.colorId = color; }
+    public String getProductId() {
+        return productId;
+    }
+    public void setProductId(String productId) {
+        this.productId = productId;
+    }
 
-    public Size getSizeId() { return sizeId; }
-    public void setSizeId(Size size) { this.sizeId = size; }
+    public Color getColorId() {
+        return colorId;
+    }
+    public void setColorId(Color colorId) {
+        this.colorId = colorId;
+    }
 
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
+    public Size getSizeId() {
+        return sizeId;
+    }
+    public void setSizeId(Size sizeId) {
+        this.sizeId = sizeId;
+    }
 
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public double getPrice() {
+        return price;
+    }
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
 }
