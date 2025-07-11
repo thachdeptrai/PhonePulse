@@ -1,45 +1,21 @@
 package com.phoneapp.phonepulse.models;
 
-import com.phoneapp.phonepulse.request.CartItem;
-
-import java.util.List;
-
 public class Cart {
+    private int id;
+    private int user_id;
+    private int product_id;
+    private int quantity;
 
-    private String userId;
-    private List<CartItem> items;
-    private String updatedAt;
+    // Getters and Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public Cart() {
-    }
+    public int getUser_id() { return user_id; }
+    public void setUser_id(int user_id) { this.user_id = user_id; }
 
-    public Cart(String userId, List<CartItem> items, String updatedAt) {
-        this.userId = userId;
-        this.items = items;
-        this.updatedAt = updatedAt;
-    }
+    public int getProduct_id() { return product_id; }
+    public void setProduct_id(int product_id) { this.product_id = product_id; }
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public List<CartItem> getItems() {
-        return items;
-    }
-
-    public void setItems(List<CartItem> items) {
-        this.items = items;
-    }
-
-    public String getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(String updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 }

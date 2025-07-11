@@ -1,129 +1,42 @@
 package com.phoneapp.phonepulse.models;
 
-import com.google.gson.annotations.SerializedName;
-
 public class Product {
-
-    @SerializedName("_id")
-    private String id;
-
-    @SerializedName("product_name")
+    private int id;
     private String name;
+    private int brand_id;
+    private int price;
+    private int discount;
+    private String image_url;
+    private String specs_json;
+    private int stock;
+    private String created_at; // có thể dùng Date
 
-    @SerializedName("description")
-    private String description;
+    // Getters and Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    @SerializedName("category_id")
-    private Category category;
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    @SerializedName("variant_id")
-    private Variant variant;
+    public int getBrand_id() { return brand_id; }
+    public void setBrand_id(int brand_id) { this.brand_id = brand_id; }
 
-    @SerializedName("created_date")
-    private String createdDate;
+    public int getPrice() { return price; }
+    public void setPrice(int price) { this.price = price; }
 
-    @SerializedName("modified_date")
-    private String modifiedDate;
+    public int getDiscount() { return discount; }
+    public void setDiscount(int discount) { this.discount = discount; }
 
-    @SerializedName("discount")
-    private Integer discount;
+    public String getImage_url() { return image_url; }
+    public void setImage_url(String image_url) { this.image_url = image_url; }
 
-    @SerializedName("productimage_id")
-    private ProductImage productImage;
+    public String getSpecs_json() { return specs_json; }
+    public void setSpecs_json(String specs_json) { this.specs_json = specs_json; }
 
-    // ===================== Getters - Setters ==================== //
+    public int getStock() { return stock; }
+    public void setStock(int stock) { this.stock = stock; }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
-    public Variant getVariant() {
-        return variant;
-    }
-
-    public void setVariant(Variant variant) {
-        this.variant = variant;
-    }
-
-    public String getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(String createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public String getModifiedDate() {
-        return modifiedDate;
-    }
-
-    public void setModifiedDate(String modifiedDate) {
-        this.modifiedDate = modifiedDate;
-    }
-
-    public int getDiscount() {
-        return discount != null ? discount : 0;
-    }
-
-    public void setDiscount(Integer discount) {
-        this.discount = discount;
-    }
-
-    public ProductImage getProductImage() {
-        return productImage;
-    }
-
-    public void setProductImage(ProductImage productImage) {
-        this.productImage = productImage;
-    }
-
-    // ===================== Tiện ích ==================== //
-
-    /**
-     * Lấy giá bán từ Variant, nếu chưa có Variant trả về 0
-     */
-    public double getPrice() {
-        if (variant != null) {
-            return variant.getPrice();
-        }
-        return 0;
-    }
-
-    /**
-     * Lấy ID của Variant để xử lý giỏ hàng
-     */
-    public String getVariantId() {
-        if (variant != null) {
-            return variant.getId();
-        }
-        return null;
-    }
+    public String getCreated_at() { return created_at; }
+    public void setCreated_at(String created_at) { this.created_at = created_at; }
 }
+

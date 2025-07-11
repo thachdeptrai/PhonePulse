@@ -1,17 +1,24 @@
 package com.phoneapp.phonepulse.ui.auth;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.text.InputType;
 import android.util.Log;
-import android.util.Patterns;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.gson.Gson;
 import com.phoneapp.phonepulse.R;
-import com.phoneapp.phonepulse.data.api.ApiResponse;
-import com.phoneapp.phonepulse.data.api.ApiService;
-import com.phoneapp.phonepulse.request.RegisterRequest;
-import com.phoneapp.phonepulse.retrofit.RetrofitClient;
+import com.phoneapp.phonepulse.data.network.API_UserResponse;
+import com.phoneapp.phonepulse.data.network.RegisterRequest;
+import com.phoneapp.phonepulse.data.network.RetrofitClient;
+import com.phoneapp.phonepulse.data.network.UserAPI_Service;
+import com.phoneapp.phonepulse.models.User;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -19,145 +26,117 @@ import retrofit2.Response;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private EditText edFullName, edEmail, edPhone, edPassword, edConfirmPassword;
-    private CheckBox cbTerms;
-    private Button btnRegister;
-    private ProgressBar progressBar;
-    private ApiService apiService;
+    private EditText rgFullName, rgEmail, rgPass, rgConPass;
+    private ImageView showHidePass, showHideConPass;
+    private Button btnRegister, btnToLogin;
+
+    private boolean isPassVisible = false;
+    private boolean isConPassVisible = false;
+
+    private static final String TAG = "RegisterActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_register);
 
-        // Khởi tạo ApiService thông qua RetrofitClient
-        apiService = RetrofitClient.getApiService(null); // null vì register không cần token
-        Log.d("DEBUG", "apiService = " + apiService);
-        Log.d("DEBUG", "BASE_URL = " + com.phoneapp.phonepulse.utils.Constants.BASE_URL);
+        // Ánh xạ view
+        rgFullName = findViewById(R.id.rgFullName);
+        rgEmail = findViewById(R.id.rgEmail);
+        rgPass = findViewById(R.id.rgPass);
+        rgConPass = findViewById(R.id.rgConPass);
+        btnRegister = findViewById(R.id.btnRg);
+        btnToLogin = findViewById(R.id.btnRgLogin);
+        showHidePass = findViewById(R.id.showHidePass);
+        showHideConPass = findViewById(R.id.showHideConPass);
 
-        // Ánh xạ views
-        initViews();
-
-        // Sự kiện đăng ký
-        btnRegister.setOnClickListener(view -> {
-            if (validateInputs()) {
-                registerUser();
+        // Mắt xem Password
+        showHidePass.setOnClickListener(v -> {
+            if (isPassVisible) {
+                rgPass.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                showHidePass.setImageResource(R.drawable.mat); // Mắt đóng
+            } else {
+                rgPass.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                showHidePass.setImageResource(R.drawable.mat); // Mắt mở
             }
+            isPassVisible = !isPassVisible;
+            rgPass.setSelection(rgPass.getText().length());
         });
-    }
 
-    private void initViews() {
-        edFullName = findViewById(R.id.edFullName);
-        edEmail = findViewById(R.id.edEmail);
-        edPhone = findViewById(R.id.edPhone);
-        edPassword = findViewById(R.id.edPassword);
-        edConfirmPassword = findViewById(R.id.edConfirmPassword);
-        cbTerms = findViewById(R.id.cbTerms);
-        btnRegister = findViewById(R.id.btnRegister);
-        progressBar = new ProgressBar(this);
-    }
+        // Mắt xem Confirm Password
+        showHideConPass.setOnClickListener(v -> {
+            if (isConPassVisible) {
+                rgConPass.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                showHideConPass.setImageResource(R.drawable.mat);
+            } else {
+                rgConPass.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                showHideConPass.setImageResource(R.drawable.mat);
+            }
+            isConPassVisible = !isConPassVisible;
+            rgConPass.setSelection(rgConPass.getText().length());
+        });
 
-    private boolean validateInputs() {
-        String name = edFullName.getText().toString().trim();
-        String email = edEmail.getText().toString().trim();
-        String phone = edPhone.getText().toString().trim();
-        String password = edPassword.getText().toString();
-        String confirmPassword = edConfirmPassword.getText().toString();
+        // Chuyển sang màn hình Login
+        btnToLogin.setOnClickListener(view -> {
+            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+            finish();
+        });
 
-        if (TextUtils.isEmpty(name)) {
-            edFullName.setError("Full Name is required");
-            return false;
-        }
+        // Xử lý đăng ký
+        btnRegister.setOnClickListener(v -> {
+            String fullName = rgFullName.getText().toString().trim();
+            String email = rgEmail.getText().toString().trim();
+            String password = rgPass.getText().toString().trim();
+            String confirmPassword = rgConPass.getText().toString().trim();
 
-        if (TextUtils.isEmpty(email) || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            edEmail.setError("Invalid Email");
-            return false;
-        }
+            if (fullName.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                Toast.makeText(this, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-        if (!TextUtils.isEmpty(phone) && !Patterns.PHONE.matcher(phone).matches()) {
-            edPhone.setError("Invalid Phone Number");
-            return false;
-        }
+            if (!password.equals(confirmPassword)) {
+                Toast.makeText(this, "Mật khẩu xác nhận không khớp", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-        if (TextUtils.isEmpty(password) || password.length() < 6) {
-            edPassword.setError("Password must be at least 6 characters");
-            return false;
-        }
-        if (!password.matches(".*[A-Z].*")) {
-            edPassword.setError("Mật khẩu phải có ít nhất 1 chữ in hoa");
-            return false;
-        }
+            RegisterRequest request = new RegisterRequest(fullName, email, password);
+            Log.d(TAG, "Dữ liệu JSON gửi đi: " + new Gson().toJson(request));
 
-        if (!password.matches(".*[0-9].*")) {
-            edPassword.setError("Mật khẩu phải có ít nhất 1 số");
-            return false;
-        }
+            UserAPI_Service apiService = RetrofitClient.getUserService();
+            Call<API_UserResponse<User>> call = apiService.register(request);
 
-        if (!password.matches(".*[!@#$%^&*()_+=|<>?{}\\[\\]~-].*")) {
-            edPassword.setError("Mật khẩu phải có ít nhất 1 ký tự đặc biệt");
-            return false;
-        }
-        if (!password.equals(confirmPassword)) {
-            edConfirmPassword.setError("Passwords do not match");
-            return false;
-        }
+            call.enqueue(new Callback<API_UserResponse<User>>() {
+                @Override
+                public void onResponse(Call<API_UserResponse<User>> call, Response<API_UserResponse<User>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        API_UserResponse<User> res = response.body();
+                        if (res.isSuccess()) {
+                            Log.d(TAG, "Đăng ký thành công: " + res.getData().getEmail());
+                            Toast.makeText(RegisterActivity.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
 
-        if (!cbTerms.isChecked()) {
-            Toast.makeText(this, "Please accept Terms & Conditions", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
-        return true;
-    }
-
-    private void registerUser() {
-        String name = edFullName.getText().toString().trim();
-        String email = edEmail.getText().toString().trim();
-        String phone = edPhone.getText().toString().trim();
-        String password = edPassword.getText().toString();
-
-        RegisterRequest request = new RegisterRequest(name, email, phone, password);
-
-        // Log thông tin request
-        Log.d("RegisterActivity", "Starting registration...");
-        Log.d("RegisterActivity", "Request data: " + request.toString()); // Thêm toString() method vào RegisterRequest nếu chưa có
-
-        btnRegister.setEnabled(false);
-        Toast.makeText(this, "Registering...", Toast.LENGTH_SHORT).show();
-
-        apiService.register(request).enqueue(new Callback<ApiResponse>() {
-            @Override
-            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                btnRegister.setEnabled(true);
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse apiResponse = response.body();
-                    if (apiResponse.isSuccess()) {
-                        Toast.makeText(RegisterActivity.this, "Register Successful!", Toast.LENGTH_LONG).show();
-                        finish(); // hoặc chuyển về màn hình login
+                            // Chuyển sang LoginActivity và truyền email, password
+                            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                            intent.putExtra("email", email);
+                            intent.putExtra("password", password);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            Log.e(TAG, "Đăng ký thất bại (lỗi logic): " + res.getMessage());
+                            Toast.makeText(RegisterActivity.this, res.getMessage(), Toast.LENGTH_LONG).show();
+                        }
                     } else {
-                        Toast.makeText(RegisterActivity.this, apiResponse.getMessage(), Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "Đăng ký thất bại (lỗi phản hồi): " + response.code());
+                        Toast.makeText(RegisterActivity.this, "Đăng ký thất bại! Mã lỗi: " + response.code(), Toast.LENGTH_LONG).show();
                     }
-                } else {
-                    Toast.makeText(RegisterActivity.this, "Registration failed. Try again.", Toast.LENGTH_LONG).show();
                 }
-            }
 
-            @Override
-            public void onFailure(Call<ApiResponse> call, Throwable t) {
-                btnRegister.setEnabled(true);
-                Log.e("RegisterActivity", "Network Error", t);
-                String errorMsg = "Network Error: ";
-                if (t instanceof java.net.SocketException) {
-                    errorMsg += "Connection failed. Check server URL and network.";
-                } else if (t instanceof java.net.UnknownHostException) {
-                    errorMsg += "Cannot resolve server address.";
-                } else if (t instanceof java.net.ConnectException) {
-                    errorMsg += "Connection refused. Check if server is running.";
-                } else {
-                    errorMsg += t.getMessage();
+                @Override
+                public void onFailure(Call<API_UserResponse<User>> call, Throwable t) {
+                    Log.e(TAG, "Đăng ký lỗi mạng: " + t.getMessage());
+                    Toast.makeText(RegisterActivity.this, "Không thể kết nối tới server", Toast.LENGTH_LONG).show();
                 }
-                Toast.makeText(RegisterActivity.this, errorMsg, Toast.LENGTH_LONG).show();
-            }
+            });
         });
     }
 }
