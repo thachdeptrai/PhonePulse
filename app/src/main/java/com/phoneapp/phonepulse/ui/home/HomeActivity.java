@@ -24,6 +24,7 @@ import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.models.Product;
 import com.phoneapp.phonepulse.retrofit.RetrofitClient;
 import com.phoneapp.phonepulse.ui.cart.CartActivity;
+import com.phoneapp.phonepulse.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,8 +42,7 @@ public class HomeActivity extends AppCompatActivity {
     private ViewPager2 vpBanner;
     private RecyclerView rvFlashSale;
     private RecyclerView rvProductList;
-    private ImageView rvCartItems;
-
+    private ImageView ivCartIcon;
 
     // Adapters
     private BannerAdapter bannerAdapter;
@@ -57,10 +57,22 @@ public class HomeActivity extends AppCompatActivity {
     // API Service
     private ApiService apiService;
 
+    // Authentication token
+    private String authToken;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        // Load the authentication token as early as possible
+        authToken = Constants.getToken(this);
+        if (authToken != null) {
+            Log.d(TAG, "Auth Token loaded: " + authToken.substring(0, Math.min(authToken.length(), 10)) + "...");
+        } else {
+            Log.w(TAG, "No auth token found. User might not be logged in or token expired.");
+            // Optionally, redirect to login if token is crucial for HomeActivity
+        }
 
         initViews();
         setupRecyclerViews();
@@ -68,18 +80,16 @@ public class HomeActivity extends AppCompatActivity {
         setupSearchFunction();
         initApiService();
         loadData();
-        Next_Cart();
+        setupCartNavigation();
     }
-
-
 
     private void initViews() {
         etSearchProduct = findViewById(R.id.et_search_product);
         vpBanner = findViewById(R.id.vp_banner);
         rvFlashSale = findViewById(R.id.rv_flash_sale);
         rvProductList = findViewById(R.id.rv_product_list);
-        rvCartItems = findViewById(R.id.rvCartItems);
-
+        // Đây là dòng đã được sửa: Gán ImageView tìm được vào biến ivCartIcon
+        ivCartIcon = findViewById(R.id.iv_cart_icon);
     }
 
     private void setupRecyclerViews() {
@@ -94,15 +104,14 @@ public class HomeActivity extends AppCompatActivity {
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
         rvProductList.setLayoutManager(gridLayoutManager);
         rvProductList.setAdapter(productGridAdapter);
-
     }
 
     private void setupViewPager() {
-        // Sample banner images - thay thế bằng URL thực tế
+        // Sample banner images - replace with actual URLs
         bannerImages = Arrays.asList(
-                "https://via.placeholder.com/150",
-                "https://via.placeholder.com/150",
-                "https://via.placeholder.com/150"
+                "https://via.placeholder.com/600x300/FF5733/FFFFFF?text=Banner+1",
+                "https://via.placeholder.com/600x300/33FF57/FFFFFF?text=Banner+2",
+                "https://via.placeholder.com/600x300/3357FF/FFFFFF?text=Banner+3"
         );
 
         bannerAdapter = new BannerAdapter(this, bannerImages);
@@ -125,7 +134,8 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void initApiService() {
-        apiService = RetrofitClient.getApiService(null);
+        // Pass the loaded token to RetrofitClient when initializing ApiService
+        apiService = RetrofitClient.getApiService(authToken);
     }
 
     private void loadData() {
@@ -141,10 +151,10 @@ public class HomeActivity extends AppCompatActivity {
                     allProducts.clear();
                     allProducts.addAll(response.body());
 
-                    // Tách flash sale products (giả sử discount > 20%)
+                    // Separate flash sale products (assume discount > 20%)
                     separateFlashSaleProducts();
 
-                    // Update adapters
+                    // Update adapters on the UI thread
                     runOnUiThread(() -> {
                         productGridAdapter.notifyDataSetChanged();
                         flashSaleAdapter.notifyDataSetChanged();
@@ -152,15 +162,15 @@ public class HomeActivity extends AppCompatActivity {
 
                     Log.d(TAG, "Loaded " + allProducts.size() + " products");
                 } else {
-                    Log.e(TAG, "Failed to load products: " + response.code());
-                    showError("Không thể tải danh sách sản phẩm");
+                    Log.e(TAG, "Failed to load products: " + response.code() + " - " + response.message());
+                    showError("Không thể tải danh sách sản phẩm.");
                 }
             }
 
             @Override
             public void onFailure(Call<List<Product>> call, Throwable t) {
-                Log.e(TAG, "Network error: " + t.getMessage());
-                showError("Lỗi kết nối mạng");
+                Log.e(TAG, "Network error during product loading: " + t.getMessage(), t);
+                showError("Lỗi kết nối mạng. Vui lòng thử lại.");
             }
         });
     }
@@ -168,7 +178,7 @@ public class HomeActivity extends AppCompatActivity {
     private void separateFlashSaleProducts() {
         flashSaleProducts.clear();
         for (Product product : allProducts) {
-            if (product.getDiscount() > 20) { // Flash sale condition
+            if (product.getDiscount() > 20) { // Example Flash sale condition: discount > 20%
                 flashSaleProducts.add(product);
             }
         }
@@ -181,25 +191,23 @@ public class HomeActivity extends AppCompatActivity {
             filteredList.addAll(allProducts);
         } else {
             for (Product product : allProducts) {
-                if (product.getName().toLowerCase().contains(query.toLowerCase())) {
+                // Ensure product.getName() is not null before converting to lower case
+                if (product.getName() != null && product.getName().toLowerCase().contains(query.toLowerCase())) {
                     filteredList.add(product);
                 }
             }
         }
-
         productGridAdapter.updateProducts(filteredList);
     }
 
     private void showError(String message) {
-        runOnUiThread(() -> Toast.makeText(this, message, Toast.LENGTH_SHORT).show());
+        runOnUiThread(() -> Toast.makeText(this, message, Toast.LENGTH_LONG).show());
     }
-    private void Next_Cart() {
-        rvCartItems.setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View view) {
-        Intent intent = new Intent(HomeActivity.this, CartActivity.class);
-        startActivity(intent);
-    }
-});
+
+    private void setupCartNavigation() {
+        ivCartIcon.setOnClickListener(view -> {
+            Intent intent = new Intent(HomeActivity.this, CartActivity.class);
+            startActivity(intent);
+        });
     }
 }

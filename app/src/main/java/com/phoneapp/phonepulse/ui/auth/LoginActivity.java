@@ -18,7 +18,7 @@ import com.phoneapp.phonepulse.repository.LoginResponse;
 import com.phoneapp.phonepulse.request.LoginRequest;
 import com.phoneapp.phonepulse.retrofit.RetrofitClient;
 import com.phoneapp.phonepulse.ui.home.HomeActivity;
-import com.phoneapp.phonepulse.utils.Constants;
+import com.phoneapp.phonepulse.utils.Constants; // Đảm bảo đã import Constants
 
 import dagger.hilt.android.AndroidEntryPoint; // Keep if using Dagger Hilt
 import retrofit2.Call;
@@ -31,11 +31,11 @@ public class LoginActivity extends AppCompatActivity {
     private ApiService apiService;
     private EditText edEmail, edPassword;
     private Button btnLogin, btnRegister;
-    private CheckBox cbRememberMe; // Added CheckBox
-    private TextView tvForgotPassword; // Added TextView for Forgot Password
+    private CheckBox cbRememberMe;
+    private TextView tvForgotPassword;
 
-    // SharedPreferences keys
-    public static final String PREF_NAME = "PhonePulsePrefs";
+    // Sử dụng Constants.SHARED_PREFS cho SharedPreferences name để nhất quán
+    // public static final String PREF_NAME = "PhonePulsePrefs"; // Dòng này có thể xóa
     private static final String KEY_REMEMBER_ME = "remember_me";
     private static final String KEY_EMAIL = "saved_email";
     private static final String KEY_PASSWORD = "saved_password";
@@ -45,7 +45,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Initialize ApiService via RetrofitClient
+        // Khởi tạo ApiService lần đầu (chưa có token)
         apiService = RetrofitClient.getApiService(null);
         Log.d("DEBUG", "apiService = " + apiService);
 
@@ -54,8 +54,8 @@ public class LoginActivity extends AppCompatActivity {
         edPassword = findViewById(R.id.edPassWord);
         btnLogin = findViewById(R.id.btnLogin);
         btnRegister = findViewById(R.id.btnRegister);
-        cbRememberMe = findViewById(R.id.cbRememberMe); // Map CheckBox
-        tvForgotPassword = findViewById(R.id.tvForgotPassword); // Map TextView
+        cbRememberMe = findViewById(R.id.cbRememberMe);
+        tvForgotPassword = findViewById(R.id.tvForgotPassword);
 
         // Load saved credentials if "Remember Me" was checked previously
         loadSavedCredentials();
@@ -72,9 +72,8 @@ public class LoginActivity extends AppCompatActivity {
             if (registeredPassword != null) {
                 edPassword.setText(registeredPassword);
             }
-            // Optionally, show a toast message
-            Toast.makeText(this, "Registration successful! Please log in.", Toast.LENGTH_LONG).show();
-            // Clear the extras to prevent re-filling on subsequent onCreate calls (e.g., rotation)
+            Toast.makeText(this, "Đăng ký thành công! Vui lòng đăng nhập.", Toast.LENGTH_LONG).show();
+            // Xóa extras để tránh hiển thị lại khi xoay màn hình hoặc khởi tạo lại Activity
             intent.removeExtra("REGISTERED_EMAIL");
             intent.removeExtra("REGISTERED_PASSWORD");
         }
@@ -91,8 +90,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         tvForgotPassword.setOnClickListener(v -> {
-            // Handle Forgot Password click - e.g., navigate to ForgotPasswordActivity
-            Toast.makeText(LoginActivity.this, "Forgot Password clicked!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, "Chức năng quên mật khẩu đang phát triển!", Toast.LENGTH_SHORT).show();
             // Example: startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
         });
     }
@@ -102,12 +100,12 @@ public class LoginActivity extends AppCompatActivity {
         String password = edPassword.getText().toString();
 
         if (TextUtils.isEmpty(email) || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            edEmail.setError("Invalid email format");
+            edEmail.setError("Email không hợp lệ.");
             return false;
         }
 
         if (TextUtils.isEmpty(password) || password.length() < 6) {
-            edPassword.setError("Password must be at least 6 characters");
+            edPassword.setError("Mật khẩu phải có ít nhất 6 ký tự.");
             return false;
         }
 
@@ -118,22 +116,21 @@ public class LoginActivity extends AppCompatActivity {
         String email = edEmail.getText().toString().trim();
         String password = edPassword.getText().toString();
 
-        // Save credentials if "Remember Me" is checked
+        // Lưu hoặc xóa credentials dựa trên trạng thái "Remember Me"
         if (cbRememberMe.isChecked()) {
             saveCredentials(email, password, true);
         } else {
-            // Clear saved credentials if "Remember Me" is unchecked
-            saveCredentials("", "", false);
+            saveCredentials("", "", false); // Xóa credentials
         }
 
         LoginRequest request = new LoginRequest(email, password);
-        btnLogin.setEnabled(false);
-        Toast.makeText(this, "Logging in...", Toast.LENGTH_SHORT).show();
+        btnLogin.setEnabled(false); // Vô hiệu hóa nút để tránh spam click
+        Toast.makeText(this, "Đang đăng nhập...", Toast.LENGTH_SHORT).show();
 
         apiService.login(request).enqueue(new Callback<ApiResponse<LoginResponse>>() {
             @Override
             public void onResponse(Call<ApiResponse<LoginResponse>> call, Response<ApiResponse<LoginResponse>> response) {
-                btnLogin.setEnabled(true);
+                btnLogin.setEnabled(true); // Kích hoạt lại nút
 
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<LoginResponse> loginResponse = response.body();
@@ -143,43 +140,56 @@ public class LoginActivity extends AppCompatActivity {
                         String token = data.getToken();
 
                         if (token != null) {
-                            saveToken(token);
-                            // Re-initialize apiService with the token for subsequent authenticated requests
+                            // Sử dụng Constants.saveToken để lưu token một cách nhất quán
+                            Constants.saveToken(LoginActivity.this, token);
+
+                            // Khởi tạo lại apiService với token để sử dụng cho các request cần xác thực
+                            // Lưu ý: Nếu RetrofitClient đã có logic Interceptor để tự động thêm token
+                            // thì bước này có thể không cần thiết, tùy thuộc vào cách bạn thiết kế RetrofitClient.
+                            // Tuy nhiên, việc truyền null/token rõ ràng là một cách an toàn.
                             apiService = RetrofitClient.getApiService(token);
+
+                            Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(LoginActivity.this, HomeActivity.class));
-                            finish();
+                            finish(); // Kết thúc LoginActivity để không quay lại
                         } else {
-                            Toast.makeText(LoginActivity.this, "Token not received", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Không nhận được token từ máy chủ.", Toast.LENGTH_SHORT).show();
                         }
                     } else {
+                        // Hiển thị thông báo lỗi từ API
                         Toast.makeText(LoginActivity.this, loginResponse.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(LoginActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
+                    // Xử lý lỗi HTTP (ví dụ: 404, 500) hoặc phản hồi không thành công
+                    Toast.makeText(LoginActivity.this, "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.", Toast.LENGTH_SHORT).show();
+                    Log.e("LoginActivity", "Login failed: " + response.code() + " " + response.message());
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<LoginResponse>> call, Throwable t) {
-                btnLogin.setEnabled(true);
-                Toast.makeText(LoginActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                btnLogin.setEnabled(true); // Kích hoạt lại nút
+                Toast.makeText(LoginActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Log.e("LoginActivity", "Network error during login", t);
             }
         });
     }
 
-    private void saveToken(String token) {
-        SharedPreferences prefs = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putString(Constants.TOKEN_KEY, token).apply();
-    }
+    // Phương thức này không còn cần thiết vì đã chuyển việc lưu token vào Constants
+    // private void saveToken(String token) {
+    //     SharedPreferences prefs = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+    //     prefs.edit().putString(Constants.TOKEN_KEY, token).apply();
+    // }
 
     /**
-     * Saves or clears login credentials based on the rememberMe flag.
-     * @param email The email to save.
-     * @param password The password to save.
-     * @param rememberMe If true, saves the credentials; if false, clears them.
+     * Lưu hoặc xóa thông tin đăng nhập (email, mật khẩu) và trạng thái "Nhớ tôi" vào SharedPreferences.
+     * @param email Email của người dùng.
+     * @param password Mật khẩu của người dùng.
+     * @param rememberMe True nếu muốn lưu thông tin, false nếu muốn xóa.
      */
     private void saveCredentials(String email, String password, boolean rememberMe) {
-        SharedPreferences prefs = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        // Sử dụng Constants.SHARED_PREFS để lưu credentials nhất quán
+        SharedPreferences prefs = getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
         editor.putBoolean(KEY_REMEMBER_ME, rememberMe);
@@ -194,10 +204,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads saved login credentials and pre-fills the EditText fields.
+     * Tải thông tin đăng nhập đã lưu từ SharedPreferences và điền vào các trường EditText.
      */
     private void loadSavedCredentials() {
-        SharedPreferences prefs = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        // Sử dụng Constants.SHARED_PREFS để đọc credentials nhất quán
+        SharedPreferences prefs = getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE);
         boolean rememberMe = prefs.getBoolean(KEY_REMEMBER_ME, false);
         cbRememberMe.setChecked(rememberMe);
 

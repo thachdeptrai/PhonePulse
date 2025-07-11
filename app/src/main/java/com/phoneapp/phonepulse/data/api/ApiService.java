@@ -82,7 +82,7 @@ public interface ApiService {
 
     // ========== CART ==========
     @GET("/api/cart")
-    Call<List<CartItem>> getCart(@Header("Authorization") String token);
+    Call<ApiResponse<List<CartItem>>> getCart(@Header("Authorization") String token); // Note: returns List<CartItem> wrapped in ApiResponse
 
     @POST("/api/cart")
     Call<ApiResponse> addToCart(@Header("Authorization") String token, @Body CartRequest body);

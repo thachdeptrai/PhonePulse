@@ -1,47 +1,31 @@
-package com.phoneapp.phonepulse.request;
+// com.phoneapp.phonepulse.request.CartItem.java (or com.phoneapp.phonepulse.models.CartItem.java if it's a model)
+package com.phoneapp.phonepulse.request; // Or adjust to models package if preferred
 
-import com.phoneapp.phonepulse.models.Product;
-import com.phoneapp.phonepulse.models.Variant;
+import com.google.gson.annotations.SerializedName;
+import com.phoneapp.phonepulse.models.Product; // Assuming this model exists
 
 public class CartItem {
+    @SerializedName("_id")
+    private String id; // ID of the cart item entry itself
 
-    private String productId;
-    private String variantId;
+    @SerializedName("product") // Assuming your backend embeds the full product object
+    private Product product;
+
+    @SerializedName("variant") // Assuming your backend embeds the full variant object
+    private com.phoneapp.phonepulse.models.Variant variant; // Full Variant object
+
+    @SerializedName("quantity")
     private int quantity;
-    private Product product;   // Phần populate từ Backend (nếu có)
-    private Variant variant;   // Thông tin chi tiết biến thể (nếu có)
 
-    public CartItem() {
+    // You might also have a 'price' or 'totalPrice' here if the backend calculates it for the item
+    // private double itemPrice;
+
+    public String getId() {
+        return id;
     }
 
-    public CartItem(String productId, String variantId, int quantity) {
-        this.productId = productId;
-        this.variantId = variantId;
-        this.quantity = quantity;
-    }
-
-    public String getProductId() {
-        return productId;
-    }
-
-    public void setProductId(String productId) {
-        this.productId = productId;
-    }
-
-    public String getVariantId() {
-        return variantId;
-    }
-
-    public void setVariantId(String variantId) {
-        this.variantId = variantId;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Product getProduct() {
@@ -52,11 +36,29 @@ public class CartItem {
         this.product = product;
     }
 
-    public Variant getVariant() {
+    public com.phoneapp.phonepulse.models.Variant getVariant() {
         return variant;
     }
 
-    public void setVariant(Variant variant) {
+    public void setVariant(com.phoneapp.phonepulse.models.Variant variant) {
         this.variant = variant;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    // Consider adding a method to get the effective price of this item
+    public double getItemTotalPrice() {
+        if (product != null && variant != null) {
+            return variant.getPrice() * quantity;
+        } else if (product != null) { // Fallback if variant isn't always present
+            return product.getPrice() * quantity;
+        }
+        return 0.0;
     }
 }

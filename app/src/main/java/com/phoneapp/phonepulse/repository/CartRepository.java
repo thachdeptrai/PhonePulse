@@ -18,18 +18,18 @@ public class CartRepository {
 
     /**
      * Lấy giỏ hàng
-     * @param token Bearer token
-     * @return List<CartItem>
+     * @param token Bearer token (raw token, "Bearer " prefix added here)
+     * @return Call<ApiResponse<List<CartItem>>>
      */
-    public Call<List<CartItem>> getCart(String token) {
+    public Call<ApiResponse<List<CartItem>>> getCart(String token) { // <-- CORRECTED RETURN TYPE HERE
         return apiService.getCart("Bearer " + token);
     }
 
     /**
      * Thêm sản phẩm vào giỏ
-     * @param token Bearer token
+     * @param token Bearer token (raw token, "Bearer " prefix added here)
      * @param request thông tin sản phẩm cần thêm
-     * @return ApiResponse
+     * @return Call<ApiResponse>
      */
     public Call<ApiResponse> addToCart(String token, CartRequest request) {
         return apiService.addToCart("Bearer " + token, request);
@@ -37,9 +37,9 @@ public class CartRepository {
 
     /**
      * Cập nhật số lượng sản phẩm
-     * @param token Bearer token
+     * @param token Bearer token (raw token, "Bearer " prefix added here)
      * @param request thông tin sản phẩm cần cập nhật
-     * @return ApiResponse
+     * @return Call<ApiResponse>
      */
     public Call<ApiResponse> updateCart(String token, CartRequest request) {
         return apiService.updateCart("Bearer " + token, request);
@@ -47,9 +47,9 @@ public class CartRepository {
 
     /**
      * Xóa sản phẩm khỏi giỏ
-     * @param token Bearer token
+     * @param token Bearer token (raw token, "Bearer " prefix added here)
      * @param request thông tin sản phẩm cần xóa
-     * @return ApiResponse
+     * @return Call<ApiResponse>
      */
     public Call<ApiResponse> removeFromCart(String token, CartRequest request) {
         return apiService.removeFromCart("Bearer " + token, request);
