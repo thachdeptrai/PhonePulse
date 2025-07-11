@@ -89,12 +89,6 @@
         </LinearLayout>
 
         <!-- Nút xóa -->
-        <ImageView
-            android:id="@+id/btn_delete"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/xoa"
-            />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

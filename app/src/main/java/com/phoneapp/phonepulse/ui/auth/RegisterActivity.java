@@ -1,5 +1,6 @@
 package com.phoneapp.phonepulse.ui.auth;
 
+import android.content.Intent; // Import Intent
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -22,7 +23,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText edFullName, edEmail, edPhone, edPassword, edConfirmPassword;
     private CheckBox cbTerms;
     private Button btnRegister;
-    private ProgressBar progressBar;
+    private ProgressBar progressBar; // Note: This ProgressBar is not actually used in the layout/shown to the user. Consider adding it to your layout if you intend to show progress.
     private ApiService apiService;
 
     @Override
@@ -30,15 +31,15 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        // Khởi tạo ApiService thông qua RetrofitClient
-        apiService = RetrofitClient.getApiService(null); // null vì register không cần token
+        // Initialize ApiService via RetrofitClient
+        apiService = RetrofitClient.getApiService(null); // null because registration doesn't require a token
         Log.d("DEBUG", "apiService = " + apiService);
         Log.d("DEBUG", "BASE_URL = " + com.phoneapp.phonepulse.utils.Constants.BASE_URL);
 
-        // Ánh xạ views
+        // Map views
         initViews();
 
-        // Sự kiện đăng ký
+        // Register button click event
         btnRegister.setOnClickListener(view -> {
             if (validateInputs()) {
                 registerUser();
@@ -50,10 +51,13 @@ public class RegisterActivity extends AppCompatActivity {
         edFullName = findViewById(R.id.edFullName);
         edEmail = findViewById(R.id.edEmail);
         edPhone = findViewById(R.id.edPhone);
-        edPassword = findViewById(R.id.edPassword);
+        edPassword = findViewById(R.id.edPassWord); // Corrected ID assuming it matches activity_login, ensure it's correct for activity_register
         edConfirmPassword = findViewById(R.id.edConfirmPassword);
         cbTerms = findViewById(R.id.cbTerms);
         btnRegister = findViewById(R.id.btnRegister);
+        // The ProgressBar instance is created here but not added to a layout, so it won't be visible.
+        // If you want to show a ProgressBar, you should define it in your XML layout (activity_register.xml)
+        // and then find it using findViewById(). For now, it's just an instance.
         progressBar = new ProgressBar(this);
     }
 
@@ -74,6 +78,7 @@ public class RegisterActivity extends AppCompatActivity {
             return false;
         }
 
+        // Phone number is optional, but if entered, it must be valid
         if (!TextUtils.isEmpty(phone) && !Patterns.PHONE.matcher(phone).matches()) {
             edPhone.setError("Invalid Phone Number");
             return false;
@@ -84,17 +89,17 @@ public class RegisterActivity extends AppCompatActivity {
             return false;
         }
         if (!password.matches(".*[A-Z].*")) {
-            edPassword.setError("Mật khẩu phải có ít nhất 1 chữ in hoa");
+            edPassword.setError("Password must contain at least 1 uppercase letter");
             return false;
         }
 
         if (!password.matches(".*[0-9].*")) {
-            edPassword.setError("Mật khẩu phải có ít nhất 1 số");
+            edPassword.setError("Password must contain at least 1 digit");
             return false;
         }
 
         if (!password.matches(".*[!@#$%^&*()_+=|<>?{}\\[\\]~-].*")) {
-            edPassword.setError("Mật khẩu phải có ít nhất 1 ký tự đặc biệt");
+            edPassword.setError("Password must contain at least 1 special character");
             return false;
         }
         if (!password.equals(confirmPassword)) {
@@ -118,9 +123,9 @@ public class RegisterActivity extends AppCompatActivity {
 
         RegisterRequest request = new RegisterRequest(name, email, phone, password);
 
-        // Log thông tin request
+        // Log request info
         Log.d("RegisterActivity", "Starting registration...");
-        Log.d("RegisterActivity", "Request data: " + request.toString()); // Thêm toString() method vào RegisterRequest nếu chưa có
+        Log.d("RegisterActivity", "Request data: " + request.toString()); // Make sure RegisterRequest has a toString() method
 
         btnRegister.setEnabled(false);
         Toast.makeText(this, "Registering...", Toast.LENGTH_SHORT).show();
@@ -133,7 +138,19 @@ public class RegisterActivity extends AppCompatActivity {
                     ApiResponse apiResponse = response.body();
                     if (apiResponse.isSuccess()) {
                         Toast.makeText(RegisterActivity.this, "Register Successful!", Toast.LENGTH_LONG).show();
-                        finish(); // hoặc chuyển về màn hình login
+
+                        // --- MODIFICATION START ---
+                        // Create an Intent to go back to LoginActivity
+                        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                        // Put email and password as extras
+                        intent.putExtra("REGISTERED_EMAIL", email);
+                        intent.putExtra("REGISTERED_PASSWORD", password);
+                        // Add flags to clear the activity stack and bring LoginActivity to the top
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finish(); // Finish RegisterActivity
+                        // --- MODIFICATION END ---
+
                     } else {
                         Toast.makeText(RegisterActivity.this, apiResponse.getMessage(), Toast.LENGTH_LONG).show();
                     }

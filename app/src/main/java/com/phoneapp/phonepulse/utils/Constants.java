@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class Constants {
-    public static final String BASE_URL = "http://10.0.2.2:5000";
+    //public static final String BASE_URL = "http://10.0.2.2:5000";
+    public static final String BASE_URL = "http://192.168.1.9:5000";
+
     public static final int TIMEOUT = 30; // seconds
     public static final String SHARED_PREFS = "app_prefs";
     public static final String TOKEN_KEY = "auth_token";

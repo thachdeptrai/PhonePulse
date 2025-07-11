@@ -80,7 +80,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     class CartViewHolder extends RecyclerView.ViewHolder {
 
-        private final ImageView ivProductImage, btnDecrease, btnIncrease, btnDelete;
+        private final ImageView ivProductImage, btnDecrease, btnIncrease;
         private final TextView tvProductName, tvProductPrice, tvQuantity;
 
         public CartViewHolder(@NonNull View itemView) {
@@ -91,7 +91,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             tvQuantity = itemView.findViewById(R.id.tv_quantity);
             btnDecrease = itemView.findViewById(R.id.btn_decrease);
             btnIncrease = itemView.findViewById(R.id.btn_increase);
-            btnDelete = itemView.findViewById(R.id.btn_delete);
         }
 
         public void bind(CartItem item) {
@@ -118,9 +117,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                 updateQuantity(item, item.getQuantity() + 1);
             });
 
-            btnDelete.setOnClickListener(v -> {
-                removeFromCart(item);
-            });
+
         }
 
         private void updateQuantity(CartItem item, int newQuantity) {
