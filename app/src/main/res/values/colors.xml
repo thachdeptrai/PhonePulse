@@ -10,6 +10,8 @@
     <color name="white_80">#CCFFFFFF</color>
     <color name="progress_start">#00D4AA</color>
     <color name="progress_end">#00A8FF</color>
+    <color name="teal_700">#018786</color>
+
 
     <color name="colorPrimary">#FF6B00</color>
     <color name="colorAccent">#FF6B00</color>
@@ -48,4 +50,9 @@
     <color name="text_primary">#FFFFFF</color>
     <color name="text_secondary">#CCCCCC</color>
     <color name="text_hint">#888888</color>
+
+    <color name="green">#4CAF50</color>
+    <color name="orange">#FF9800</color>
+    <color name="gray">#757575</color>
+    <color name="red">#F44336</color>
 </resources>

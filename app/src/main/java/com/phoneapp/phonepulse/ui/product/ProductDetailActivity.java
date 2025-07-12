@@ -13,10 +13,13 @@ import com.bumptech.glide.Glide;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.models.Product;
+import com.phoneapp.phonepulse.models.ProductImage;
+import com.phoneapp.phonepulse.models.Variant;
 import com.phoneapp.phonepulse.retrofit.RetrofitClient;
 import com.phoneapp.phonepulse.utils.Constants;
 
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -26,22 +29,14 @@ import retrofit2.Response;
 public class ProductDetailActivity extends AppCompatActivity {
     private static final String TAG = "ProductDetailActivity";
 
-    // UI Components
     private Toolbar toolbar;
     private ImageView ivProductImage;
-    private TextView tvProductName;
-    private TextView tvOriginalPrice;
-    private TextView tvDiscountPrice;
-    private TextView tvDiscountPercent;
-    private TextView tvProductSpecs;
-    private TextView tvStock;
+    private TextView tvProductName, tvOriginalPrice, tvDiscountPrice, tvDiscountPercent, tvProductSpecs, tvStock;
 
-    // Data
     private String productId;
     private Product currentProduct;
+    private Variant defaultVariant;
     private NumberFormat numberFormat;
-
-    // API Service
     private ApiService apiService;
 
     @Override
@@ -49,10 +44,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_detail);
 
-        // Get product ID from intent
         productId = getIntent().getStringExtra(Constants.PRODUCT_ID);
-        // log
-        Log.d(TAG, "Received product ID: " + productId);
         if (productId == null) {
             Toast.makeText(this, "Không tìm thấy sản phẩm", Toast.LENGTH_SHORT).show();
             finish();
@@ -61,10 +53,12 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         initViews();
         setupToolbar();
-        initApiService();
-        loadProductDetail();
-
+        apiService = RetrofitClient.getApiService(null);
         numberFormat = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
+
+        loadProductDetail();
+        loadProductImage();
+        loadProductVariants();
     }
 
     private void initViews() {
@@ -85,86 +79,93 @@ public class ProductDetailActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowHomeEnabled(true);
             getSupportActionBar().setTitle("Chi tiết sản phẩm");
         }
-
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
-    private void initApiService() {
-        apiService = RetrofitClient.getApiService(null); // null because product detail does not require token
-    }
-
     private void loadProductDetail() {
-        Call<Product> call = apiService.getProductById(String.valueOf(productId));
-        call.enqueue(new Callback<Product>() {
+        apiService.getProductById(productId).enqueue(new Callback<Product>() {
             @Override
             public void onResponse(Call<Product> call, Response<Product> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     currentProduct = response.body();
-                    runOnUiThread(() -> displayProductDetail());
-                    Log.d(TAG, "Product loaded: " + currentProduct.getName());
-                } else {
-                    Log.e(TAG, "Failed to load product: " + response.code());
-                    runOnUiThread(() -> showError("Không thể tải thông tin sản phẩm"));
-                }
+                    tvProductName.setText(currentProduct.getName());
+                    if (getSupportActionBar() != null)
+                        getSupportActionBar().setTitle(currentProduct.getName());
+                } else showError("Không thể tải thông tin sản phẩm");
             }
 
             @Override
             public void onFailure(Call<Product> call, Throwable t) {
-                Log.e(TAG, "Network error: " + t.getMessage());
-                runOnUiThread(() -> showError("Lỗi kết nối mạng"));
+                showError("Lỗi kết nối mạng");
             }
         });
     }
 
-    private void displayProductDetail() {
-        if (currentProduct == null) return;
+    private void loadProductImage() {
+        apiService.getProductImages(productId).enqueue(new Callback<List<ProductImage>>() {
+            @Override
+            public void onResponse(Call<List<ProductImage>> call, Response<List<ProductImage>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    Glide.with(ProductDetailActivity.this)
+                            .load(response.body().get(0).getImageUrl())
+                            .placeholder(R.drawable.placeholder_product)
+                            .into(ivProductImage);
+                }
+            }
 
-        // Load product image
-        Glide.with(this)
-                .load(currentProduct.getProductImage().getImageUrl())
-                .placeholder(R.drawable.placeholder_product)
-                .error(R.drawable.placeholder_product)
-                .into(ivProductImage);
+            @Override
+            public void onFailure(Call<List<ProductImage>> call, Throwable t) {
+                Log.e(TAG, "Failed to load image: " + t.getMessage());
+            }
+        });
+    }
 
-        // Set product name
-        tvProductName.setText(currentProduct.getName());
+    private void loadProductVariants() {
+        apiService.getVariants(productId).enqueue(new Callback<List<Variant>>() {
+            @Override
+            public void onResponse(Call<List<Variant>> call, Response<List<Variant>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    defaultVariant = response.body().get(0);
+                    displayPriceAndSpecs();
+                }
+            }
 
-        // Calculate and display prices
-        double originalPrice = currentProduct.getVariantId().getPrice();
-        int discount = currentProduct.getDiscount();
+            @Override
+            public void onFailure(Call<List<Variant>> call, Throwable t) {
+                Log.e(TAG, "Failed to load variants: " + t.getMessage());
+            }
+        });
+    }
+
+    private void displayPriceAndSpecs() {
+        if (defaultVariant == null) return;
+
+        double originalPrice = defaultVariant.getPrice();
+        int discount = currentProduct != null ? currentProduct.getDiscount() : 0;
 
         if (discount > 0) {
-            // Show discount
             tvDiscountPercent.setVisibility(TextView.VISIBLE);
             tvOriginalPrice.setVisibility(TextView.VISIBLE);
-
             double discountedPrice = originalPrice * (100 - discount) / 100;
 
             tvOriginalPrice.setText("₫" + numberFormat.format(originalPrice));
             tvDiscountPrice.setText("₫" + numberFormat.format(discountedPrice));
             tvDiscountPercent.setText("-" + discount + "%");
 
-            // Strike through original price
             tvOriginalPrice.setPaintFlags(tvOriginalPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
         } else {
-            // No discount
             tvDiscountPercent.setVisibility(TextView.GONE);
             tvOriginalPrice.setVisibility(TextView.GONE);
             tvDiscountPrice.setText("₫" + numberFormat.format(originalPrice));
         }
 
-        // Display specifications
-        if (currentProduct.getVariantId() != null ) {
-            tvProductSpecs.setText(
-                            "Dòng : " + currentProduct.getVariantId().getSizeId().getName() + "\n" +
-                            "Màu sắc: " + currentProduct.getVariantId().getColorId().getName() + "\n" +
-                            "Bộ nhớ: " + currentProduct.getVariantId().getSizeId().getStorage() + "\n");
-        } else {
-            tvProductSpecs.setText("Thông số kỹ thuật đang được cập nhật");
-        }
+        tvProductSpecs.setText(
+                "Dòng: " + defaultVariant.getSizeId().getName() + "\n" +
+                        "Màu sắc: " + defaultVariant.getColorId().getName() + "\n" +
+                        "Bộ nhớ: " + defaultVariant.getSizeId().getStorage()
+        );
 
-        // Display stock
-        int stock = currentProduct.getVariantId().getQuantity();
+        int stock = defaultVariant.getQuantity();
         if (stock > 0) {
             tvStock.setText("Còn " + stock + " sản phẩm");
             tvStock.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
@@ -172,14 +173,9 @@ public class ProductDetailActivity extends AppCompatActivity {
             tvStock.setText("Hết hàng");
             tvStock.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
         }
-
-        // Update toolbar title
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(currentProduct.getName());
-        }
     }
 
-    private void showError(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    private void showError(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 }

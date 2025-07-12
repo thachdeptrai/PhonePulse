@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Toolbar đẹp mắt -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_order_creation"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@drawable/gradient_toolbar"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:title="Tạo đơn hàng"
+            app:titleTextColor="@android:color/white"
+            app:navigationIcon="@drawable/ic_back" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Nội dung chính -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <!-- CardView chứa các trường nhập liệu -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="6dp"
+            android:foreground="?attr/selectableItemBackground">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Địa chỉ giao hàng -->
+                <EditText
+                    android:id="@+id/et_shipping_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Địa chỉ giao hàng"
+                    android:textSize="16sp"
+                    android:textColor="#212121"
+                    android:textColorHint="#757575"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Số điện thoại -->
+                <EditText
+                    android:id="@+id/et_phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Số điện thoại"
+                    android:inputType="phone"
+                    android:textSize="16sp"
+                    android:textColor="#212121"
+                    android:textColorHint="#757575"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Mã voucher (tùy chọn) -->
+                <EditText
+                    android:id="@+id/et_voucher_code"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Mã voucher (tùy chọn)"
+                    android:textSize="16sp"
+                    android:textColor="#212121"
+                    android:textColorHint="#757575"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Phương thức thanh toán -->
+                <EditText
+                    android:id="@+id/et_payment_method"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Phương thức thanh toán"
+                    android:textSize="16sp"
+                    android:textColor="#212121"
+                    android:textColorHint="#757575"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Ghi chú (tùy chọn) -->
+                <EditText
+                    android:id="@+id/et_note"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Ghi chú (tùy chọn)"
+                    android:textSize="16sp"
+                    android:textColor="#212121"
+                    android:textColorHint="#757575"
+                    android:layout_marginBottom="12dp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Nút gửi đơn hàng -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_submit_order"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Gửi đơn hàng"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/teal_700"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Loading Indicator -->
+        <ProgressBar
+            android:id="@+id/pb_loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
