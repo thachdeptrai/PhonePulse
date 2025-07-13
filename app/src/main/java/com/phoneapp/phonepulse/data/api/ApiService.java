@@ -1,8 +1,8 @@
 package com.phoneapp.phonepulse.data.api;
 
-import com.phoneapp.phonepulse.Response.CartDataResponse;
+import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.models.*;
-import com.phoneapp.phonepulse.repository.LoginResponse;
+import com.phoneapp.phonepulse.Response.LoginResponse;
 import com.phoneapp.phonepulse.request.*;
 
 import java.util.List;
@@ -38,10 +38,17 @@ public interface ApiService {
     Call<ApiResponse> deleteAccount(@Header("Authorization") String token);
 
 
-    // ========== PRODUCT ==========
-    @GET("/api/products")
-    Call<List<Product>> getAllProducts();
+    // ========================================================================================
+    // ========== PRODUCT (Đã điều chỉnh để khớp với Home_FRAGMENT mới nhất) ==========
+    // ========================================================================================
 
+    // Dùng cho Home_FRAGMENT để lấy danh sách Product gốc
+    // Backend route: GET /api/products
+    @GET("/api/products")
+    Call<List<Product>> getAllProductsRaw(); // Đã đổi tên để rõ ràng hơn
+
+    // Lấy Product gốc theo ID (vẫn dùng cho ProductDetailActivity để lấy discount)
+    // Backend route: GET /api/products/{id}
     @GET("/api/products/{id}")
     Call<Product> getProductById(@Path("id") String id);
 
@@ -82,18 +89,8 @@ public interface ApiService {
 
 
     // ========== CART ==========
-    // ========== CART ==========\
     @GET("/api/cart")
-    Call<ApiResponse<CartDataResponse>> getCart(@Header("Authorization") String token); // <--- THAY ĐỔI Ở ĐÂY
-
-    @POST("/api/cart")
-    Call<ApiResponse> addToCart(@Header("Authorization") String token, @Body CartRequest request);
-
-    @PUT("/api/cart")
-    Call<ApiResponse> updateCart(@Header("Authorization") String token, @Body CartRequest request);
-
-    @DELETE("/api/cart")
-    Call<ApiResponse> removeCartItem(@Header("Authorization") String token, @Body CartRequest request);
+    Call<ApiResponse<ApiResponse>> getCart(@Header("Authorization") String token);
 
 
     // ========== ORDER ==========
@@ -138,21 +135,46 @@ public interface ApiService {
     Call<ApiResponse> deleteProductImage(@Path("id") String productId, @Query("imageId") String imageId);
 
 
-    // ========== VARIANTS ==========
-    @GET("/api/products/{id}/variants")
-    Call<List<Variant>> getVariants(@Path("id") String productId);
+    // ========================================================================================
+    // ========== VARIANTS (Đã điều chỉnh để khớp với Home_FRAGMENT mới nhất) ==========
+    // ========================================================================================
 
-    @POST("/api/products/{id}/variants")
-    Call<ApiResponse<Variant>> addVariant(@Path("id") String productId, @Body Variant variant);
+    // Dùng cho Home_FRAGMENT để lấy variants cho TỪNG sản phẩm cụ thể
+    // Backend route: GET /api/products/:id/variants
+    // LƯU Ý: Hàm này chỉ populate color_id và size_id ở backend, không có product_name hay image_url.
+    @GET("/api/products/{productId}/variants")
+    Call<List<Variant>> getVariantsForProduct(@Path("productId") String productId);
 
-    @GET("/api/products/{id}/variants/{variantId}")
-    Call<Variant> getVariant(@Path("id") String productId, @Path("variantId") String variantId);
 
-    @PUT("/api/products/{id}/variants/{variantId}")
-    Call<ApiResponse<Variant>> updateVariant(@Path("id") String productId, @Path("variantId") String variantId, @Body Variant variant);
+    // Thêm variant mới cho một product_id cụ thể
+    // Backend route: POST /api/products/:id/variants
+    @POST("/api/products/{productId}/variants")
+    Call<ApiResponse<Variant>> addVariantForProduct(@Path("productId") String productId, @Body Variant variant);
 
-    @DELETE("/api/products/{id}/variants/{variantId}")
-    Call<ApiResponse> deleteVariant(@Path("id") String productId, @Path("variantId") String variantId);
+    // Lấy một variant cụ thể qua product_id và variant_id
+    // Backend route: GET /api/products/:id/variants/:variantId
+    // LƯU Ý: Hàm này chỉ populate color_id và size_id ở backend, không có product_name hay image_url.
+    @GET("/api/products/{productId}/variants/{variantId}")
+    Call<Variant> getVariantForProductById(@Path("productId") String productId, @Path("variantId") String variantId); // <-- Đã sửa lỗi tại đây!
+
+    // Cập nhật một variant cụ thể qua product_id và variant_id
+    // Backend route: PUT /api/products/:id/variants/:variantId
+    @PUT("/api/products/{productId}/variants/{variantId}")
+    Call<ApiResponse<Variant>> updateVariantForProductById(@Path("productId") String productId, @Path("variantId") String variantId, @Body Variant variant);
+
+    // Xoá một variant cụ thể qua product_id và variant_id
+    // Backend route: DELETE /api/products/:id/variants/:variantId
+    @DELETE("/api/products/{productId}/variants/{variantId}")
+    Call<ApiResponse> deleteVariantForProductById(@Path("productId") String productId, @Path("variantId") String variantId);
+
+
+    // ===============================================================
+    // API cho ProductDetailActivity (nếu bạn muốn nó lấy variant chi tiết bằng variantId)
+    // Backend cần có route và controller tương ứng với aggregation.
+    // Nếu không, ProductDetailActivity sẽ cần gọi getVariantForProductById VÀ getProductById riêng.
+    // ===============================================================
+    // @GET("/api/variants/{id}/details")
+    // Call<Variant> getVariantDetailsById(@Path("id") String variantId);
 
 
     // ========== NOTIFICATIONS ==========

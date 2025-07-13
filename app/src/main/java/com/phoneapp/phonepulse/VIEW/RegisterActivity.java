@@ -1,4 +1,4 @@
-package com.phoneapp.phonepulse.ui.auth;
+package com.phoneapp.phonepulse.VIEW;
 
 import android.content.Intent; // Import Intent
 import android.os.Bundle;
@@ -9,10 +9,10 @@ import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.phoneapp.phonepulse.R;
-import com.phoneapp.phonepulse.data.api.ApiResponse;
+import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.request.RegisterRequest;
-import com.phoneapp.phonepulse.retrofit.RetrofitClient;
+import com.phoneapp.phonepulse.data.api.RetrofitClient;
 
 import retrofit2.Call;
 import retrofit2.Callback;

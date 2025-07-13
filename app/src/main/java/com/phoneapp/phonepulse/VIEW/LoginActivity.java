@@ -1,4 +1,4 @@
-package com.phoneapp.phonepulse.ui.auth;
+package com.phoneapp.phonepulse.VIEW;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,12 +12,11 @@ import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.phoneapp.phonepulse.R;
-import com.phoneapp.phonepulse.data.api.ApiResponse;
+import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.data.api.ApiService;
-import com.phoneapp.phonepulse.repository.LoginResponse;
+import com.phoneapp.phonepulse.Response.LoginResponse;
 import com.phoneapp.phonepulse.request.LoginRequest;
-import com.phoneapp.phonepulse.retrofit.RetrofitClient;
-import com.phoneapp.phonepulse.ui.home.HomeActivity;
+import com.phoneapp.phonepulse.data.api.RetrofitClient;
 import com.phoneapp.phonepulse.utils.Constants; // Đảm bảo đã import Constants
 
 import dagger.hilt.android.AndroidEntryPoint; // Keep if using Dagger Hilt
@@ -150,7 +149,7 @@ public class LoginActivity extends AppCompatActivity {
                             apiService = RetrofitClient.getApiService(token);
 
                             Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                            startActivity(new Intent(LoginActivity.this, DashBoar_Activity.class));
                             finish(); // Kết thúc LoginActivity để không quay lại
                         } else {
                             Toast.makeText(LoginActivity.this, "Không nhận được token từ máy chủ.", Toast.LENGTH_SHORT).show();

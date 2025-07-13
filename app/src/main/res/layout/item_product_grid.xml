@@ -23,6 +23,7 @@
 
         <!-- Product Info -->
         <LinearLayout
+            android:background="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -53,7 +54,6 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="₫25.990.000"
                     android:textSize="16sp"
                     android:textColor="#FF6B00"
                     android:textStyle="bold" />

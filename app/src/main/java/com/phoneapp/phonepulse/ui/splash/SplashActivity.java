@@ -18,9 +18,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.ViewPropertyAnimatorCompat;
 
 import com.phoneapp.phonepulse.R;
-import com.phoneapp.phonepulse.ui.auth.LoginActivity;
-
-import dagger.hilt.android.AndroidEntryPoint;
+import com.phoneapp.phonepulse.VIEW.LoginActivity;
 
 public class SplashActivity extends AppCompatActivity {
 

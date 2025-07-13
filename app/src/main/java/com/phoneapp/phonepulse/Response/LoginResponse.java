@@ -1,4 +1,4 @@
-package com.phoneapp.phonepulse.repository;
+package com.phoneapp.phonepulse.Response;
 
 
 import com.phoneapp.phonepulse.models.User;

@@ -1,7 +1,8 @@
 package com.phoneapp.phonepulse.repository;
 
+import com.phoneapp.phonepulse.Response.LoginResponse;
 import com.phoneapp.phonepulse.data.api.ApiService;
-import com.phoneapp.phonepulse.data.api.ApiResponse;
+import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.request.LoginRequest;
 import com.phoneapp.phonepulse.request.RegisterRequest;
 

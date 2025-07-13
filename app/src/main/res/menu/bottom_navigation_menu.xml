@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        app:tint="#FF6B00"
+        android:id="@+id/nav_home"
+        android:icon="@drawable/trangchu"
+        android:title="Trang chủ " />
+    <item
+        app:tint="#FF6B00"
+        android:id="@+id/nav_categories"
+        android:icon="@drawable/danhsach"
+        android:title="Thể loại " />
+    <item
+        app:tint="#FF6B00"
+        android:id="@+id/nav_favorites"
+        android:icon="@drawable/yeuthich"
+        android:title="Yêu thích " />
+
+    <item
+        app:tint="#FF6B00"
+        android:id="@+id/nav_message"
+        android:icon="@drawable/ic_chat"
+        android:title="Tin nhắn  " />
+    <item
+        app:tint="#FF6B00"
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/taikhoan"
+        android:title="Tài khoản " />
+</menu>

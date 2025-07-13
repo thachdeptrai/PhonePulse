@@ -1,6 +1,5 @@
-package com.phoneapp.phonepulse.retrofit;
+package com.phoneapp.phonepulse.data.api;
 
-import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.utils.Constants;
 
 import java.util.concurrent.TimeUnit;

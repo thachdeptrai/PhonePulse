@@ -4,10 +4,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.phoneapp.phonepulse.data.api.ApiResponse;
+import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.repository.AuthRepository;
 import com.phoneapp.phonepulse.request.LoginRequest;
-import com.phoneapp.phonepulse.repository.LoginResponse;
+import com.phoneapp.phonepulse.Response.LoginResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;

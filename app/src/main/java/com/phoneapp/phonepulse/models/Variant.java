@@ -2,18 +2,43 @@ package com.phoneapp.phonepulse.models;
 
 import com.google.gson.annotations.SerializedName;
 
+// Đảm bảo bạn đã định nghĩa Color và Size model nếu chúng được sử dụng trong Variants
+// Ví dụ đơn giản cho Color và Size (nếu chúng chỉ có ID và Name)
+/*
+public class Color {
+    @SerializedName("_id")
+    private String id;
+    @SerializedName("color_name") // Tên trường trong DB
+    private String name;
+    // Getters and Setters
+}
+
+public class Size {
+    @SerializedName("_id")
+    private String id;
+    @SerializedName("size_name") // Tên trường trong DB
+    private String name;
+    // Getters and Setters
+}
+*/
+
 public class Variant {
     @SerializedName("_id")
-    private String id;  // Đổi tên biến thành id cho thống nhất
+    private String id;
 
+    // Giữ productId nếu bạn vẫn muốn biết variant này thuộc product nào
     @SerializedName("product_id")
     private String productId;
 
-    @SerializedName("color_id") // Đây là một đối tượng Color, không phải String
-    private Color colorId;
+    // Các trường gốc của Variant
+    // Đảm bảo Color và Size model của bạn khớp với cấu trúc JSON trả về.
+    // Nếu backend trả về Color và Size là object, thì giữ nguyên
+    // Nếu backend chỉ trả về ID của Color/Size, bạn có thể thay đổi kiểu dữ liệu thành String
+    @SerializedName("color_id") // Hoặc "color" nếu backend populate toàn bộ object Color
+    private Color color; // Đã đổi tên biến cho rõ ràng hơn (từ colorId sang color)
 
-    @SerializedName("size_id") // Đây là một đối tượng Size, không phải String
-    private Size sizeId;
+    @SerializedName("size_id")  // Hoặc "size" nếu backend populate toàn bộ object Size
+    private Size size;   // Đã đổi tên biến cho rõ ràng hơn (từ sizeId sang size)
 
     @SerializedName("price")
     private double price;
@@ -21,8 +46,30 @@ public class Variant {
     @SerializedName("quantity")
     private int quantity;
 
+    // THÊM CÁC TRƯỜNG ĐƯỢC NHÚNG TỪ PRODUCT VÀ PRODUCTIMAGE (Aggregation từ Backend)
+    // Tên trong @SerializedName PHẢI KHỚP VỚI TÊN TRƯỜNG BẠN ĐẶT TRONG $project CỦA AGGREGATION
+    @SerializedName("product_name")
+    private String productName;
+
+    @SerializedName("image_url")
+    private String imageUrl;
+
+    // ===================== Constructors ==================== //
     public Variant() {
     }
+
+    public Variant(String id, String productId, Color color, Size size, double price, int quantity, String productName, String imageUrl) {
+        this.id = id;
+        this.productId = productId;
+        this.color = color;
+        this.size = size;
+        this.price = price;
+        this.quantity = quantity;
+        this.productName = productName;
+        this.imageUrl = imageUrl;
+    }
+
+    // ===================== Getters - Setters ==================== //
 
     public String getId() {
         return id;
@@ -38,18 +85,20 @@ public class Variant {
         this.productId = productId;
     }
 
-    public Color getColorId() {
-        return colorId;
+    // Đã đổi tên getter/setter cho khớp với tên biến 'color'
+    public Color getColor() {
+        return color;
     }
-    public void setColorId(Color colorId) {
-        this.colorId = colorId;
+    public void setColor(Color color) {
+        this.color = color;
     }
 
-    public Size getSizeId() {
-        return sizeId;
+    // Đã đổi tên getter/setter cho khớp với tên biến 'size'
+    public Size getSize() {
+        return size;
     }
-    public void setSizeId(Size sizeId) {
-        this.sizeId = sizeId;
+    public void setSize(Size size) {
+        this.size = size;
     }
 
     public double getPrice() {
@@ -64,5 +113,19 @@ public class Variant {
     }
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
