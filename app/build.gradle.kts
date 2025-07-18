@@ -73,7 +73,9 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.0.0")
 // G2
     implementation("com.google.code.gson:gson:2.10.1")
-// // Import the Firebase BoM
+ // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
     implementation("com.google.firebase:firebase-analytics")
+    //Facebook
+    implementation("com.facebook.android:facebook-login:16.3.0")
 }

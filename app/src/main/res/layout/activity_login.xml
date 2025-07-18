@@ -8,9 +8,8 @@
     <RelativeLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/gradient_background"
-        android:padding="24dp">
+        android:layout_height="match_parent"
+        android:background="@drawable/gradient_background">
 
         <!-- Top Container with Logo -->
         <LinearLayout
@@ -18,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="20dp"
             android:gravity="center"
             android:orientation="vertical"
             android:padding="20dp">
@@ -56,7 +55,7 @@
                 android:layout_height="wrap_content"
                 android:text="PhonePulse"
                 style="@style/TitleText"
-                android:layout_marginTop="16dp" />
+                android:layout_marginTop="5dp" />
 
             <!-- Tagline -->
             <TextView
@@ -65,7 +64,7 @@
                 android:layout_height="wrap_content"
                 android:text="Come Find What's Yours"
                 style="@style/SubtitleText"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="3dp" />
 
             <!-- Slogan -->
             <TextView
@@ -83,7 +82,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/logoContainer"
-            android:layout_marginTop="32dp"
             android:orientation="vertical"
             android:background="@drawable/card_background"
             android:padding="28dp"
@@ -93,7 +91,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="10dp"
                 style="@style/CustomTextInputLayout"
                 android:hint="Email Address">
 
@@ -108,7 +106,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="15dp"
                 style="@style/CustomTextInputLayout"
                 android:hint="Password">
 
@@ -125,7 +123,7 @@
                 style="@style/PrimaryButton"
                 android:text="SIGN IN"
                 android:background="@drawable/button_gradient"
-                android:layout_marginBottom="24dp" />
+                android:layout_marginBottom="10dp" />
 
             <!-- Divider -->
             <LinearLayout
@@ -157,32 +155,34 @@
             </LinearLayout>
 
             <!-- Social Login -->
+
+            <!-- Register Button -->
+
             <LinearLayout
                 android:id="@+id/socialLoginLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
                 android:gravity="center"
-                android:orientation="horizontal"
-                android:layout_marginBottom="24dp">
+                android:orientation="horizontal">
 
                 <!-- Google Button -->
                 <ImageButton
                     android:id="@+id/btnGoogle"
                     style="@style/SocialButton"
-                    android:src="@drawable/ic_gg"
                     android:layout_marginEnd="16dp"
-                    android:contentDescription="Google Login" />
+                    android:contentDescription="Google Login"
+                    android:src="@drawable/ic_gg" />
 
                 <!-- Facebook Button -->
                 <ImageButton
                     android:id="@+id/btnFacebook"
                     style="@style/SocialButton"
-                    android:src="@drawable/ic_fb"
                     android:layout_marginStart="16dp"
-                    android:contentDescription="Facebook Login" />
+                    android:contentDescription="Facebook Login"
+                    android:src="@drawable/ic_fb" />
             </LinearLayout>
 
-            <!-- Register Button -->
             <Button
                 android:id="@+id/btnRegister"
                 style="@style/SecondaryButton"
