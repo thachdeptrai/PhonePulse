@@ -22,7 +22,7 @@ public interface ApiService {
     @POST("/api/users/logout")
     Call<ApiResponse> logout(@Header("Authorization") String token);
 
-    @POST("api/auth/login-google")
+    @POST("api/auth/login-social")
     Call<LoginResponse> socialLogin(@Body SocialLoginRequest body);
     // ========== PROFILE ==========
     @GET("/api/users/profile")

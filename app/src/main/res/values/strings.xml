@@ -8,4 +8,7 @@
     <string name="loading_almost_ready">Almost ready...</string>
     <string name="loading_welcome">Welcome!</string>
     <string name="powered_by">Powered by TechSolutions</string>
+    <string name="facebook_app_id">745098701394229</string>
+    <string name="facebook_client_token">1400f19297f6986d34b45e817ebddd6</string>
+
 </resources>
