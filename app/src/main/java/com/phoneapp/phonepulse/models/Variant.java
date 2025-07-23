@@ -2,78 +2,54 @@ package com.phoneapp.phonepulse.models;
 
 import com.google.gson.annotations.SerializedName;
 
-// Đảm bảo bạn đã định nghĩa Color và Size model nếu chúng được sử dụng trong Variants
-// Ví dụ đơn giản cho Color và Size (nếu chúng chỉ có ID và Name)
-/*
-public class Color {
-    @SerializedName("_id")
-    private String id;
-    @SerializedName("color_name") // Tên trường trong DB
-    private String name;
-    // Getters and Setters
-}
-
-public class Size {
-    @SerializedName("_id")
-    private String id;
-    @SerializedName("size_name") // Tên trường trong DB
-    private String name;
-    // Getters and Setters
-}
-*/
-
 public class Variant {
     @SerializedName("_id")
-    private String id;
+    private String id; // ID của biến thể, tương ứng với _id trong MongoDB
 
-    // Giữ productId nếu bạn vẫn muốn biết variant này thuộc product nào
     @SerializedName("product_id")
-    private String productId;
+    private String productId; // ID của sản phẩm mà biến thể này thuộc về.
+    // Nếu bạn populate Product ở backend, bạn có thể thay bằng `private Product product;`
 
-    // Các trường gốc của Variant
-    // Đảm bảo Color và Size model của bạn khớp với cấu trúc JSON trả về.
-    // Nếu backend trả về Color và Size là object, thì giữ nguyên
-    // Nếu backend chỉ trả về ID của Color/Size, bạn có thể thay đổi kiểu dữ liệu thành String
-    @SerializedName("color_id") // Hoặc "color" nếu backend populate toàn bộ object Color
-    private Color color; // Đã đổi tên biến cho rõ ràng hơn (từ colorId sang color)
+    @SerializedName("color_id")
+    private Color color; // Đối tượng Color. Backend nên populate để trả về toàn bộ thông tin màu sắc
 
-    @SerializedName("size_id")  // Hoặc "size" nếu backend populate toàn bộ object Size
-    private Size size;   // Đã đổi tên biến cho rõ ràng hơn (từ sizeId sang size)
-
-    @SerializedName("price")
-    private double price;
+    @SerializedName("size_id")
+    private Size size; // Đối tượng Size. Backend nên populate để trả về toàn bộ thông tin kích thước/dung lượng
 
     @SerializedName("quantity")
-    private int quantity;
+    private int quantity; // Số lượng tồn kho của biến thể
 
-    // THÊM CÁC TRƯỜNG ĐƯỢC NHÚNG TỪ PRODUCT VÀ PRODUCTIMAGE (Aggregation từ Backend)
-    // Tên trong @SerializedName PHẢI KHỚP VỚI TÊN TRƯỜNG BẠN ĐẶT TRONG $project CỦA AGGREGATION
-    @SerializedName("product_name")
-    private String productName;
+    @SerializedName("price")
+    private double price; // Giá của biến thể
 
-    @SerializedName("image_url")
-    private String imageUrl;
+    @SerializedName("created_date")
+    private String createdDate; // Ngày tạo biến thể
 
-    // ===================== Constructors ==================== //
+    @SerializedName("modified_date")
+    private String modifiedDate; // Ngày chỉnh sửa gần nhất
+
+    // --- Constructors (tùy chọn) ---
     public Variant() {
+        // Constructor mặc định cần thiết cho Gson
     }
 
-    public Variant(String id, String productId, Color color, Size size, double price, int quantity, String productName, String imageUrl) {
+    // Constructor với tất cả các trường (tùy chọn)
+    public Variant(String id, String productId, Color color, Size size, int quantity, double price, String createdDate, String modifiedDate) {
         this.id = id;
         this.productId = productId;
         this.color = color;
         this.size = size;
-        this.price = price;
         this.quantity = quantity;
-        this.productName = productName;
-        this.imageUrl = imageUrl;
+        this.price = price;
+        this.createdDate = createdDate;
+        this.modifiedDate = modifiedDate;
     }
 
-    // ===================== Getters - Setters ==================== //
-
+    // --- Getters and Setters ---
     public String getId() {
         return id;
     }
+
     public void setId(String id) {
         this.id = id;
     }
@@ -81,51 +57,56 @@ public class Variant {
     public String getProductId() {
         return productId;
     }
+
     public void setProductId(String productId) {
         this.productId = productId;
     }
 
-    // Đã đổi tên getter/setter cho khớp với tên biến 'color'
     public Color getColor() {
         return color;
     }
+
     public void setColor(Color color) {
         this.color = color;
     }
 
-    // Đã đổi tên getter/setter cho khớp với tên biến 'size'
     public Size getSize() {
         return size;
     }
+
     public void setSize(Size size) {
         this.size = size;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-    public void setPrice(double price) {
-        this.price = price;
     }
 
     public int getQuantity() {
         return quantity;
     }
+
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
 
-    public String getProductName() {
-        return productName;
-    }
-    public void setProductName(String productName) {
-        this.productName = productName;
+    public double getPrice() {
+        return price;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public void setPrice(double price) {
+        this.price = price;
     }
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+
+    public String getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(String createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public String getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(String modifiedDate) {
+        this.modifiedDate = modifiedDate;
     }
 }

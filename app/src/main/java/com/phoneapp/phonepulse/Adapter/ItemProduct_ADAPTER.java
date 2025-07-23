@@ -1,219 +1,175 @@
 package com.phoneapp.phonepulse.Adapter;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Paint;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.Button; // Sử dụng Button thay vì MaterialButton nếu bạn không có thư viện Material Components
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.phoneapp.phonepulse.R;
-import com.phoneapp.phonepulse.models.Variant;
-import com.phoneapp.phonepulse.ui.product.ProductDetailActivity; // Đảm bảo đúng package
-import com.phoneapp.phonepulse.utils.Constants;
+import com.phoneapp.phonepulse.request.ProductGirdItem;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTER.ProductViewHolder> {
 
-    private static final String TAG = "ItemProduct_ADAPTER";
-
+    private List<ProductGirdItem> productList;
     private Context context;
-    private List<Variant> variantList;
+    private OnItemClickListener listener;
 
-    public ItemProduct_ADAPTER(Context context, List<Variant> variantList) {
-        this.context = context;
-        this.variantList = variantList != null ? variantList : new ArrayList<>();
-        Log.d(TAG, "Adapter initialized with " + this.variantList.size() + " variants.");
+    public interface OnItemClickListener {
+        void onAddToCartClick(ProductGirdItem item);
+        void onItemClick(ProductGirdItem item);
     }
 
-    public void setData(List<Variant> newData) {
-        this.variantList.clear();
-        if (newData != null) {
-            this.variantList.addAll(newData);
-        }
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
+
+    public ItemProduct_ADAPTER(List<ProductGirdItem> productList) {
+        this.productList = productList;
+    }
+
+    public void setData(List<ProductGirdItem> newProductList) {
+        this.productList = newProductList;
         notifyDataSetChanged();
-        Log.d(TAG, "setData: Adapter data updated. New size: " + variantList.size());
     }
 
     @NonNull
     @Override
     public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_product_grid, parent, false); // Changed to item_product
-        Log.d(TAG, "onCreateViewHolder: New ViewHolder created from R.layout.item_product.");
+        context = parent.getContext();
+        View view = LayoutInflater.from(context).inflate(R.layout.item_product_grid, parent, false);
         return new ProductViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
-        Variant variant = variantList.get(position);
+        ProductGirdItem currentItem = productList.get(position);
 
-        if (variant == null) {
-            Log.w(TAG, "onBindViewHolder: Variant at position " + position + " is null.");
-            return;
-        }
-
-        Log.d(TAG, "onBindViewHolder: Binding variant at position " + position + ": " + variant.getProductName());
-
-        // 1. Set Product Name (lấy từ Variant)
-        holder.tvProductName.setText(variant.getProductName() != null ? variant.getProductName() : "Tên không xác định");
-        Log.d(TAG, "Product Name (from Variant): " + variant.getProductName());
-
-        // 2. Set Product Image using Glide (lấy từ Variant)
-        String imageUrl = variant.getImageUrl();
-
-        // Kiểm tra ivProductImage trước khi sử dụng
-        if (holder.ivProductImage != null) {
-            if (imageUrl != null && !imageUrl.isEmpty()) {
-                Glide.with(context)
-                        .load(imageUrl)
-                        .placeholder(R.drawable.placeholder_product)
-                        .error(R.drawable.placeholder_product)
-                        .into(holder.ivProductImage);
-                Log.d(TAG, "Variant Image URL: " + imageUrl);
-            } else {
-                holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
-                Log.w(TAG, "Variant " + variant.getProductName() + " has no image URL. Using placeholder.");
-            }
+        // --- 1. Tải ảnh sản phẩm ---
+        if (currentItem.getImage_url() != null && !currentItem.getImage_url().isEmpty()) {
+            Glide.with(context)
+                    .load(currentItem.getImage_url())
+                    .placeholder(R.drawable.placeholder_product)
+                    .error(R.drawable.placeholder_product)
+                    .into(holder.ivProductImage);
         } else {
-            Log.e(TAG, "onBindViewHolder: ivProductImage is NULL for variant " + variant.getProductName() + ". Cannot set image.");
+            holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
         }
 
+        // --- 2. Tên sản phẩm ---
+        // Giữ nguyên setText, vì minLines đã xử lý khoảng trống
+        holder.tvProductName.setText(currentItem.getProduct_name() != null ? currentItem.getProduct_name() : "");
 
-        // 3. Handle Price (loại bỏ hoàn toàn logic discount)
-        double price = variant.getPrice();
-        if (holder.tvDiscountPrice != null) {
-            holder.tvDiscountPrice.setText(formatCurrency(price));
-            holder.tvDiscountPrice.setVisibility(View.VISIBLE);
+        // --- 3. Kích thước và Màu sắc ---
+        boolean hasSize = currentItem.getSize_name() != null && !currentItem.getSize_name().isEmpty();
+        boolean hasColor = currentItem.getColor_name() != null && !currentItem.getColor_name().isEmpty();
+
+        if (hasSize) {
+            holder.tvProductSize.setText(currentItem.getSize_name());
+            holder.tvProductSize.setVisibility(View.VISIBLE);
         } else {
-            Log.e(TAG, "onBindViewHolder: tvDiscountPrice is NULL for variant " + variant.getProductName() + ". Cannot set price.");
+            holder.tvProductSize.setText(""); // Đặt rỗng để không hiển thị văn bản cũ
+            holder.tvProductSize.setVisibility(View.GONE);
         }
 
-        if (holder.tvOriginalPrice != null) {
+        if (hasColor) {
+            holder.tvProductColor.setText(currentItem.getColor_name());
+            holder.tvProductColor.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvProductColor.setText(""); // Đặt rỗng
+            holder.tvProductColor.setVisibility(View.GONE);
+        }
+
+        // Ẩn/hiện container cho size và color nếu cả hai đều không có dữ liệu
+        if (!hasSize && !hasColor) {
+            holder.llSizeColorContainer.setVisibility(View.GONE);
+        } else {
+            holder.llSizeColorContainer.setVisibility(View.VISIBLE);
+        }
+
+        // --- 4. Định dạng và hiển thị giá ---
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+        currencyFormat.setMaximumFractionDigits(0);
+
+        holder.tvDiscountPrice.setText(currencyFormat.format(currentItem.getPrice()));
+
+        // --- 5. Giá gốc và Phần trăm giảm giá ---
+        if (currentItem.getDiscount_percent() > 0 && currentItem.getOriginal_price() > currentItem.getPrice()) {
+            holder.tvOriginalPrice.setText(currencyFormat.format(currentItem.getOriginal_price()));
+            holder.tvOriginalPrice.setPaintFlags(holder.tvOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.tvOriginalPrice.setVisibility(View.VISIBLE);
+
+            holder.tvDiscountPercent.setText("-" + currentItem.getDiscount_percent() + "%");
+            holder.tvDiscountPercent.setVisibility(View.VISIBLE);
+        } else {
             holder.tvOriginalPrice.setVisibility(View.GONE);
-        }
-        if (holder.tvDiscountPercent != null) {
             holder.tvDiscountPercent.setVisibility(View.GONE);
         }
-        Log.d(TAG, "Displaying price (from Variant): " + price);
 
-        // 4. Set Sold Count (vẫn ẩn)
-        if (holder.tvSold != null) {
-            holder.tvSold.setVisibility(View.GONE);
-        }
-        Log.d(TAG, "Sold count TextView is set to GONE.");
-
-        // 5. Button Add to Cart Listener (Giữ nguyên)
-        if (holder.btnAddToCart != null) {
-            holder.btnAddToCart.setOnClickListener(v -> {
-                Toast.makeText(context, "Thêm " + variant.getProductName() + " vào giỏ hàng!", Toast.LENGTH_SHORT).show();
-                Log.d(TAG, "Add to cart button clicked for " + variant.getProductName());
-            });
+        // --- 6. Số lượng đã bán ---
+        if (currentItem.getSold_count() >= 0) { // Kiểm tra giá trị hợp lệ
+            holder.tvSold.setText("Đã bán " + currentItem.getSold_count());
+            holder.tvSold.setVisibility(View.VISIBLE);
         } else {
-            Log.e(TAG, "onBindViewHolder: btnAddToCart is NULL for variant " + variant.getProductName() + ". Cannot set click listener.");
+            holder.tvSold.setText(""); // Đặt rỗng
+            holder.tvSold.setVisibility(View.INVISIBLE); // Dùng INVISIBLE để giữ khoảng trống cho dòng này
         }
 
 
-        // ======================================================================================
-        // SỬA ĐỔI QUAN TRỌNG TẠI ĐÂY: Handle item click (cho chi tiết variant)
-        // Đảm bảo truyền cả VARIANT_ID và PRODUCT_ID
-        // ======================================================================================
+        // --- 7. Xử lý sự kiện click cho nút "Thêm vào giỏ" ---
+        holder.btnAddtoCart.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onAddToCartClick(currentItem);
+            }
+        });
+
+        // --- 8. Xử lý sự kiện click cho toàn bộ item (CardView) ---
         holder.itemView.setOnClickListener(v -> {
-            String currentVariantId = variant.getId();
-            String currentProductId = variant.getProductId(); // Lấy productId từ Variant object
-
-            // Log giá trị ID trước khi truyền
-            Log.d(TAG, "Item click: Attempting to open ProductDetailActivity.");
-            Log.d(TAG, "Item click: Variant ID to pass: " + currentVariantId);
-            Log.d(TAG, "Item click: Product ID to pass: " + currentProductId);
-
-
-            if (currentVariantId != null && currentProductId != null) { // Đảm bảo cả hai ID không null
-                Intent intent = new Intent(context, ProductDetailActivity.class);
-                intent.putExtra(Constants.VARIANT_ID, currentVariantId); // Truyền variant ID
-                intent.putExtra(Constants.PRODUCT_ID, currentProductId); // TRUYỀN PRODUCT ID
-                context.startActivity(intent);
-                Log.d(TAG, "Item clicked: Opening ProductDetailActivity for Variant ID: " + currentVariantId + ", Product ID: " + currentProductId);
-            } else {
-                String missingId = (currentVariantId == null) ? "Variant ID" : "Product ID";
-                Toast.makeText(context, "Không thể mở chi tiết sản phẩm: " + missingId + " không hợp lệ.", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Item click failed: " + missingId + " is null for " + variant.getProductName());
+            if (listener != null) {
+                listener.onItemClick(currentItem);
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return variantList != null ? variantList.size() : 0;
+        return productList.size();
     }
 
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
         ImageView ivProductImage;
         TextView tvProductName;
+        LinearLayout llSizeColorContainer;
+        TextView tvProductSize;
+        TextView tvProductColor;
         TextView tvDiscountPrice;
-        TextView tvDiscountPercent;
         TextView tvOriginalPrice;
+        TextView tvDiscountPercent;
         TextView tvSold;
-        Button btnAddToCart;
+        Button btnAddtoCart; // Nếu dùng MaterialButton thì đổi thành MaterialButton
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
-            // Khởi tạo và kiểm tra từng View
             ivProductImage = itemView.findViewById(R.id.iv_product_image);
-            if (ivProductImage == null) {
-                Log.e(TAG, "ProductViewHolder: ivProductImage (R.id.iv_product_image) is NULL!");
-            }
-
             tvProductName = itemView.findViewById(R.id.tv_product_name);
-            if (tvProductName == null) {
-                Log.e(TAG, "ProductViewHolder: tvProductName (R.id.tv_product_name) is NULL!");
-            }
-
+            llSizeColorContainer = itemView.findViewById(R.id.ll_size_color_container);
+            tvProductSize = itemView.findViewById(R.id.tv_product_size);
+            tvProductColor = itemView.findViewById(R.id.tv_product_color);
             tvDiscountPrice = itemView.findViewById(R.id.tv_discount_price);
-            if (tvDiscountPrice == null) {
-                Log.e(TAG, "ProductViewHolder: tvDiscountPrice (R.id.tv_discount_price) is NULL!");
-            }
-
-            tvDiscountPercent = itemView.findViewById(R.id.tv_discount_percent);
-            if (tvDiscountPercent == null) {
-                Log.e(TAG, "ProductViewHolder: tvDiscountPercent (R.id.tv_discount_percent) is NULL!");
-            }
-
             tvOriginalPrice = itemView.findViewById(R.id.tv_original_price);
-            if (tvOriginalPrice == null) {
-                Log.e(TAG, "ProductViewHolder: tvOriginalPrice (R.id.tv_original_price) is NULL!");
-            }
-
+            tvDiscountPercent = itemView.findViewById(R.id.tv_discount_percent);
             tvSold = itemView.findViewById(R.id.tv_sold);
-            if (tvSold == null) {
-                Log.e(TAG, "ProductViewHolder: tvSold (R.id.tv_sold) is NULL!");
-            }
-
-            btnAddToCart = itemView.findViewById(R.id.btn_add_to_cart);
-            if (btnAddToCart == null) {
-                Log.e(TAG, "ProductViewHolder: btnAddToCart (R.id.btn_add_to_cart) is NULL!");
-            }
-
-            Log.d(TAG, "ProductViewHolder initialized. All views checked for null.");
+            btnAddtoCart = itemView.findViewById(R.id.btn_add_to_cart);
         }
-    }
-
-    private String formatCurrency(double amount) {
-        NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        String formatted = formatter.format(amount);
-        formatted = formatted.replaceAll("(\\,|\\.)00(\\s*₫)?$", "$2");
-        return formatted;
     }
 }

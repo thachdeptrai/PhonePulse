@@ -1,10 +1,10 @@
 package com.phoneapp.phonepulse.models;
 
 import com.google.gson.annotations.SerializedName;
-import java.util.List; // Import List
+
+import java.util.List; // Thêm import này cho List
 
 public class Product {
-
     @SerializedName("_id")
     private String id;
 
@@ -14,11 +14,12 @@ public class Product {
     @SerializedName("description")
     private String description;
 
-    @SerializedName("category_id")
-    private Category category; // Assuming Category model exists and is correctly mapped
+    @SerializedName("category_id") // Backend populate thành đối tượng Category
+    private Category category;
 
-    @SerializedName("variants") // Phải khớp với tên trường 'variants' mà backend trả về
-    private List<Variant> variants; // Bây giờ là một DANH SÁCH các biến thể
+    // THAY ĐỔI: Đây là mảng các biến thể mà backend trả về
+    @SerializedName("variants") // Tên trường trong JSON là "variants"
+    private List<Variant> variants; // Loại dữ liệu là List<Variant>
 
     @SerializedName("created_date")
     private String createdDate;
@@ -27,108 +28,68 @@ public class Product {
     private String modifiedDate;
 
     @SerializedName("discount")
-    private Integer discount;
+    private int discount = 0;
 
-    @SerializedName("productimage_id") // Assuming productimage_id field holds a ProductImage object
-    private ProductImage productImage; // Assuming ProductImage model exists
+    // THAY ĐỔI: Đổi tên trường và @SerializedName cho khớp với backend
+    @SerializedName("productImage") // Tên trường trong JSON là "productImage"
+    private ProductImage productImage;
 
-    // ===================== Getters - Setters ==================== //
-
-    public String getId() {
-        return id;
+    // Constructor mặc định (cần cho Gson)
+    public Product() {
     }
 
-    public void setId(String id) {
+    // Constructor đầy đủ (Tùy chọn, nhưng hữu ích)
+    public Product(String id, String name, String description, Category category,
+                   List<Variant> variants, String createdDate, String modifiedDate,
+                   int discount, ProductImage productImage) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
         this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
         this.category = category;
-    }
-
-    // Getter cho danh sách biến thể
-    public List<Variant> getVariants() {
-        return variants;
-    }
-
-    // Setter cho danh sách biến thể
-    public void setVariants(List<Variant> variants) {
         this.variants = variants;
-    }
-
-    public String getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(String createdDate) {
         this.createdDate = createdDate;
-    }
-
-    public String getModifiedDate() {
-        return modifiedDate;
-    }
-
-    public void setModifiedDate(String modifiedDate) {
         this.modifiedDate = modifiedDate;
-    }
-
-    public int getDiscount() {
-        return discount != null ? discount : 0;
-    }
-
-    public void setDiscount(Integer discount) {
         this.discount = discount;
-    }
-
-    public ProductImage getProductImage() {
-        return productImage;
-    }
-
-    public void setProductImage(ProductImage productImage) {
         this.productImage = productImage;
     }
 
-    // ===================== Tiện ích ==================== //
 
-    /**
-     * Lấy giá bán từ Variant ĐẦU TIÊN trong danh sách, nếu không có biến thể trả về 0.
-     * Lưu ý: Nếu sản phẩm có nhiều biến thể, phương thức này chỉ lấy giá của biến thể đầu tiên.
-     */
-    public double getPrice() {
-        if (variants != null && !variants.isEmpty()) {
-            return variants.get(0).getPrice(); // Lấy giá từ biến thể đầu tiên
+    // ✅ Hàm an toàn để lấy image URL (vẫn giữ nguyên, rất tốt!)
+    public String getImageUrlSafe() {
+        if (productImage != null && productImage.getImageUrl() != null) {
+            return productImage.getImageUrl();
+        } else {
+            // Có thể trả về một URL ảnh mặc định nếu không có ảnh nào
+            return null;
         }
-        return 0; // Trả về 0 nếu không có biến thể
     }
 
-    /**
-     * Lấy ID của Variant ĐẦU TIÊN để xử lý giỏ hàng, nếu không có biến thể trả về null.
-     * Lưu ý: Nếu sản phẩm có nhiều biến thể, phương thức này chỉ lấy ID của biến thể đầu tiên.
-     */
-    public String getVariantId() {
-        if (variants != null && !variants.isEmpty()) {
-            return variants.get(0).getId(); // Lấy ID từ biến thể đầu tiên
-        }
-        return null; // Trả về null nếu không có biến thể
-    }
+    // --- Getters and Setters ---
+    // Đảm bảo có getter/setter cho List<Variant>
+    public List<Variant> getVariants() { return variants; }
+    public void setVariants(List<Variant> variants) { this.variants = variants; }
+
+    public ProductImage getProductImage() { return productImage; }
+    public void setProductImage(ProductImage productImage) { this.productImage = productImage; }
+
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
+
+    public String getCreatedDate() { return createdDate; }
+    public void setCreatedDate(String createdDate) { this.createdDate = createdDate; }
+
+    public String getModifiedDate() { return modifiedDate; }
+    public void setModifiedDate(String modifiedDate) { this.modifiedDate = modifiedDate; }
+
+    public int getDiscount() { return discount; }
+    public void setDiscount(int discount) { this.discount = discount; }
 }

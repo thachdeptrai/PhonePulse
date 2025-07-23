@@ -37,15 +37,8 @@ public interface ApiService {
     @DELETE("/api/users/delete-self")
     Call<ApiResponse> deleteAccount(@Header("Authorization") String token);
 
-
-    // ========================================================================================
-    // ========== PRODUCT (Đã điều chỉnh để khớp với Home_FRAGMENT mới nhất) ==========
-    // ========================================================================================
-
-    // Dùng cho Home_FRAGMENT để lấy danh sách Product gốc
-    // Backend route: GET /api/products
     @GET("/api/products")
-    Call<List<Product>> getAllProductsRaw(); // Đã đổi tên để rõ ràng hơn
+    Call<List<Product>> getAllProductsRaw();
 
     // Lấy Product gốc theo ID (vẫn dùng cho ProductDetailActivity để lấy discount)
     // Backend route: GET /api/products/{id}

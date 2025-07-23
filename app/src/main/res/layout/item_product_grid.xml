@@ -1,113 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/card_product"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="4dp"
     app:cardCornerRadius="8dp"
-    app:cardElevation="2dp">
+    app:cardElevation="4dp"
+    app:cardPreventCornerOverlap="true"
+    app:cardUseCompatPadding="true">
+    <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/iv_product_image"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/placeholder_product"
+        tools:srcCompat="@tools:sample/backgrounds/scenic" /> <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white" android:orientation="vertical"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/tv_product_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="iPhone 15 Pro Max 256GB - Blue Titanium" android:textSize="14sp"
+        android:textColor="#333333"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:textStyle="bold" /> <LinearLayout
+    android:id="@+id/ll_size_color_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_marginTop="2dp"
+    android:gravity="center_vertical"
+        tools:ignore="ExtraText">
+
+    <TextView
+        android:id="@+id/tv_product_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="256GB"
+        android:textSize="12sp"
+        android:textColor="#666666"
+        android:background="@drawable/bg_circle_white"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:layout_marginEnd="4dp" />
+
+    <TextView
+        android:id="@+id/tv_product_color"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Xanh"
+        android:textSize="12sp"
+        android:textColor="#666666"
+        android:background="@drawable/bg_circle_white"
+        android:paddingStart="6dp"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp" />
+</LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="6dp"> <TextView
+        android:id="@+id/tv_discount_price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="#FF6B00"
+        android:textStyle="bold"
+        android:text="₫24.990.000" /> <TextView
+        android:id="@+id/tv_original_price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="₫29.990.000"
+        android:textSize="12sp"
+        android:textColor="#999999"
+        android:layout_marginStart="8dp"
+        /> <TextView
+        android:id="@+id/tv_discount_percent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="-15%"
+        android:textSize="12sp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/discount_badge_bg"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:layout_marginStart="8dp" /> </LinearLayout>
 
-        <!-- Product Image -->
-        <ImageView
-            android:id="@+id/iv_product_image"
-            android:layout_width="match_parent"
-            android:layout_height="140dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/placeholder_product" />
+    <TextView
+        android:id="@+id/tv_sold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Đã bán 245"
+        android:textSize="11sp"
+        android:textColor="#666666"
+        android:layout_marginTop="4dp" />
 
-        <!-- Product Info -->
-        <LinearLayout
-            android:background="@color/white"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="8dp">
+    <Button
+        android:id="@+id/btn_add_to_cart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Thêm vào giỏ"
+        android:textSize="14sp"
+        android:backgroundTint="#FF6B00"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="8dp" android:layout_marginBottom="4dp" />
 
-            <!-- Product Name -->
-            <TextView
-                android:id="@+id/tv_product_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="iPhone 15 Pro Max 256GB"
-                android:textSize="14sp"
-                android:textColor="#333333"
-                android:maxLines="2"
-                android:ellipsize="end" />
+</LinearLayout>
 
-            <!-- Price Container -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="4dp">
-
-                <!-- Discount Price -->
-                <TextView
-                    android:id="@+id/tv_discount_price"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textSize="16sp"
-                    android:textColor="#FF6B00"
-                    android:textStyle="bold" />
-
-                <!-- Discount Percent -->
-                <TextView
-                    android:id="@+id/tv_discount_percent"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="-15%"
-                    android:textSize="12sp"
-                    android:textColor="@android:color/white"
-                    android:background="@drawable/discount_badge_bg"
-                    android:paddingStart="6dp"
-                    android:paddingEnd="6dp"
-                    android:paddingTop="2dp"
-                    android:paddingBottom="2dp" />
-
-            </LinearLayout>
-
-            <!-- Original Price -->
-            <TextView
-                android:id="@+id/tv_original_price"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="₫29.990.000"
-                android:textSize="12sp"
-                android:textColor="#999999"
-                android:layout_marginTop="2dp" />
-
-            <!-- Sold Count -->
-            <TextView
-                android:id="@+id/tv_sold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Đã bán 245"
-                android:textSize="11sp"
-                android:textColor="#666666"
-                android:layout_marginTop="4dp" />
-
-            <!-- Button Add to Cart -->
-            <Button
-                android:id="@+id/btn_add_to_cart"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Thêm vào giỏ"
-                android:textSize="14sp"
-                android:backgroundTint="#FF6B00"
-                android:textColor="@android:color/white"
-                android:layout_marginTop="6dp"
-                android:layout_marginBottom="4dp" />
-
-        </LinearLayout>
-
-    </LinearLayout>
+</LinearLayout>
 
 </androidx.cardview.widget.CardView>
