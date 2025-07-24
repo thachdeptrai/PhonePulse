@@ -16,22 +16,27 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.phoneapp.phonepulse.Adapter.BannerAdapter;
 import com.phoneapp.phonepulse.Adapter.ItemProduct_ADAPTER;
 import com.phoneapp.phonepulse.R;
+import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.data.api.ApiService;
-import com.phoneapp.phonepulse.models.Product;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
+import com.phoneapp.phonepulse.models.Cart;
+import com.phoneapp.phonepulse.models.Product;
+import com.phoneapp.phonepulse.request.CartRequest;
 import com.phoneapp.phonepulse.request.DataConverter;
-import com.phoneapp.phonepulse.request.ProductGirdItem; // Đây là đối tượng bạn đang sử dụng trong adapter
-import com.phoneapp.phonepulse.utils.Constants; // <-- Đảm bảo import Constants
+import com.phoneapp.phonepulse.request.ProductGirdItem;
+import com.phoneapp.phonepulse.utils.Constants;
 import com.phoneapp.phonepulse.VIEW.DashBoar_Activity;
-import com.phoneapp.phonepulse.ui.product.ProductDetailActivity; // <-- Đảm bảo import ProductDetailActivity
+import com.phoneapp.phonepulse.ui.cart.Cart_Activity;
+import com.phoneapp.phonepulse.ui.product.ProductDetailActivity;
 
+import com.google.gson.Gson; // <-- THÊM IMPORT NÀY
+import com.google.gson.GsonBuilder; // <-- THÊM IMPORT NÀY
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +49,6 @@ import retrofit2.Response;
 public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnItemClickListener {
     private static final String TAG = "Home_FRAGMENT";
 
-    // ... (các khai báo biến khác của bạn)
     private ViewPager2 vpBanner;
     private RecyclerView rvProductList;
     private RecyclerView rvFlashSale;
@@ -63,6 +67,8 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnIte
     private ApiService apiService;
     private String authToken;
 
+    // Khởi tạo Gson ở đây
+    private Gson gson = new GsonBuilder().setPrettyPrinting().create(); // <-- THÊM DÒNG NÀY
 
     public Home_FRAGMENT() {
         // Required empty public constructor
@@ -85,6 +91,7 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnIte
         initApiService();
         setupRecyclerViews();
         setupViewPager();
+
 
         Log.d(TAG, "onCreateView: View created and data loading initiated.");
         return fragmentView;
@@ -111,9 +118,10 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnIte
 
             if (frameCart != null) {
                 frameCart.setOnClickListener(v -> {
-                    Toast.makeText(hostingActivity, "Giỏ hàng được nhấp!", Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "Cart icon clicked.");
-                    // TODO: Implement navigation to Cart Activity here
+                    Toast.makeText(hostingActivity, "Đang mở giỏ hàng...", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Cart icon clicked. Navigating to Cart_Activity.");
+                    Intent cartIntent = new Intent(requireContext(), Cart_Activity.class);
+                    startActivity(cartIntent);
                 });
             } else {
                 Log.e(TAG, "frame_cart not found in DashBoar_Activity's layout. Check its ID.");
@@ -142,17 +150,15 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnIte
         rvProductList.setAdapter(productListAdapter);
         rvProductList.setNestedScrollingEnabled(false);
 
-        // Flash Sale RecyclerView setup (nếu bạn có)
-        // ...
-
         Log.d(TAG, "RecyclerViews and Adapters setup.");
     }
 
     private void setupViewPager() {
+        // Sử dụng URL placeholder để tránh lỗi 404 từ tgdd.vn
         bannerImages = Arrays.asList(
-                "https://cdn.tgdd.vn/Files/2023/10/06/1825134/iphone-15-pro-max-co-gi-moi-thiet-ke-cau-hinh-gia-ban-2023100615570220231006155823.jpg",
-                "https://cdn.tgdd.vn/Files/2023/10/06/1825134/iphone-15-pro-max-co-gi-moi-thiet-ke-cau-hinh-gia-ban-2023100615570220231006155823.jpg",
-                "https://cdn.tgdd.vn/Files/2023/10/06/1825134/iphone-15-pro-max-co-gi-moi-thiet-ke-cau-hinh-gia-ban-2023100615570220231006155823.jpg"
+                "https://placehold.co/1000x400/png",
+                "https://placehold.co/1000x400/png",
+                "https://placehold.co/1000x400/png"
         );
         bannerAdapter = new BannerAdapter(requireContext(), bannerImages);
         vpBanner.setAdapter(bannerAdapter);
@@ -196,12 +202,12 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnIte
 
     private void initApiService() {
         apiService = RetrofitClient.getApiService(authToken);
-        Log.d(TAG, "ApiService initialized.");
+        Log.d(TAG, "ApiService initialized with token.");
     }
 
     private void fetchProductData() {
         if (apiService == null) {
-            showError("API Service is not initialized.");
+            showError("API Service is not initialized. Please log in.");
             Log.e(TAG, "fetchProductData: ApiService is null.");
             return;
         }
@@ -213,6 +219,9 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnIte
                 if (response.isSuccessful() && response.body() != null) {
                     List<Product> rawProducts = response.body();
                     Log.d(TAG, "API call successful. Received " + rawProducts.size() + " raw products.");
+                    // Chuyển đổi List<Product> thành chuỗi JSON để in ra Logcat
+                    String rawProductsJson = gson.toJson(rawProducts); // <-- DÒNG ĐÃ THAY ĐỔI
+                    Log.d(TAG, "Raw Products from API (JSON): " + rawProductsJson); // <-- DÒNG ĐÃ THAY ĐỔI
 
                     allProductsGridItems = DataConverter.convertProductsToGridItems(rawProducts);
                     displayedProductsGridItems.clear();
@@ -256,20 +265,69 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnIte
     @Override
     public void onAddToCartClick(ProductGirdItem item) {
         if (isAdded() && getContext() != null) {
-            Toast.makeText(requireContext(), "Thêm vào giỏ: " + item.getProduct_name(), Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Add to cart clicked for: " + item.getProduct_name() + " with variant ID: " + item.getVariant_id());
+            Log.d(TAG, "Add to cart clicked for: " + item.getProduct_name() + " with Product ID: " + item.get_id() + ", Variant ID: " + item.getVariant_id());
+
+            if (item.get_id() == null || item.getVariant_id() == null) {
+                Toast.makeText(requireContext(), "Không thể thêm sản phẩm này vào giỏ hàng (thiếu ID).", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Product ID or Variant ID is null for item: " + item.getProduct_name());
+                return;
+            }
+
+            callAddToCartApi(item.get_id(), item.getVariant_id(), 1);
         }
     }
+
+    private void callAddToCartApi(String productId, String variantId, int quantity) {
+        if (authToken == null || authToken.isEmpty()) {
+            Toast.makeText(requireContext(), "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        apiService = RetrofitClient.getApiService(authToken);
+
+        CartRequest.AddToCart request = new CartRequest.AddToCart(productId, variantId, quantity);
+
+        Toast.makeText(requireContext(), "Đang thêm sản phẩm vào giỏ hàng...", Toast.LENGTH_SHORT).show();
+
+        apiService.addToCart(request).enqueue(new Callback<ApiResponse<Cart>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<com.phoneapp.phonepulse.models.Cart>> call, @NonNull Response<ApiResponse<com.phoneapp.phonepulse.models.Cart>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    Toast.makeText(requireContext(), "Thêm vào giỏ hàng thành công!", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Product added to cart successfully. Current cart: " + response.body().getData());
+                } else {
+                    String errorMsg = "Lỗi khi thêm vào giỏ hàng.";
+                    if (response.body() != null && response.body().getMessage() != null) {
+                        errorMsg = response.body().getMessage();
+                    } else if (response.errorBody() != null) {
+                        try {
+                            errorMsg += " " + response.errorBody().string();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing error body for add to cart", e);
+                        }
+                    }
+                    Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "Add to cart API failed: " + response.code() + " - " + errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<com.phoneapp.phonepulse.models.Cart>> call, @NonNull Throwable t) {
+                Toast.makeText(requireContext(), "Lỗi mạng khi thêm vào giỏ hàng: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Log.e(TAG, "Add to cart network failure: ", t);
+            }
+        });
+    }
+
 
     @Override
     public void onItemClick(ProductGirdItem item) {
         if (isAdded() && getContext() != null) {
-            Toast.makeText(requireContext(), "Xem chi tiết: " + item.getProduct_name(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Đang mở chi tiết: " + item.getProduct_name(), Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Item clicked: " + item.getProduct_name() + " Product ID: " + item.get_id() + ", Variant ID: " + item.getVariant_id());
 
             Intent intent = new Intent(requireContext(), ProductDetailActivity.class);
 
-            // Gửi Product ID và Variant ID qua Intent
             if (item.get_id() != null) {
                 intent.putExtra(Constants.PRODUCT_ID, item.get_id());
             } else {
@@ -279,7 +337,7 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnIte
             if (item.getVariant_id() != null) {
                 intent.putExtra(Constants.VARIANT_ID, item.getVariant_id());
             } else {
-                Log.e(TAG, "Variant ID is null for item: " + item.getProduct_name());
+                Log.w(TAG, "Variant ID is null for item: " + item.getProduct_name() + ". Proceeding without variant ID.");
             }
 
             startActivity(intent);

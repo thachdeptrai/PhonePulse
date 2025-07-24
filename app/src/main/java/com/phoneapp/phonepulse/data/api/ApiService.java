@@ -83,7 +83,19 @@ public interface ApiService {
 
     // ========== CART ==========
     @GET("/api/cart")
-    Call<ApiResponse<ApiResponse>> getCart(@Header("Authorization") String token);
+    Call<ApiResponse<Cart>> getCart();
+
+    @POST("/api/cart")
+        // Sử dụng CartRequest.AddToCart
+    Call<ApiResponse<Cart>> addToCart(@Body CartRequest.AddToCart request);
+
+    @PUT("/api/cart")
+        // Sử dụng CartRequest.UpdateCartItem
+    Call<ApiResponse<Cart>> updateCartItem(@Body CartRequest.UpdateCartItem request);
+
+    @HTTP(method = "DELETE", path = "/api/cart", hasBody = true)
+        // Sử dụng CartRequest.RemoveCartItem
+    Call<ApiResponse<Cart>> removeFromCart(@Body CartRequest.RemoveCartItem request);
 
 
     // ========== ORDER ==========
