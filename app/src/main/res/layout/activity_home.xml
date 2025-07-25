@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_home"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@drawable/gradient_toolbar"
+        android:elevation="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:title="Trang chủ"
+        android:titleTextColor="@android:color/white"
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+    <!-- Nội dung chính -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="56dp"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Thanh tìm kiếm -->
+            <EditText
+                android:id="@+id/et_search_product"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="Tìm kiếm sản phẩm"
+                android:drawableLeft="@drawable/ic_search"
+                android:background="@drawable/rounded_search_background"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:inputType="text"
+                android:textColor="#333"
+                android:textSize="14sp" />
+
+            <!-- ViewPager2 Banner -->
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/vp_banner"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:layout_marginTop="16dp" />
+
+            <!-- Flash Sale RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_flash_sale"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingTop="8dp"
+                android:clipToPadding="false"
+                android:orientation="horizontal" />
+
+            <!-- Danh mục điện thoại -->
+            <LinearLayout
+                android:id="@+id/Linea_DienThoai"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:background="@drawable/rounded_search_background">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Danh mục: Điện thoại"
+                    android:textSize="16sp"
+                    android:textColor="#000" />
+            </LinearLayout>
+
+            <!-- Danh sách sản phẩm -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_product_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingTop="8dp"
+                android:clipToPadding="false" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Icon giỏ hàng nổi bên phải -->
+    <ImageView
+        android:id="@+id/rvCartItems"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/ic_cart"
+        android:contentDescription="Giỏ hàng"
+        android:background="@drawable/rounded_cart_bg"
+        android:padding="8dp" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
