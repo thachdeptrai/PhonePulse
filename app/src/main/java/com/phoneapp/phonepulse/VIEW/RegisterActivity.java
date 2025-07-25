@@ -1,18 +1,19 @@
-package com.phoneapp.phonepulse.VIEW;
+package com.phoneapp.phonepulse.ui.auth;
 
-import android.content.Intent; // Import Intent
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.phoneapp.phonepulse.R;
-import com.phoneapp.phonepulse.Response.ApiResponse;
+import com.phoneapp.phonepulse.data.api.ApiResponse;
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.request.RegisterRequest;
-import com.phoneapp.phonepulse.data.api.RetrofitClient;
+import com.phoneapp.phonepulse.retrofit.RetrofitClient;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -22,8 +23,8 @@ public class RegisterActivity extends AppCompatActivity {
 
     private EditText edFullName, edEmail, edPhone, edPassword, edConfirmPassword;
     private CheckBox cbTerms;
-    private Button btnRegister;
-    private ProgressBar progressBar; // Note: This ProgressBar is not actually used in the layout/shown to the user. Consider adding it to your layout if you intend to show progress.
+    private Button btnRegister, btnLogin;
+    private ProgressBar progressBar;
     private ApiService apiService;
 
     @Override
@@ -31,15 +32,19 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        // Initialize ApiService via RetrofitClient
-        apiService = RetrofitClient.getApiService(null); // null because registration doesn't require a token
+        // Khởi tạo ApiService thông qua RetrofitClient
+        apiService = RetrofitClient.getApiService(null); // null vì register không cần token
         Log.d("DEBUG", "apiService = " + apiService);
         Log.d("DEBUG", "BASE_URL = " + com.phoneapp.phonepulse.utils.Constants.BASE_URL);
 
-        // Map views
+        // Ánh xạ views
         initViews();
 
-        // Register button click event
+        btnLogin.setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
+        });
+
+        // Sự kiện đăng ký
         btnRegister.setOnClickListener(view -> {
             if (validateInputs()) {
                 registerUser();
@@ -51,13 +56,11 @@ public class RegisterActivity extends AppCompatActivity {
         edFullName = findViewById(R.id.edFullName);
         edEmail = findViewById(R.id.edEmail);
         edPhone = findViewById(R.id.edPhone);
-        edPassword = findViewById(R.id.edPassWord); // Corrected ID assuming it matches activity_login, ensure it's correct for activity_register
+        edPassword = findViewById(R.id.edPassword);
         edConfirmPassword = findViewById(R.id.edConfirmPassword);
         cbTerms = findViewById(R.id.cbTerms);
         btnRegister = findViewById(R.id.btnRegister);
-        // The ProgressBar instance is created here but not added to a layout, so it won't be visible.
-        // If you want to show a ProgressBar, you should define it in your XML layout (activity_register.xml)
-        // and then find it using findViewById(). For now, it's just an instance.
+        btnLogin = findViewById(R.id.btnLogin);
         progressBar = new ProgressBar(this);
     }
 
@@ -78,7 +81,6 @@ public class RegisterActivity extends AppCompatActivity {
             return false;
         }
 
-        // Phone number is optional, but if entered, it must be valid
         if (!TextUtils.isEmpty(phone) && !Patterns.PHONE.matcher(phone).matches()) {
             edPhone.setError("Invalid Phone Number");
             return false;
@@ -89,17 +91,17 @@ public class RegisterActivity extends AppCompatActivity {
             return false;
         }
         if (!password.matches(".*[A-Z].*")) {
-            edPassword.setError("Password must contain at least 1 uppercase letter");
+            edPassword.setError("Mật khẩu phải có ít nhất 1 chữ in hoa");
             return false;
         }
 
         if (!password.matches(".*[0-9].*")) {
-            edPassword.setError("Password must contain at least 1 digit");
+            edPassword.setError("Mật khẩu phải có ít nhất 1 số");
             return false;
         }
 
         if (!password.matches(".*[!@#$%^&*()_+=|<>?{}\\[\\]~-].*")) {
-            edPassword.setError("Password must contain at least 1 special character");
+            edPassword.setError("Mật khẩu phải có ít nhất 1 ký tự đặc biệt");
             return false;
         }
         if (!password.equals(confirmPassword)) {
@@ -123,9 +125,9 @@ public class RegisterActivity extends AppCompatActivity {
 
         RegisterRequest request = new RegisterRequest(name, email, phone, password);
 
-        // Log request info
+        // Log thông tin request
         Log.d("RegisterActivity", "Starting registration...");
-        Log.d("RegisterActivity", "Request data: " + request.toString()); // Make sure RegisterRequest has a toString() method
+        Log.d("RegisterActivity", "Request data: " + request.toString()); // Thêm toString() method vào RegisterRequest nếu chưa có
 
         btnRegister.setEnabled(false);
         Toast.makeText(this, "Registering...", Toast.LENGTH_SHORT).show();
@@ -138,19 +140,7 @@ public class RegisterActivity extends AppCompatActivity {
                     ApiResponse apiResponse = response.body();
                     if (apiResponse.isSuccess()) {
                         Toast.makeText(RegisterActivity.this, "Register Successful!", Toast.LENGTH_LONG).show();
-
-                        // --- MODIFICATION START ---
-                        // Create an Intent to go back to LoginActivity
-                        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                        // Put email and password as extras
-                        intent.putExtra("REGISTERED_EMAIL", email);
-                        intent.putExtra("REGISTERED_PASSWORD", password);
-                        // Add flags to clear the activity stack and bring LoginActivity to the top
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        finish(); // Finish RegisterActivity
-                        // --- MODIFICATION END ---
-
+                        finish(); // hoặc chuyển về màn hình login
                     } else {
                         Toast.makeText(RegisterActivity.this, apiResponse.getMessage(), Toast.LENGTH_LONG).show();
                     }
