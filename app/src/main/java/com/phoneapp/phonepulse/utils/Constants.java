@@ -7,7 +7,7 @@ public class Constants {
     // Base URL for API calls. Use 10.0.2.2 for Android Emulator to connect to localhost.
     // Use 192.168.x.x for real devices connected to the same local network.
    //  public static final String BASE_URL = "http://10.0.2.2:5000";
-    public static final String BASE_URL = "http://192.168.1.9:5000"; // Your current active base URL
+    public static final String BASE_URL = "http://10.24.10.65:5000"; // Your current active base URL
 
     public static final int TIMEOUT = 30; // Network timeout in seconds
     public static final String SHARED_PREFS = "app_prefs"; // Name for SharedPreferences file
