@@ -18,7 +18,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="32dp"
             android:gravity="center"
             android:orientation="vertical"
             android:padding="16dp">
@@ -83,7 +82,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/logoContainer"
-            android:layout_marginTop="24dp"
             android:orientation="vertical"
             android:background="@drawable/card_background"
             android:padding="28dp"
@@ -194,8 +192,7 @@
                 android:id="@+id/btnRegister"
                 style="@style/PrimaryButton"
                 android:text="CREATE ACCOUNT"
-                android:background="@drawable/button_gradient"
-                android:layout_marginBottom="24dp" />
+                android:background="@drawable/button_gradient" />
 
             <!-- Divider -->
             <LinearLayout
@@ -211,13 +208,6 @@
                     android:layout_weight="1"
                     android:background="#444444" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="OR SIGN UP WITH"
-                    android:textColor="#888888"
-                    android:textSize="12sp"
-                    android:paddingHorizontal="16dp" />
 
                 <View
                     android:layout_width="0dp"
@@ -225,33 +215,6 @@
                     android:layout_weight="1"
                     android:background="#444444" />
             </LinearLayout>
-
-            <!-- Social Registration -->
-            <LinearLayout
-                android:id="@+id/socialRegisterLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:layout_marginBottom="24dp">
-
-                <!-- Google Button -->
-                <ImageButton
-                    android:id="@+id/btnGoogleRegister"
-                    style="@style/SocialButton"
-                    android:src="@drawable/ic_gg"
-                    android:layout_marginEnd="16dp"
-                    android:contentDescription="Google Registration" />
-
-                <!-- Facebook Button -->
-                <ImageButton
-                    android:id="@+id/btnFacebookRegister"
-                    style="@style/SocialButton"
-                    android:src="@drawable/ic_fb"
-                    android:layout_marginStart="16dp"
-                    android:contentDescription="Facebook Registration" />
-            </LinearLayout>
-
             <!-- Login Button -->
             <Button
                 android:id="@+id/btnLogin"
