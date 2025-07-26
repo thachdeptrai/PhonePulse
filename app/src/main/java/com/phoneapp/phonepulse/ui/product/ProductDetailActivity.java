@@ -1,5 +1,7 @@
 package com.phoneapp.phonepulse.ui.product;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,10 +18,13 @@ import androidx.core.content.ContextCompat; // Thêm import này
 
 import com.bumptech.glide.Glide;
 import com.phoneapp.phonepulse.R;
+import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.data.api.ApiService;
+import com.phoneapp.phonepulse.models.Cart;
 import com.phoneapp.phonepulse.models.Product;
 import com.phoneapp.phonepulse.models.Variant;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
+import com.phoneapp.phonepulse.request.CartRequest;
 import com.phoneapp.phonepulse.utils.Constants; // <-- Đảm bảo import Constants
 
 import java.text.NumberFormat;
@@ -49,6 +54,8 @@ public class ProductDetailActivity extends AppCompatActivity {
     private Variant displayedVariant; // Đối tượng Variant chứa thông tin biến thể cụ thể
     private NumberFormat numberFormat;
     private ApiService apiService;
+    private String authToken;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +65,12 @@ public class ProductDetailActivity extends AppCompatActivity {
         // Lấy variantId và productId từ Intent (Sử dụng Constants keys)
         variantId = getIntent().getStringExtra(Constants.VARIANT_ID);
         productId = getIntent().getStringExtra(Constants.PRODUCT_ID);
-
+        authToken = Constants.getToken(this);
+        if (authToken != null) {
+            Log.d(TAG, "Auth Token loaded successfully.");
+        } else {
+            Log.w(TAG, "No auth token found. User might not be logged in or token expired.");
+        }
         // Kiểm tra xem dữ liệu có bị null không
         if (variantId == null || productId == null) {
             Toast.makeText(this, "Không tìm thấy biến thể hoặc sản phẩm. Dữ liệu không hợp lệ.", Toast.LENGTH_LONG).show();
@@ -100,13 +112,18 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         // Đặt lắng nghe sự kiện click cho các nút
         btnAddToCart.setOnClickListener(v -> {
-            if (currentProduct != null) {
-                Toast.makeText(ProductDetailActivity.this, "Thêm " + currentProduct.getName() + " vào giỏ hàng", Toast.LENGTH_SHORT).show();
-                // TODO: Triển khai logic thêm vào giỏ hàng
+            if (currentProduct != null && displayedVariant != null) {
+                String productId = currentProduct.getId();          // Lấy ID sản phẩm
+                String variantId = displayedVariant.getId();        // Lấy ID biến thể (màu, dung lượng, v.v.)
+                int quantity = 1;                                   // Số lượng mặc định là 1
+
+                // Gọi hàm thực hiện API thêm vào giỏ hàng
+                callAddToCartApi(productId, variantId, quantity);
             } else {
                 Toast.makeText(ProductDetailActivity.this, "Thông tin sản phẩm chưa tải xong.", Toast.LENGTH_SHORT).show();
             }
         });
+
         btnBuyNow.setOnClickListener(v -> {
             if (currentProduct != null) {
                 Toast.makeText(ProductDetailActivity.this, "Mua ngay " + currentProduct.getName(), Toast.LENGTH_SHORT).show();
@@ -276,11 +293,6 @@ public class ProductDetailActivity extends AppCompatActivity {
             // Thêm các thông số khác nếu có trong Variant model của bạn
         }
 
-        // Nếu Product có trường `specsDetails` (như đã thảo luận trước đó), bạn sẽ dùng nó ở đây:
-        // if (currentProduct.getSpecsDetails() != null && !currentProduct.getSpecsDetails().isEmpty()) {
-        //     specsText.append(currentProduct.getSpecsDetails());
-        // }
-
         if (specsText.length() > 0) {
             tvProductSpecs.setText(specsText.toString().trim());
             tvProductSpecs.setVisibility(View.VISIBLE);
@@ -344,12 +356,53 @@ public class ProductDetailActivity extends AppCompatActivity {
         int stock = displayedVariant.getQuantity();
         if (stock > 0) {
             tvStock.setText("Còn " + stock + " sản phẩm");
-            tvStock.setTextColor(ContextCompat.getColor(this, R.color.green)); // Sử dụng ContextCompat
+            tvStock.setTextColor(ContextCompat.getColor(this, R.color.success_green)); // Sử dụng ContextCompat
         } else {
             tvStock.setText("Hết hàng");
             tvStock.setTextColor(ContextCompat.getColor(this, R.color.error_red)); // Sử dụng ContextCompat
         }
         Log.d(TAG, "displayPriceAndSpecs: Tồn kho đã cập nhật: " + stock);
+    }
+    private void callAddToCartApi(String productId, String variantId, int quantity) {
+        if (authToken == null || authToken.isEmpty()) {
+            Toast.makeText(ProductDetailActivity.this, "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        apiService = RetrofitClient.getApiService(authToken);
+
+        CartRequest.AddToCart request = new CartRequest.AddToCart(productId, variantId, quantity);
+
+        Toast.makeText(ProductDetailActivity.this, "Đang thêm sản phẩm vào giỏ hàng...", Toast.LENGTH_SHORT).show();
+
+        apiService.addToCart(request).enqueue(new Callback<ApiResponse<Cart>>() {
+            @Override
+            public void onResponse(@androidx.annotation.NonNull Call<ApiResponse<com.phoneapp.phonepulse.models.Cart>> call, @androidx.annotation.NonNull Response<ApiResponse<com.phoneapp.phonepulse.models.Cart>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    Toast.makeText(ProductDetailActivity.this, "Thêm vào giỏ hàng thành công!", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Product added to cart successfully. Current cart: " + response.body().getData());
+                } else {
+                    String errorMsg = "Lỗi khi thêm vào giỏ hàng.";
+                    if (response.body() != null && response.body().getMessage() != null) {
+                        errorMsg = response.body().getMessage();
+                    } else if (response.errorBody() != null) {
+                        try {
+                            errorMsg += " " + response.errorBody().string();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing error body for add to cart", e);
+                        }
+                    }
+                    Toast.makeText(ProductDetailActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "Add to cart API failed: " + response.code() + " - " + errorMsg);
+                }
+            }
+
+            @Override
+            public void onFailure(@androidx.annotation.NonNull Call<ApiResponse<com.phoneapp.phonepulse.models.Cart>> call, @androidx.annotation.NonNull Throwable t) {
+                Toast.makeText(ProductDetailActivity.this, "Lỗi mạng khi thêm vào giỏ hàng: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Log.e(TAG, "Add to cart network failure: ", t);
+            }
+        });
     }
 
     /**
