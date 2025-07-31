@@ -3,8 +3,8 @@ package com.phoneapp.phonepulse.Adapter;
 import android.content.Context;
 import android.graphics.Paint;
 import android.text.TextUtils;
-import android.util.Base64; // Import Base64
-import android.util.Log; // Import Log
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +12,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy; // Import DiskCacheStrategy
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.request.ProductGirdItem;
 
@@ -25,8 +27,7 @@ import java.util.Locale;
 
 public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTER.ProductViewHolder> {
 
-    private static final String TAG = "ProductAdapter"; // Tag cho Logcat
-
+    private static final String TAG = "ItemProductAdapter";
     private List<ProductGirdItem> productList;
     private Context context;
     private OnItemClickListener listener;
@@ -44,10 +45,10 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
         this.productList = productList;
     }
 
-    public void setData(List<ProductGirdItem> newProductList) {
-        this.productList = newProductList;
+    public void setData(List<ProductGirdItem> newList) {
+        this.productList = newList;
         notifyDataSetChanged();
-        Log.d(TAG, "setData: Product list updated. New size: " + newProductList.size());
+        Log.d(TAG, "setData: Updated list with size = " + newList.size());
     }
 
     @NonNull
@@ -55,140 +56,110 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
     public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         context = parent.getContext();
         View view = LayoutInflater.from(context).inflate(R.layout.item_product_grid, parent, false);
-        Log.d(TAG, "onCreateViewHolder: ViewHolder created.");
         return new ProductViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
-        ProductGirdItem currentItem = productList.get(position);
-        Log.d(TAG, "onBindViewHolder: Binding item at position " + position + " - Product: " + currentItem.getProduct_name());
+        ProductGirdItem item = productList.get(position);
+        Log.d(TAG, "Binding product at position " + position + ": " + item.getProduct_name());
 
-        // --- 1. Tải ảnh sản phẩm ---
-        String imageUrl = currentItem.getImage_url();
-        Log.d(TAG, "onBindViewHolder: Product Image URL for " + currentItem.getProduct_name() + ": " + imageUrl);
+        // --- Load Image ---
+        String imageUrl = null;
+        if (item.getImages() != null && !item.getImages().isEmpty()) {
+            imageUrl = item.getImages().get(0).getImageUrl();
+        } else {
+            imageUrl = item.getImage_url(); // fallback
+        }
 
         if (!TextUtils.isEmpty(imageUrl)) {
             if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
-                // Đây là URL web thông thường
                 Glide.with(context)
                         .load(imageUrl)
                         .placeholder(R.drawable.placeholder_product)
                         .error(R.drawable.placeholder_product)
-                        .diskCacheStrategy(DiskCacheStrategy.ALL) // Cache ảnh để tải nhanh hơn
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .into(holder.ivProductImage);
-                Log.d(TAG, "onBindViewHolder: Glide loading URL image for " + currentItem.getProduct_name() + " from URL: " + imageUrl);
+                Log.d(TAG, "Loaded image from URL: " + imageUrl);
             } else if (imageUrl.startsWith("data:image/")) {
-                // Đây là chuỗi Base64
                 try {
-                    // Tách phần Base64 ra khỏi tiền tố "data:image/jpeg;base64,"
-                    String base64Image = imageUrl.substring(imageUrl.indexOf(",") + 1);
-                    byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
+                    String base64 = imageUrl.substring(imageUrl.indexOf(",") + 1);
+                    byte[] decoded = Base64.decode(base64, Base64.DEFAULT);
                     Glide.with(context)
-                            .load(decodedString) // Tải từ byte array
+                            .load(decoded)
                             .placeholder(R.drawable.placeholder_product)
                             .error(R.drawable.placeholder_product)
                             .into(holder.ivProductImage);
-                    Log.d(TAG, "onBindViewHolder: Glide loading Base64 image for " + currentItem.getProduct_name());
-                } catch (IllegalArgumentException e) {
-                    Log.e(TAG, "onBindViewHolder: Invalid Base64 string for " + currentItem.getProduct_name(), e);
-                    holder.ivProductImage.setImageResource(R.drawable.placeholder_product); // Fallback nếu Base64 lỗi
+                    Log.d(TAG, "Loaded image from Base64.");
+                } catch (Exception e) {
+                    Log.e(TAG, "Error decoding Base64 image", e);
+                    holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
                 }
+            } else if (imageUrl.startsWith("/uploads/")) {
+                String localUrl = "http://10.0.2.2:5000" + imageUrl;
+                Glide.with(context)
+                        .load(localUrl)
+                        .placeholder(R.drawable.placeholder_product)
+                        .error(R.drawable.placeholder_product)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(holder.ivProductImage);
+                Log.d(TAG, "Loaded image from local uploads: " + localUrl);
             } else {
-                // Đây là một đường dẫn file cục bộ hoặc định dạng không xác định
-                // Nếu bạn có ảnh cục bộ trong thư mục drawable, bạn có thể kiểm tra ở đây:
-                // Ví dụ: if (imageUrl.equals("local_image_name")) { holder.ivProductImage.setImageResource(R.drawable.local_image_name); }
-                // Hiện tại, chúng ta sẽ mặc định dùng placeholder nếu không phải URL hoặc Base64
+                Log.w(TAG, "Unknown image format: " + imageUrl);
                 holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
-                Log.w(TAG, "onBindViewHolder: Unrecognized image URL format for " + currentItem.getProduct_name() + ". Using placeholder. URL: " + imageUrl);
             }
         } else {
-            // URL ảnh là null hoặc rỗng, dùng placeholder
+            Log.w(TAG, "Image URL is empty");
             holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
-            Log.w(TAG, "onBindViewHolder: Image URL is null or empty for " + currentItem.getProduct_name() + ". Using placeholder.");
         }
 
-        // --- 2. Tên sản phẩm ---
-        holder.tvProductName.setText(currentItem.getProduct_name() != null ? currentItem.getProduct_name() : "");
-        Log.d(TAG, "onBindViewHolder: Product Name: " + holder.tvProductName.getText());
+        // --- Product Name ---
+        holder.tvProductName.setText(item.getProduct_name() != null ? item.getProduct_name() : "");
 
-        // --- 3. Kích thước và Màu sắc ---
-        boolean hasSize = currentItem.getSize_name() != null && !currentItem.getSize_name().isEmpty();
-        boolean hasColor = currentItem.getColor_name() != null && !currentItem.getColor_name().isEmpty();
+        // --- Size & Color ---
+        boolean hasSize = !TextUtils.isEmpty(item.getSize_name());
+        boolean hasColor = !TextUtils.isEmpty(item.getColor_name());
 
-        Log.d(TAG, "onBindViewHolder: Product Size: " + currentItem.getSize_name() + ", Color: " + currentItem.getColor_name());
+        holder.tvProductSize.setVisibility(hasSize ? View.VISIBLE : View.GONE);
+        holder.tvProductSize.setText(hasSize ? item.getSize_name() : "");
 
-        if (hasSize) {
-            holder.tvProductSize.setText(currentItem.getSize_name());
-            holder.tvProductSize.setVisibility(View.VISIBLE);
-        } else {
-            holder.tvProductSize.setText("");
-            holder.tvProductSize.setVisibility(View.GONE);
-        }
+        holder.tvProductColor.setVisibility(hasColor ? View.VISIBLE : View.GONE);
+        holder.tvProductColor.setText(hasColor ? item.getColor_name() : "");
 
-        if (hasColor) {
-            holder.tvProductColor.setText(currentItem.getColor_name());
-            holder.tvProductColor.setVisibility(View.VISIBLE);
-        } else {
-            holder.tvProductColor.setText("");
-            holder.tvProductColor.setVisibility(View.GONE);
-        }
+        holder.llSizeColorContainer.setVisibility((hasSize || hasColor) ? View.VISIBLE : View.GONE);
 
-        if (!hasSize && !hasColor) {
-            holder.llSizeColorContainer.setVisibility(View.GONE);
-            Log.d(TAG, "onBindViewHolder: Hiding size/color container for " + currentItem.getProduct_name());
-        } else {
-            holder.llSizeColorContainer.setVisibility(View.VISIBLE);
-            Log.d(TAG, "onBindViewHolder: Showing size/color container for " + currentItem.getProduct_name());
-        }
+        // --- Price Formatting ---
+        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+        nf.setMaximumFractionDigits(0);
+        holder.tvDiscountPrice.setText(nf.format(item.getPrice()));
 
-        // --- 4. Định dạng và hiển thị giá ---
-        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        currencyFormat.setMaximumFractionDigits(0);
-
-        holder.tvDiscountPrice.setText(currencyFormat.format(currentItem.getPrice()));
-        Log.d(TAG, "onBindViewHolder: Discount Price: " + currentItem.getPrice());
-
-        // --- 5. Giá gốc và Phần trăm giảm giá ---
-        if (currentItem.getDiscount_percent() > 0 && currentItem.getOriginal_price() > currentItem.getPrice()) {
-            holder.tvOriginalPrice.setText(currencyFormat.format(currentItem.getOriginal_price()));
-            holder.tvOriginalPrice.setPaintFlags(holder.tvOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        if (item.getDiscount_percent() > 0 && item.getOriginal_price() > item.getPrice()) {
             holder.tvOriginalPrice.setVisibility(View.VISIBLE);
+            holder.tvOriginalPrice.setText(nf.format(item.getOriginal_price()));
+            holder.tvOriginalPrice.setPaintFlags(holder.tvOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
-            holder.tvDiscountPercent.setText("-" + currentItem.getDiscount_percent() + "%");
             holder.tvDiscountPercent.setVisibility(View.VISIBLE);
-            Log.d(TAG, "onBindViewHolder: Original Price: " + currentItem.getOriginal_price() + ", Discount Percent: " + currentItem.getDiscount_percent());
+            holder.tvDiscountPercent.setText("-" + item.getDiscount_percent() + "%");
         } else {
             holder.tvOriginalPrice.setVisibility(View.GONE);
             holder.tvDiscountPercent.setVisibility(View.GONE);
-            Log.d(TAG, "onBindViewHolder: No discount for " + currentItem.getProduct_name());
         }
 
-        // --- 6. Số lượng đã bán ---
-        if (currentItem.getSold_count() >= 0) {
-            holder.tvSold.setText("Đã bán " + currentItem.getSold_count());
+        // --- Sold Count ---
+        if (item.getSold_count() >= 0) {
+            holder.tvSold.setText("Đã bán " + item.getSold_count());
             holder.tvSold.setVisibility(View.VISIBLE);
-            Log.d(TAG, "onBindViewHolder: Sold Count: " + currentItem.getSold_count());
         } else {
-            holder.tvSold.setText("");
             holder.tvSold.setVisibility(View.INVISIBLE);
-            Log.d(TAG, "onBindViewHolder: Sold Count not available for " + currentItem.getProduct_name());
         }
 
-        // --- 7. Xử lý sự kiện click cho nút "Thêm vào giỏ" ---
+        // --- Click Listeners ---
         holder.btnAddtoCart.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onAddToCartClick(currentItem);
-                Log.d(TAG, "onBindViewHolder: Add to Cart button clicked for " + currentItem.getProduct_name());
-            }
+            if (listener != null) listener.onAddToCartClick(item);
         });
 
-        // --- 8. Xử lý sự kiện click cho toàn bộ item (CardView) ---
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onItemClick(currentItem);
-                Log.d(TAG, "onBindViewHolder: Item clicked for " + currentItem.getProduct_name());
-            }
+            if (listener != null) listener.onItemClick(item);
         });
     }
 
@@ -199,21 +170,14 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
 
     public static class ProductViewHolder extends RecyclerView.ViewHolder {
         ImageView ivProductImage;
-        TextView tvProductName;
-        LinearLayout llSizeColorContainer;
-        TextView tvProductSize;
-        TextView tvProductColor;
-        TextView tvDiscountPrice;
-        TextView tvOriginalPrice;
-        TextView tvDiscountPercent;
-        TextView tvSold;
+        TextView tvProductName, tvProductSize, tvProductColor, tvDiscountPrice, tvOriginalPrice, tvDiscountPercent, tvSold;
         Button btnAddtoCart;
+        LinearLayout llSizeColorContainer;
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
             ivProductImage = itemView.findViewById(R.id.iv_product_image);
             tvProductName = itemView.findViewById(R.id.tv_product_name);
-            llSizeColorContainer = itemView.findViewById(R.id.ll_size_color_container);
             tvProductSize = itemView.findViewById(R.id.tv_product_size);
             tvProductColor = itemView.findViewById(R.id.tv_product_color);
             tvDiscountPrice = itemView.findViewById(R.id.tv_discount_price);
@@ -221,7 +185,7 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
             tvDiscountPercent = itemView.findViewById(R.id.tv_discount_percent);
             tvSold = itemView.findViewById(R.id.tv_sold);
             btnAddtoCart = itemView.findViewById(R.id.btn_add_to_cart);
-            Log.d(TAG, "ProductViewHolder: Views initialized.");
+            llSizeColorContainer = itemView.findViewById(R.id.ll_size_color_container);
         }
     }
 }

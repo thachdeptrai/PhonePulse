@@ -3,28 +3,27 @@ package com.phoneapp.phonepulse.models;
 import com.google.gson.annotations.SerializedName;
 
 public class ProductImage {
+
     @SerializedName("_id")
-    private String id; // Maps to MongoDB's _id for the image record
+    private String id;
 
     @SerializedName("product_id")
-    private String productId; // The ID of the product this image belongs to.
-    // If you want the full Product object here, the backend needs to populate it.
+    private String productId;
 
     @SerializedName("image_url")
-    private String imageUrl; // The URL of the image, where the image is actually hosted
+    private String imageUrl;
 
-    // --- Constructors (Optional, but good practice) ---
-    public ProductImage() {
-        // Default constructor required for Gson
-    }
+    // Default constructor
+    public ProductImage() {}
 
+    // Full constructor
     public ProductImage(String id, String productId, String imageUrl) {
         this.id = id;
         this.productId = productId;
         this.imageUrl = imageUrl;
     }
 
-    // --- Getters and Setters ---
+    // --- Getters & Setters ---
     public String getId() {
         return id;
     }
@@ -47,5 +46,15 @@ public class ProductImage {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    // Optional: toString() for debugging/logging
+    @Override
+    public String toString() {
+        return "ProductImage{" +
+                "id='" + id + '\'' +
+                ", productId='" + productId + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                '}';
     }
 }

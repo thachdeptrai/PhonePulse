@@ -11,6 +11,8 @@ import java.util.List;
 
 public class DataConverter {
 
+    private static List<ProductImage> images;
+
     /**
      * Chuyển đổi danh sách Product (được populate từ API) thành danh sách ProductGirdItem.
      * Mỗi biến thể của sản phẩm sẽ trở thành một ProductGirdItem riêng biệt.
@@ -69,14 +71,16 @@ public class DataConverter {
                             product.getId(),         // _id của Product
                             variant.getId(),         // _id của Variant
                             product.getName(),       // product_name của Product
-                            imageUrl,                // image_url của ProductImage
+                            imageUrl,                // image_url đại diện
                             discountedPrice,         // price (giá đã giảm)
-                            originalPrice,           // original_price (giá gốc đã tính)
-                            discountPercent,         // discount_percent (phần trăm giảm giá)
-                            soldCount,               // sold_count (số lượng đã bán)
-                            sizeName,                // size_name của Size
-                            colorName                // color_name của Color
+                            originalPrice,           // original_price (giá gốc)
+                            discountPercent,         // discount_percent
+                            soldCount,               // sold_count
+                            sizeName,                // size_name
+                            colorName,               // color_name
+                            images                   // ✅ Danh sách ảnh List<ProductImage>
                     );
+
                     gridItems.add(item);
                 }
             }
