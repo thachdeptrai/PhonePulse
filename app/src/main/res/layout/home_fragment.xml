@@ -258,18 +258,7 @@
 
     </androidx.cardview.widget.CardView>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_flash_sale"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:clipToPadding="false"
-        android:nestedScrollingEnabled="false"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        android:orientation="horizontal"
-        tools:listitem="@layout/item_product_grid" />
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -296,7 +285,6 @@
             android:padding="4dp" />
 
     </LinearLayout>
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_product_list"
         android:layout_width="match_parent"
@@ -305,9 +293,15 @@
         android:paddingEnd="8dp"
         android:clipToPadding="false"
         android:nestedScrollingEnabled="false"
+        android:orientation="horizontal"
         tools:listitem="@layout/item_product_grid"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        app:spanCount="2" />
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        />
+
+
+
+
 
 </LinearLayout>
 

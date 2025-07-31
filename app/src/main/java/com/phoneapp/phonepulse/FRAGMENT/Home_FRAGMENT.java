@@ -137,7 +137,6 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnIte
     private void initFragmentViews(View view) {
         vpBanner = view.findViewById(R.id.vp_banner);
         rvProductList = view.findViewById(R.id.rv_product_list);
-        rvFlashSale = view.findViewById(R.id.rv_flash_sale);
         Log.d(TAG, "Fragment views initialized.");
     }
 
@@ -145,13 +144,16 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnIte
         productListAdapter = new ItemProduct_ADAPTER(new ArrayList<>());
         productListAdapter.setOnItemClickListener(this);
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(requireContext(), 2);
+        // GridLayoutManager với 2 hàng, cuộn theo chiều ngang (trái sang phải)
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(requireContext(), 1, RecyclerView.HORIZONTAL, false);
+
         rvProductList.setLayoutManager(gridLayoutManager);
         rvProductList.setAdapter(productListAdapter);
         rvProductList.setNestedScrollingEnabled(false);
 
         Log.d(TAG, "RecyclerViews and Adapters setup.");
     }
+
 
     private void setupViewPager() {
         // Sử dụng URL placeholder để tránh lỗi 404 từ tgdd.vn
