@@ -1,38 +1,165 @@
 package com.phoneapp.phonepulse.models;
 
+import com.google.gson.annotations.SerializedName;
+import java.util.Date;
+
 public class User {
-    private int id;
+
+    @SerializedName("_id")
+    private String id;
+
+    @SerializedName("name")
     private String name;
+
+    @SerializedName("email")
     private String email;
-    private String password_hash;
+
+    @SerializedName("password")
+    private String passwordHash;
+
+    @SerializedName("avatar_url")
+    private String avatar_url; // Đã đổi tên biến để khớp với tên phương thức
+
+    @SerializedName("phone")
     private String phone;
-    private String avatar_url;
-    private boolean is_admin;
-    private String created_at; // có thể dùng Date
 
-    // Getters and Setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    @SerializedName("address")
+    private String address;
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    @SerializedName("gender")
+    private String gender;
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    @SerializedName("birthday")
+    private Date birthday;
 
-    public String getPassword_hash() { return password_hash; }
-    public void setPassword_hash(String password_hash) { this.password_hash = password_hash; }
+    @SerializedName("role")
+    private boolean isAdmin;
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
+    @SerializedName("status")
+    private boolean status;
 
-    public String getAvatar_url() { return avatar_url; }
-    public void setAvatar_url(String avatar_url) { this.avatar_url = avatar_url; }
+    @SerializedName("is_verified")
+    private boolean isVerified;
 
-    public boolean isIs_admin() { return is_admin; }
-    public void setIs_admin(boolean is_admin) { this.is_admin = is_admin; }
+    @SerializedName("created_date")
+    private Date createdDate;
 
-    public String getCreated_at() { return created_at; }
-    public void setCreated_at(String created_at) { this.created_at = created_at; }
+    @SerializedName("modified_date")
+    private Date modifiedDate;
+
+    // Getters
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    // Giữ nguyên tên phương thức theo yêu cầu
+    public String getAvatar_url() {
+        return avatar_url;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public boolean getStatus() {
+        return status;
+    }
+
+    public boolean isVerified() {
+        return isVerified;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public Date getModifiedDate() {
+        return modifiedDate;
+    }
+
+    // Setters
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    // Giữ nguyên tên phương thức theo yêu cầu
+    public void setAvatar_url(String avatar_url) {
+        this.avatar_url = avatar_url;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public void setAdmin(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    public void setVerified(boolean isVerified) {
+        this.isVerified = isVerified;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public void setModifiedDate(Date modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
 }
-
