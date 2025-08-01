@@ -6,8 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.phoneapp.phonepulse.R;
@@ -40,20 +42,27 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         Order order = orderList.get(position);
 
         // Set mã đơn hàng
-        holder.tvOrderId.setText("Đơn hàng #" + order.getId());
+        holder.tvOrderId.setText("Đơn hàng #" + order.get_id());
 
         // Set ngày đặt
-        holder.tvOrderDate.setText("Ngày đặt: " + order.getCreated_at());
+        if (order.getCreated_date() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+            holder.tvOrderDate.setText("Ngày đặt: " + dateFormat.format(order.getCreated_date()));
+        }
 
         // Set tổng tiền
         DecimalFormat formatter = new DecimalFormat("#,###");
-        holder.tvOrderTotal.setText("Tổng tiền: " + formatter.format(order.getTotal_price()) + "đ");
+        holder.tvOrderTotal.setText("Tổng tiền: " + formatter.format(order.getFinal_price()) + "đ");
 
         // Set trạng thái
         String status = order.getStatus();
         holder.tvOrderStatus.setText("Trạng thái: " + getStatusText(status));
         holder.tvOrderStatus.setTextColor(context.getResources().getColor(getStatusColor(status)));
-        holder.ivOrderStatus.setImageResource(getStatusIcon(status));
+        // holder.ivOrderStatus.setImageResource(getStatusIcon(status)); // Cần có icon tương ứng trong drawable
+
+        // Setup RecyclerView cho các sản phẩm trong đơn hàng
+        holder.rvOrderItems.setLayoutManager(new LinearLayoutManager(context));
+        // holder.rvOrderItems.setAdapter(new OrderItemsAdapter(order.getItems()));
     }
 
     @Override
@@ -64,6 +73,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     public static class OrderViewHolder extends RecyclerView.ViewHolder {
         TextView tvOrderId, tvOrderDate, tvOrderTotal, tvOrderStatus;
         ImageView ivOrderStatus;
+        RecyclerView rvOrderItems;
 
         public OrderViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -72,14 +82,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             tvOrderTotal = itemView.findViewById(R.id.tv_order_total);
             tvOrderStatus = itemView.findViewById(R.id.tv_order_status);
             ivOrderStatus = itemView.findViewById(R.id.iv_order_status_icon);
+            rvOrderItems = itemView.findViewById(R.id.rv_order_items);
         }
     }
 
     private String getStatusText(String status) {
         switch (status) {
             case "pending": return "Đang xử lý";
-            case "shipping": return "Đang giao";
-            case "completed": return "Đã giao";
+            case "confirmed": return "Đã xác nhận";
             case "cancelled": return "Đã hủy";
             default: return "Không rõ";
         }
@@ -88,20 +98,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     private int getStatusColor(String status) {
         switch (status) {
             case "pending": return R.color.orange;
-            case "shipping": return R.color.green;
-            case "completed": return R.color.green;
+            case "confirmed": return R.color.green;
             case "cancelled": return R.color.red;
             default: return R.color.black;
-        }
-    }
-
-    private int getStatusIcon(String status) {
-        switch (status) {
-            case "pending": return R.drawable.ic_pending;
-            case "shipping": return R.drawable.ic_shipping;
-            case "completed": return R.drawable.ic_completed;
-            case "cancelled": return R.drawable.ic_cancelled;
-            default: return R.drawable.ic_pending;
         }
     }
 }

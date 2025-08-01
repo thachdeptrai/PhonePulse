@@ -13,10 +13,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager; // Import FragmentManager
+import androidx.fragment.app.FragmentTransaction; // Import FragmentTransaction
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.phoneapp.phonepulse.Adapter.CartAdapter;
+import com.phoneapp.phonepulse.FRAGMENT.CheckoutFragment;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.data.api.ApiService;
@@ -87,7 +90,30 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
 
         // Xử lý nút "Thanh toán"
         btnCheckout.setOnClickListener(v -> {
-            Toast.makeText(Cart_Activity.this, "Chức năng thanh toán đang phát triển!", Toast.LENGTH_SHORT).show();
+            // Kiểm tra nếu giỏ hàng không rỗng trước khi chuyển màn hình
+            if (currentCartItems != null && !currentCartItems.isEmpty()) {
+                // Sử dụng FragmentManager để chuyển sang CheckoutFragment
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                // Khởi tạo CheckoutFragment và truyền dữ liệu cần thiết (ví dụ: danh sách sản phẩm)
+                CheckoutFragment checkoutFragment = new CheckoutFragment();
+
+                // Thay thế container hiện tại bằng CheckoutFragment
+                fragmentTransaction.replace(R.id.fragment_container, checkoutFragment);
+
+                // Thêm vào back stack để người dùng có thể quay lại giỏ hàng
+                fragmentTransaction.addToBackStack(null);
+
+                // Thực thi transaction
+                fragmentTransaction.commit();
+
+                // Ẩn thanh công cụ của giỏ hàng và thanh toán
+                cartActionBar.setVisibility(View.GONE);
+                bottomCheckoutBar.setVisibility(View.GONE);
+            } else {
+                Toast.makeText(this, "Giỏ hàng của bạn đang trống!", Toast.LENGTH_SHORT).show();
+            }
         });
 
         // Tải dữ liệu giỏ hàng khi activity được tạo
@@ -101,6 +127,7 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
         fetchCartData();
     }
 
+    // ... (các phương thức khác: fetchCartData, updateTotalPrice, showEmptyCartView)
     private void fetchCartData() {
         String token = Constants.getToken(this); // Lấy token từ Constants
 
@@ -203,22 +230,18 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
         return super.onOptionsItemSelected(item);
     }
 
-    // --- Triển khai CartAdapter.OnCartItemActionListener ---
+    // ... (Triển khai CartAdapter.OnCartItemActionListener không thay đổi)
     @Override
     public void onQuantityChange(CartItem item, int newQuantity) {
         if (newQuantity <= 0) {
-            // Nếu số lượng là 0 hoặc âm, Adapter đã xử lý hiển thị dialog xóa.
-            // Nếu người dùng xác nhận xóa, onRemoveItem sẽ được gọi.
-            // Ở đây, chúng ta chỉ cần đảm bảo UI không hiển thị số lượng âm/0 nếu người dùng chưa xác nhận xóa.
-            cartAdapter.notifyDataSetChanged(); // Đảm bảo UI khớp với dữ liệu gốc nếu không có hành động API
+            cartAdapter.notifyDataSetChanged();
             return;
         }
 
-        // Đảm bảo item.getProduct() và item.getVariant() không null
         if (item.getProduct() == null || item.getVariant() == null) {
             Log.e("Cart_Activity", "Product or Variant data missing for item during quantity change.");
             Toast.makeText(this, "Không thể cập nhật: Dữ liệu sản phẩm bị thiếu.", Toast.LENGTH_SHORT).show();
-            cartAdapter.notifyDataSetChanged(); // Cập nhật lại UI để số lượng không bị thay đổi ảo
+            cartAdapter.notifyDataSetChanged();
             return;
         }
 
@@ -228,14 +251,11 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
 
         if (token == null || token.isEmpty()) {
             Toast.makeText(this, "Bạn cần đăng nhập để cập nhật giỏ hàng.", Toast.LENGTH_LONG).show();
-            cartAdapter.notifyDataSetChanged(); // Cập nhật lại UI để số lượng không bị thay đổi ảo
+            cartAdapter.notifyDataSetChanged();
             return;
         }
 
-        // Tạo request body
         CartRequest.UpdateCartItem request = new CartRequest.UpdateCartItem(productId, variantId, newQuantity);
-
-        // Đảm bảo apiService được khởi tạo với token hiện tại
         apiService = RetrofitClient.getApiService(token);
 
         progressBar.setVisibility(View.VISIBLE);
@@ -245,7 +265,6 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     Toast.makeText(Cart_Activity.this, "Cập nhật số lượng thành công!", Toast.LENGTH_SHORT).show();
-                    // Gọi lại fetchCartData để tải lại toàn bộ giỏ hàng và cập nhật UI một cách nhất quán
                     fetchCartData();
                 } else {
                     String errorMsg = "Lỗi khi cập nhật số lượng.";
@@ -260,7 +279,7 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
                     }
                     Toast.makeText(Cart_Activity.this, errorMsg, Toast.LENGTH_LONG).show();
                     Log.e("Cart_Activity", "Update quantity API failed: " + response.code() + " - " + errorMsg);
-                    cartAdapter.notifyDataSetChanged(); // Cập nhật lại UI để số lượng không bị thay đổi ảo nếu lỗi
+                    cartAdapter.notifyDataSetChanged();
                 }
             }
 
@@ -269,14 +288,13 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(Cart_Activity.this, "Lỗi mạng khi cập nhật số lượng: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 Log.e("Cart_Activity", "Update quantity network failure: ", t);
-                cartAdapter.notifyDataSetChanged(); // Cập nhật lại UI để số lượng không bị thay đổi ảo nếu lỗi mạng
+                cartAdapter.notifyDataSetChanged();
             }
         });
     }
 
     @Override
     public void onRemoveItem(CartItem item) {
-        // Đảm bảo item.getProduct() và item.getVariant() không null
         if (item.getProduct() == null || item.getVariant() == null) {
             Log.e("Cart_Activity", "Product or Variant data missing for item during removal.");
             Toast.makeText(this, "Không thể xóa: Dữ liệu sản phẩm bị thiếu.", Toast.LENGTH_SHORT).show();
@@ -292,10 +310,7 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
             return;
         }
 
-        // Tạo request body
         CartRequest.RemoveCartItem request = new CartRequest.RemoveCartItem(productId, variantId);
-
-        // Đảm bảo apiService được khởi tạo với token hiện tại
         apiService = RetrofitClient.getApiService(token);
 
         progressBar.setVisibility(View.VISIBLE);
@@ -305,7 +320,6 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
                 progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     Toast.makeText(Cart_Activity.this, "Xóa sản phẩm khỏi giỏ hàng thành công!", Toast.LENGTH_SHORT).show();
-                    // Gọi lại fetchCartData để tải lại toàn bộ giỏ hàng và cập nhật UI một cách nhất quán
                     fetchCartData();
                 } else {
                     String errorMsg = "Lỗi khi xóa sản phẩm khỏi giỏ hàng.";

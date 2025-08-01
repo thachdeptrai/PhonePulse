@@ -20,6 +20,7 @@
         app:navigationIcon="?attr/homeAsUpIndicator" />
 
     <FrameLayout
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -82,8 +83,8 @@
                         android:drawableStart="@drawable/ic_shopping_cart"
                         android:drawablePadding="8dp"
                         android:paddingStart="24dp"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp" />
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -124,7 +125,9 @@
                         android:padding="2dp"
                         android:contentDescription="Xóa các mục đã chọn"
                         app:tint="#FF6B00"
-                        /> </LinearLayout>
+                        tools:src="@drawable/ic_delete_forever" />
+
+                </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_cart_items"
@@ -159,7 +162,6 @@
                     app:spanCount="2"
                     tools:itemCount="4"
                     tools:listitem="@layout/item_product_grid" />
-
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 
@@ -169,7 +171,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:visibility="gone"
-            tools:visibility="visible" /> </FrameLayout>
+            tools:visibility="visible" />
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/bottom_checkout_bar"
