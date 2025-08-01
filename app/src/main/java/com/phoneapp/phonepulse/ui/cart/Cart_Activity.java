@@ -16,14 +16,17 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
 import com.phoneapp.phonepulse.Adapter.CartAdapter;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.Response.ApiResponse;
+import com.phoneapp.phonepulse.VIEW.Oder_Activity;
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
 import com.phoneapp.phonepulse.models.Cart;
 import com.phoneapp.phonepulse.request.CartItem;
 import com.phoneapp.phonepulse.request.CartRequest; // Import CartRequest để sử dụng các nested class
+import com.phoneapp.phonepulse.request.OrderItem;
 import com.phoneapp.phonepulse.utils.Constants;
 
 import java.text.NumberFormat;
@@ -49,6 +52,8 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
     private ProgressBar progressBar;
 
     private ApiService apiService;
+    private List<OrderItem> orderItemList = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,11 +89,13 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
         btnShopNow.setOnClickListener(v -> {
             finish();
         });
-
         // Xử lý nút "Thanh toán"
         btnCheckout.setOnClickListener(v -> {
-            Toast.makeText(Cart_Activity.this, "Chức năng thanh toán đang phát triển!", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(Cart_Activity.this, Oder_Activity.class);
+            intent.putExtra("order_items", new Gson().toJson(orderItemList)); // dùng Gson để convert sang JSON
+            startActivity(intent);
         });
+
 
         // Tải dữ liệu giỏ hàng khi activity được tạo
         fetchCartData();
@@ -119,26 +126,57 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
             @Override
             public void onResponse(Call<ApiResponse<Cart>> call, Response<ApiResponse<Cart>> response) {
                 progressBar.setVisibility(View.GONE);
+
+                Log.d("Cart_Activity", "onResponse() called");
+                Log.d("Cart_Activity", "HTTP status code: " + response.code());
+
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<Cart> apiResponse = response.body();
+
+                    Log.d("Cart_Activity", "API success: " + apiResponse.isSuccess());
+                    Log.d("Cart_Activity", "API message: " + apiResponse.getMessage());
+
                     if (apiResponse.isSuccess() && apiResponse.getData() != null) {
                         Cart cart = apiResponse.getData();
+                        Log.d("Cart_Activity", "Cart ID: " + cart.getId());
+                        Log.d("Cart_Activity", "Cart Items Count: " + (cart.getItems() != null ? cart.getItems().size() : 0));
+
                         if (cart.getItems() != null && !cart.getItems().isEmpty()) {
                             currentCartItems.clear();
                             currentCartItems.addAll(cart.getItems());
                             cartAdapter.setCartItemList(currentCartItems);
+
+                            // 🔧 Chuẩn bị orderItemList
+                            orderItemList.clear();
+                            for (CartItem cartItem : currentCartItems) {
+                                if (cartItem.getProduct() != null && cartItem.getVariant() != null) {
+                                    String name = cartItem.getProduct().getProductName();
+                                    String imageUrl = cartItem.getProductImage();
+                                    int price = (int) cartItem.getVariant().getPrice();
+                                    int quantity = cartItem.getQuantity();
+
+                                    Log.d("Cart_Activity", "OrderItem - Name: " + name + ", Image: " + imageUrl + ", Price: " + price + ", Quantity: " + quantity);
+
+                                    orderItemList.add(new OrderItem(name, imageUrl, price, quantity));
+                                } else {
+                                    Log.w("Cart_Activity", "CartItem missing product or variant: " + cartItem);
+                                }
+                            }
+
                             showEmptyCartView(false);
                             updateTotalPrice();
                         } else {
+                            Log.d("Cart_Activity", "Cart is empty");
                             currentCartItems.clear();
                             cartAdapter.setCartItemList(currentCartItems);
+                            orderItemList.clear();
                             showEmptyCartView(true);
                             updateTotalPrice();
                         }
                     } else {
                         Toast.makeText(Cart_Activity.this, apiResponse.getMessage() != null ? apiResponse.getMessage() : "Lỗi khi lấy giỏ hàng", Toast.LENGTH_SHORT).show();
+                        Log.e("Cart_Activity", "API Response not success or no data: " + apiResponse.getMessage());
                         showEmptyCartView(true);
-                        Log.e("Cart_Activity", "API Response: " + apiResponse.getMessage());
                     }
                 } else {
                     String errorBodyString = "N/A";
@@ -150,10 +188,10 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
                         Log.e("Cart_Activity", "Error reading errorBody", e);
                     }
                     Toast.makeText(Cart_Activity.this, "Lỗi kết nối hoặc phản hồi server: " + response.code(), Toast.LENGTH_SHORT).show();
-                    showEmptyCartView(true);
                     Log.e("Cart_Activity", "HTTP Error: " + response.code() + " - " + response.message() + " - " + errorBodyString);
                 }
             }
+
 
             @Override
             public void onFailure(Call<ApiResponse<Cart>> call, Throwable t) {
@@ -164,6 +202,7 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
             }
         });
     }
+
 
     private void updateTotalPrice() {
         double total = 0;

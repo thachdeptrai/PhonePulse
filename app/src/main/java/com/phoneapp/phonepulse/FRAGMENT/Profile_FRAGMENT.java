@@ -1,6 +1,9 @@
 package com.phoneapp.phonepulse.FRAGMENT;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,6 +64,7 @@ public class Profile_FRAGMENT extends Fragment {
         tvGender = view.findViewById(R.id.tv_gender);
         tvBirthday = view.findViewById(R.id.tv_birthday);
         btnEdit = view.findViewById(R.id.btn_edit_profile);
+
     }
 
     private void loadUserProfile() {
@@ -115,21 +119,36 @@ public class Profile_FRAGMENT extends Fragment {
     }
 
     private void bindUserToUI(User user) {
-        tvFullName.setText(user.getName() != null ? user.getName() : "Không có tên");
-        tvEmail.setText(user.getEmail() != null ? user.getEmail() : "Không có email");
-        tvPhone.setText(user.getPhone() != null ? String.valueOf(user.getPhone()) : "Không có số điện thoại");
-        tvAddress.setText(user.getAddress() != null ? user.getAddress() : "Chưa có địa chỉ");
-        tvGender.setText(user.getGender() != null ? user.getGender() : "Không chia sẻ");
+        Context context = requireContext();
+        SharedPreferences preferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        editor.putString("fullname", user.getName());
+        editor.putString("phone", String.valueOf(user.getPhone())); // Đảm bảo ép thành String
+        editor.putString("address", user.getAddress());
+        editor.apply();
+
+        // Log để kiểm tra
+        Log.d("USER_PREF", "✅ Saved to prefs → Fullname: " + user.getName() +
+                ", Phone: " + user.getPhone() +
+                ", Address: " + user.getAddress());
+
+        // Gán giá trị hiển thị lên UI
+        tvFullName.setText(nonNull(user.getName(), "Không có tên"));
+        tvEmail.setText(nonNull(user.getEmail(), "Không có email"));
+        tvPhone.setText(nonNull(String.valueOf(user.getPhone()), "Không có số điện thoại"));
+        tvAddress.setText(nonNull(user.getAddress(), "Chưa có địa chỉ"));
+        tvGender.setText(nonNull(user.getGender(), "Không chia sẻ"));
 
         if (user.getBirthday() != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            String formattedDate = sdf.format(user.getBirthday());
+            String formattedDate = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                    .format(user.getBirthday());
             tvBirthday.setText(formattedDate);
         } else {
             tvBirthday.setText("Chưa có ngày sinh");
         }
 
-        if (user.getAvatar_url() != null && !user.getAvatar_url().isEmpty()) {
+        if (!TextUtils.isEmpty(user.getAvatar_url())) {
             Glide.with(this)
                     .load(user.getAvatar_url())
                     .placeholder(R.drawable.avatar_circle)
@@ -139,4 +158,11 @@ public class Profile_FRAGMENT extends Fragment {
             imgAvatar.setImageResource(R.drawable.avatar_circle);
         }
     }
+
+
+    // Hàm tiện ích tránh lặp null check
+    private String nonNull(String value, String fallback) {
+        return (value != null && !value.trim().isEmpty()) ? value : fallback;
+    }
+
 }

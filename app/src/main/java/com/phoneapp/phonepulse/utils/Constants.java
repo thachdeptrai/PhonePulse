@@ -4,48 +4,72 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class Constants {
-    // Base URL for API calls. Use 10.0.2.2 for Android Emulator to connect to localhost.
-    // Use 192.168.x.x for real devices connected to the same local network.
-   //  public static final String BASE_URL = "http://10.0.2.2:5000";
-    public static final String BASE_URL = "http://192.168.1.9:5000"; // Your current active base URL
+    public static final String BASE_URL = "http://192.168.1.9:5000";
 
-    public static final int TIMEOUT = 30; // Network timeout in seconds
-    public static final String SHARED_PREFS = "app_prefs"; // Name for SharedPreferences file
-    public static final String TOKEN_KEY = "auth_token"; // Key for storing authentication token
-    public static final String PRODUCT_ID = "product_id"; // Key for passing product ID in intents/bundles
-    public static final String VARIANT_ID = "variant_id"; // Key for passing variant ID in intents/bundles
+    public static final int TIMEOUT = 30;
+    public static final String SHARED_PREFS = "app_prefs";
+    public static final String TOKEN_KEY = "auth_token";
+    public static final String PRODUCT_ID = "product_id";
+    public static final String VARIANT_ID = "variant_id";
 
-    /**
-     * Retrieves the authentication token from SharedPreferences.
-     * @param context The application context.
-     * @return The stored authentication token, or null if not found.
-     */
+    // NEW: User Info Keys
+    public static final String USER_NAME = "user_name";
+    public static final String USER_EMAIL = "user_email";
+    public static final String USER_PHONE = "user_phone";
+    public static final String USER_IMAGE = "user_image";
+
+    // Token
     public static String getToken(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
         return prefs.getString(TOKEN_KEY, null);
     }
 
-    /**
-     * Saves the authentication token to SharedPreferences.
-     * @param context The application context.
-     * @param token The token string to be saved.
-     */
     public static void saveToken(Context context, String token) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(TOKEN_KEY, token);
-        editor.apply(); // Apply changes asynchronously
+        prefs.edit().putString(TOKEN_KEY, token).apply();
     }
 
-    /**
-     * Clears the authentication token from SharedPreferences.
-     * This is useful during logout.
-     * @param context The application context.
-     */
     public static void clearToken(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.remove(TOKEN_KEY);
-        editor.apply(); // Apply changes asynchronously
+        prefs.edit().remove(TOKEN_KEY).apply();
+    }
+
+    // NEW: User Info Save
+    public static void saveUserInfo(Context context, String name, String email, String phone, String imageUrl) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .putString(USER_NAME, name)
+                .putString(USER_EMAIL, email)
+                .putString(USER_PHONE, phone)
+                .putString(USER_IMAGE, imageUrl)
+                .apply();
+    }
+
+    // NEW: User Info Get
+    public static String getUserName(Context context) {
+        return context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE).getString(USER_NAME, "");
+    }
+
+    public static String getUserEmail(Context context) {
+        return context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE).getString(USER_EMAIL, "");
+    }
+
+    public static String getUserPhone(Context context) {
+        return context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE).getString(USER_PHONE, "");
+    }
+
+    public static String getUserImage(Context context) {
+        return context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE).getString(USER_IMAGE, "");
+    }
+
+    // Optional: clear all
+    public static void clearUserInfo(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
+        prefs.edit()
+                .remove(USER_NAME)
+                .remove(USER_EMAIL)
+                .remove(USER_PHONE)
+                .remove(USER_IMAGE)
+                .apply();
     }
 }
