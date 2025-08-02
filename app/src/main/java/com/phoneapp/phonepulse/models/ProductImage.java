@@ -14,7 +14,8 @@ public class ProductImage {
     private String imageUrl;
 
     // Default constructor
-    public ProductImage() {}
+    public ProductImage() {
+    }
 
     // Full constructor
     public ProductImage(String id, String productId, String imageUrl) {

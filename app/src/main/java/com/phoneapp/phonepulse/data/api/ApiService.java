@@ -53,6 +53,9 @@ public interface ApiService {
     @GET("/api/categories/{id}")
     Call<Category> getCategoryById(@Path("id") String id);
 
+    @GET("api/products")
+    Call<List<ProductGirdItem>> getProductsByCategory(@Query("category") String categoryId);
+
 
     // ========== COLOR ==========
     @GET("/api/colors")

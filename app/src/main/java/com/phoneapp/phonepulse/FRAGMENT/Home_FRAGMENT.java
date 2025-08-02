@@ -141,7 +141,7 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnIte
     }
 
     private void setupRecyclerViews() {
-        productListAdapter = new ItemProduct_ADAPTER(new ArrayList<>());
+        productListAdapter = new ItemProduct_ADAPTER(requireContext(), new ArrayList<ProductGirdItem>());
         productListAdapter.setOnItemClickListener(this);
 
         // GridLayoutManager với 2 hàng, cuộn theo chiều ngang (trái sang phải)
