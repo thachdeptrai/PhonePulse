@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.phoneapp.phonepulse.FRAGMENT.CategoryFragment;
 import com.phoneapp.phonepulse.FRAGMENT.Home_FRAGMENT;
 import com.phoneapp.phonepulse.FRAGMENT.Profile_FRAGMENT;
 import com.phoneapp.phonepulse.R;
@@ -42,7 +43,7 @@ public class DashBoar_Activity extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d("CartClick", "Bạn đã nhấn vào giỏ hàng");
                 Toast.makeText(DashBoar_Activity.this, "Đã nhấn giỏ hàng", Toast.LENGTH_SHORT).show();
-                Intent intent =  new Intent(DashBoar_Activity.this, Cart_Activity.class);
+                Intent intent = new Intent(DashBoar_Activity.this, Cart_Activity.class);
                 startActivity(intent);
             }
         });
@@ -65,7 +66,7 @@ public class DashBoar_Activity extends AppCompatActivity {
                 replaceFragment(new Home_FRAGMENT(), "Trang Chủ");
                 return true;
             } else if (id == R.id.nav_categories) {
-                // TODO: Thêm Fragment categories nếu cần
+                replaceFragment(new CategoryFragment(), "Danh mục");
                 return true;
             } else if (id == R.id.nav_profile) {
                 replaceFragment(new Profile_FRAGMENT(), "Tài khoản");

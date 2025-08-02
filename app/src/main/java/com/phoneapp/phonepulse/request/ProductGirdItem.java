@@ -3,7 +3,7 @@ package com.phoneapp.phonepulse.request;
 import com.google.gson.annotations.SerializedName;
 import com.phoneapp.phonepulse.models.ProductImage;
 
-import java.io.Serializable; // THÊM IMPORT NÀY
+import java.io.Serializable;
 import java.util.List;
 
 public class ProductGirdItem implements Serializable {
@@ -57,35 +57,85 @@ public class ProductGirdItem implements Serializable {
     }
 
     // --- Getters và Setters ---
-    public String get_id() { return _id; }
-    public void set_id(String _id) { this._id = _id; }
+    public String get_id() {
+        return _id;
+    }
 
-    public String getVariant_id() { return variant_id; }
-    public void setVariant_id(String variant_id) { this.variant_id = variant_id; }
+    public void set_id(String _id) {
+        this._id = _id;
+    }
 
-    public String getProduct_name() { return product_name; }
-    public void setProduct_name(String product_name) { this.product_name = product_name; }
+    public String getVariant_id() {
+        return variant_id;
+    }
 
-    public String getImage_url() { return image_url; }
-    public void setImage_url(String image_url) { this.image_url = image_url; }
+    public void setVariant_id(String variant_id) {
+        this.variant_id = variant_id;
+    }
 
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
+    public String getProduct_name() {
+        return product_name;
+    }
 
-    public double getOriginal_price() { return original_price; }
-    public void setOriginal_price(double original_price) { this.original_price = original_price; }
+    public void setProduct_name(String product_name) {
+        this.product_name = product_name;
+    }
 
-    public int getDiscount_percent() { return discount_percent; }
-    public void setDiscount_percent(int discount_percent) { this.discount_percent = discount_percent; }
+    public String getImage_url() {
+        return image_url;
+    }
 
-    public int getSold_count() { return sold_count; }
-    public void setSold_count(int sold_count) { this.sold_count = sold_count; }
+    public void setImage_url(String image_url) {
+        this.image_url = image_url;
+    }
 
-    public String getSize_name() { return size_name; }
-    public void setSize_name(String size_name) { this.size_name = size_name; }
+    public double getPrice() {
+        return price;
+    }
 
-    public String getColor_name() { return color_name; }
-    public void setColor_name(String color_name) { this.color_name = color_name; }
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public double getOriginal_price() {
+        return original_price;
+    }
+
+    public void setOriginal_price(double original_price) {
+        this.original_price = original_price;
+    }
+
+    public int getDiscount_percent() {
+        return discount_percent;
+    }
+
+    public void setDiscount_percent(int discount_percent) {
+        this.discount_percent = discount_percent;
+    }
+
+    public int getSold_count() {
+        return sold_count;
+    }
+
+    public void setSold_count(int sold_count) {
+        this.sold_count = sold_count;
+    }
+
+    public String getSize_name() {
+        return size_name;
+    }
+
+    public void setSize_name(String size_name) {
+        this.size_name = size_name;
+    }
+
+    public String getColor_name() {
+        return color_name;
+    }
+
+    public void setColor_name(String color_name) {
+        this.color_name = color_name;
+    }
 
     // ✅ Getter & Setter for list image
     public List<ProductImage> getImages() {

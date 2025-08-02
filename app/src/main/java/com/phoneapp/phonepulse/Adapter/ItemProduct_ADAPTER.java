@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.phoneapp.phonepulse.R;
+import com.phoneapp.phonepulse.models.Product;
 import com.phoneapp.phonepulse.request.ProductGirdItem;
 
 import java.text.NumberFormat;
@@ -41,7 +42,8 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
         this.listener = listener;
     }
 
-    public ItemProduct_ADAPTER(List<ProductGirdItem> productList) {
+    public ItemProduct_ADAPTER(Context context, List<ProductGirdItem> productList) {
+        this.context = context;
         this.productList = productList;
     }
 
@@ -91,7 +93,7 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
                     holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
                 }
             } else if (imageUrl.startsWith("/uploads/")) {
-                String localUrl = "http://10.0.2.2:5000" + imageUrl;
+                String localUrl = "http://10.24.60.244:5000" + imageUrl;
                 Glide.with(context)
                         .load(localUrl)
                         .placeholder(R.drawable.placeholder_product)

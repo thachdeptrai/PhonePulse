@@ -55,6 +55,9 @@ public interface ApiService {
     @GET("/api/categories/{id}")
     Call<Category> getCategoryById(@Path("id") String id);
 
+    @GET("api/products")
+    Call<List<ProductGirdItem>> getProductsByCategory(@Query("category") String categoryId);
+
 
     // ========== COLOR ==========
     @GET("/api/colors")
@@ -104,8 +107,9 @@ public interface ApiService {
     @POST("/api/orders")
     Call<ApiResponse<Order>> createOrder(@Header("Authorization") String token, @Body OrderRequest body);
 
+    // Đã sửa lỗi kiểu trả về để khớp với backend
     @GET("/api/orders")
-    Call<List<Order>> getUserOrders(@Header("Authorization") String token);
+    Call<ApiResponse<List<Order>>> getUserOrders(@Header("Authorization") String token);
 
     @PUT("/api/orders/{id}/cancel")
     Call<ApiResponse> cancelOrder(@Header("Authorization") String token, @Path("id") String id);

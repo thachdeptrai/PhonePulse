@@ -2,28 +2,26 @@ package com.phoneapp.phonepulse.models;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Category {
+import java.io.Serializable;
+import java.util.Date;
+
+public class Category implements Serializable {
     @SerializedName("_id")
-    private String id; // Maps to MongoDB's _id
+    private String id;
 
     @SerializedName("name")
-    private String name; // Category name
+    private String name;
 
     @SerializedName("icon")
-    private String icon; // URL or name of the icon
+    private String icon;
 
     @SerializedName("created_date")
-    private String createdDate; // Creation date
+    private Date createdDate;
 
     @SerializedName("modified_date")
-    private String modifiedDate; // Last modified date
+    private Date modifiedDate;
 
-    // --- Constructors (Optional, but good practice) ---
-    public Category() {
-        // Default constructor required for Gson
-    }
-
-    public Category(String id, String name, String icon, String createdDate, String modifiedDate) {
+    public Category(String id, String name, String icon, Date createdDate, Date modifiedDate) {
         this.id = id;
         this.name = name;
         this.icon = icon;
@@ -31,44 +29,45 @@ public class Category {
         this.modifiedDate = modifiedDate;
     }
 
-    // --- Getters and Setters ---
+    // Getters
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getIcon() {
         return icon;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public Date getModifiedDate() {
+        return modifiedDate;
+    }
+
+    // Setters (Nếu cần)
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setIcon(String icon) {
         this.icon = icon;
     }
 
-    public String getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(String createdDate) {
+    public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
 
-    public String getModifiedDate() {
-        return modifiedDate;
-    }
-
-    public void setModifiedDate(String modifiedDate) {
+    public void setModifiedDate(Date modifiedDate) {
         this.modifiedDate = modifiedDate;
     }
 }
