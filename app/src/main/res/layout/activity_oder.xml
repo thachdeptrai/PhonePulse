@@ -138,8 +138,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:nestedScrollingEnabled="false"
-                        tools:itemCount="2"
-                        tools:listitem="@layout/item_order_product" />
+                        />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

@@ -48,7 +48,6 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
     public void setData(List<ProductGirdItem> newList) {
         this.productList = newList;
         notifyDataSetChanged();
-        Log.d(TAG, "setData: Updated list with size = " + newList.size());
     }
 
     @NonNull
@@ -62,7 +61,6 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         ProductGirdItem item = productList.get(position);
-        Log.d(TAG, "Binding product at position " + position + ": " + item.getProduct_name());
 
         // --- Load Image ---
         String imageUrl = null;
@@ -80,7 +78,6 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
                         .error(R.drawable.placeholder_product)
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .into(holder.ivProductImage);
-                Log.d(TAG, "Loaded image from URL: " + imageUrl);
             } else if (imageUrl.startsWith("data:image/")) {
                 try {
                     String base64 = imageUrl.substring(imageUrl.indexOf(",") + 1);
@@ -90,9 +87,7 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
                             .placeholder(R.drawable.placeholder_product)
                             .error(R.drawable.placeholder_product)
                             .into(holder.ivProductImage);
-                    Log.d(TAG, "Loaded image from Base64.");
                 } catch (Exception e) {
-                    Log.e(TAG, "Error decoding Base64 image", e);
                     holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
                 }
             } else if (imageUrl.startsWith("/uploads/")) {
@@ -103,13 +98,10 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
                         .error(R.drawable.placeholder_product)
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .into(holder.ivProductImage);
-                Log.d(TAG, "Loaded image from local uploads: " + localUrl);
             } else {
-                Log.w(TAG, "Unknown image format: " + imageUrl);
                 holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
             }
         } else {
-            Log.w(TAG, "Image URL is empty");
             holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
         }
 

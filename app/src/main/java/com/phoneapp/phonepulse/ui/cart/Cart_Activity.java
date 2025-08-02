@@ -53,6 +53,8 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
 
     private ApiService apiService;
     private List<OrderItem> orderItemList = new ArrayList<>();
+    private double totalPrice = 0;
+
 
 
     @Override
@@ -92,7 +94,8 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
         // Xử lý nút "Thanh toán"
         btnCheckout.setOnClickListener(v -> {
             Intent intent = new Intent(Cart_Activity.this, Oder_Activity.class);
-            intent.putExtra("order_items", new Gson().toJson(orderItemList)); // dùng Gson để convert sang JSON
+            intent.putParcelableArrayListExtra("order_items", new ArrayList<>(orderItemList));
+            intent.putExtra("total_price", totalPrice);
             startActivity(intent);
         });
 
@@ -127,19 +130,14 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
             public void onResponse(Call<ApiResponse<Cart>> call, Response<ApiResponse<Cart>> response) {
                 progressBar.setVisibility(View.GONE);
 
-                Log.d("Cart_Activity", "onResponse() called");
-                Log.d("Cart_Activity", "HTTP status code: " + response.code());
+
 
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<Cart> apiResponse = response.body();
 
-                    Log.d("Cart_Activity", "API success: " + apiResponse.isSuccess());
-                    Log.d("Cart_Activity", "API message: " + apiResponse.getMessage());
 
                     if (apiResponse.isSuccess() && apiResponse.getData() != null) {
                         Cart cart = apiResponse.getData();
-                        Log.d("Cart_Activity", "Cart ID: " + cart.getId());
-                        Log.d("Cart_Activity", "Cart Items Count: " + (cart.getItems() != null ? cart.getItems().size() : 0));
 
                         if (cart.getItems() != null && !cart.getItems().isEmpty()) {
                             currentCartItems.clear();
@@ -155,18 +153,15 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
                                     int price = (int) cartItem.getVariant().getPrice();
                                     int quantity = cartItem.getQuantity();
 
-                                    Log.d("Cart_Activity", "OrderItem - Name: " + name + ", Image: " + imageUrl + ", Price: " + price + ", Quantity: " + quantity);
 
                                     orderItemList.add(new OrderItem(name, imageUrl, price, quantity));
                                 } else {
-                                    Log.w("Cart_Activity", "CartItem missing product or variant: " + cartItem);
                                 }
                             }
 
                             showEmptyCartView(false);
                             updateTotalPrice();
                         } else {
-                            Log.d("Cart_Activity", "Cart is empty");
                             currentCartItems.clear();
                             cartAdapter.setCartItemList(currentCartItems);
                             orderItemList.clear();
@@ -175,7 +170,6 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
                         }
                     } else {
                         Toast.makeText(Cart_Activity.this, apiResponse.getMessage() != null ? apiResponse.getMessage() : "Lỗi khi lấy giỏ hàng", Toast.LENGTH_SHORT).show();
-                        Log.e("Cart_Activity", "API Response not success or no data: " + apiResponse.getMessage());
                         showEmptyCartView(true);
                     }
                 } else {
@@ -185,10 +179,10 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
                             errorBodyString = response.errorBody().string();
                         }
                     } catch (Exception e) {
-                        Log.e("Cart_Activity", "Error reading errorBody", e);
+
                     }
                     Toast.makeText(Cart_Activity.this, "Lỗi kết nối hoặc phản hồi server: " + response.code(), Toast.LENGTH_SHORT).show();
-                    Log.e("Cart_Activity", "HTTP Error: " + response.code() + " - " + response.message() + " - " + errorBodyString);
+
                 }
             }
 
@@ -205,19 +199,20 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
 
 
     private void updateTotalPrice() {
-        double total = 0;
+        totalPrice = 0;
         int totalItems = 0;
         for (CartItem item : currentCartItems) {
             if (item.getVariant() != null && item.getProduct() != null) {
-                total += item.getVariant().getPrice() * item.getQuantity();
+                totalPrice += item.getVariant().getPrice() * item.getQuantity();
                 totalItems += item.getQuantity();
             }
         }
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         currencyFormat.setMaximumFractionDigits(0);
-        tvTotalPrice.setText(currencyFormat.format(total));
+        tvTotalPrice.setText(currencyFormat.format(totalPrice));
         btnCheckout.setText("Thanh toán (" + totalItems + ")");
     }
+
 
     private void showEmptyCartView(boolean isEmpty) {
         if (isEmpty) {
@@ -255,7 +250,6 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
 
         // Đảm bảo item.getProduct() và item.getVariant() không null
         if (item.getProduct() == null || item.getVariant() == null) {
-            Log.e("Cart_Activity", "Product or Variant data missing for item during quantity change.");
             Toast.makeText(this, "Không thể cập nhật: Dữ liệu sản phẩm bị thiếu.", Toast.LENGTH_SHORT).show();
             cartAdapter.notifyDataSetChanged(); // Cập nhật lại UI để số lượng không bị thay đổi ảo
             return;

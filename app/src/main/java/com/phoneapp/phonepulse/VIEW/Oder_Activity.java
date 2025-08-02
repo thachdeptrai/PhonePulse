@@ -70,23 +70,22 @@ public class Oder_Activity extends AppCompatActivity {
         // Nhận dữ liệu truyền từ Intent
         ArrayList<OrderItem> orderItemList = (ArrayList<OrderItem>) getIntent().getSerializableExtra("order_items");
 
-// Gắn Adapter nếu dữ liệu không rỗng
         if (orderItemList != null && !orderItemList.isEmpty()) {
             OrderItemAdapter adapter = new OrderItemAdapter(orderItemList);
             rvCheckoutProducts.setLayoutManager(new LinearLayoutManager(this));
             rvCheckoutProducts.setAdapter(adapter);
 
-            // Tính tổng tiền (nếu muốn hiển thị ở tvTotalAmount)
+            // Tính tổng tiền
             int total = 0;
             for (OrderItem item : orderItemList) {
                 total += item.getPrice() * item.getQuantity();
             }
             tvTotalAmount.setText(String.format("%,d đ", total).replace(",", "."));
-            tvSubtotal.setText(tvTotalAmount.getText()); // Nếu muốn
-            tvFinalPrice.setText(tvTotalAmount.getText()); // Nếu không có giảm giá
+            tvSubtotal.setText(tvTotalAmount.getText());
+            tvFinalPrice.setText(tvTotalAmount.getText());
+        } else {
+            Log.w("OderActivity", "Không có sản phẩm trong đơn hàng.");
         }
-
-
     }
 
     private void bindUserToUI() {

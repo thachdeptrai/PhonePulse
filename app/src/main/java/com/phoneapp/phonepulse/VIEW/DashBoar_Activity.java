@@ -71,6 +71,7 @@ public class DashBoar_Activity extends AppCompatActivity {
                 replaceFragment(new Profile_FRAGMENT(), "Tài khoản");
                 return true;
             }
+
             return false;
         });
 

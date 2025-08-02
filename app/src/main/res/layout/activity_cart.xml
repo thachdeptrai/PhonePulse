@@ -92,39 +92,10 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:background="@drawable/card_background"
                     android:padding="12dp"
                     android:layout_marginBottom="12dp"
                     android:elevation="2dp">
-
-                    <CheckBox
-                        android:id="@+id/cb_select_all"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tất cả"
-                        android:textColor="#333333"
-                        app:buttonTint="#FF6B00"
-                        android:layout_marginEnd="16dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Chọn tất cả sản phẩm"
-                        android:textColor="#666666"
-                        android:textSize="14sp" />
-
-                    <ImageView
-                        android:id="@+id/iv_delete_selected"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:padding="2dp"
-                        android:contentDescription="Xóa các mục đã chọn"
-                        app:tint="#FF6B00"
-                        /> </LinearLayout>
+                    </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_cart_items"

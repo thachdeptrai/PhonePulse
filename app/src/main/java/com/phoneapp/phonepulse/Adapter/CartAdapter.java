@@ -64,7 +64,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         // Lấy URL ảnh trực tiếp từ trường productImage trong CartItem
         String imageUrl = currentItem.getProductImage(); // <-- THAY ĐỔI Ở ĐÂY
 
-        Log.d(TAG, "onBindViewHolder: Product Image URL for " + (currentItem.getProduct() != null ? currentItem.getProduct().getProductName() : "N/A") + ": " + imageUrl);
+
 
         if (!TextUtils.isEmpty(imageUrl)) {
             if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
@@ -74,7 +74,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                         .placeholder(R.drawable.placeholder_product)
                         .error(R.drawable.placeholder_product)
                         .into(holder.ivProductImage);
-                Log.d(TAG, "onBindViewHolder: Glide loading URL image for " + (currentItem.getProduct() != null ? currentItem.getProduct().getProductName() : "N/A") + " from URL: " + imageUrl);
+
             } else if (imageUrl.startsWith("data:image/")) {
                 // Đây là chuỗi Base64
                 try {
@@ -85,9 +85,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                             .placeholder(R.drawable.placeholder_product)
                             .error(R.drawable.placeholder_product)
                             .into(holder.ivProductImage);
-                    Log.d(TAG, "onBindViewHolder: Glide loading Base64 image for " + (currentItem.getProduct() != null ? currentItem.getProduct().getProductName() : "N/A"));
+
                 } catch (IllegalArgumentException e) {
-                    Log.e(TAG, "onBindViewHolder: Invalid Base64 string for " + (currentItem.getProduct() != null ? currentItem.getProduct().getProductName() : "N/A"), e);
+
                     holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
                 }
             } else {
