@@ -3,32 +3,37 @@ package com.phoneapp.phonepulse.request;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class OrderItem implements Parcelable {
-    private String name;
-    private String imageUrl;
-    private int price;
-    private int quantity;
-    private String variant; // Tùy chọn, có thể là màu/kích thước
+import androidx.annotation.NonNull;
 
-    public OrderItem(String name, String imageUrl, int price, int quantity, String variant) {
+public class OrderItem implements Parcelable {
+    private final String name;
+    private final String imageUrl;
+    private final int price;
+    private final int quantity;
+    private final String variant;
+    private final String productId;
+    private final String variantId;
+
+    // ✅ Constructor đầy đủ
+    public OrderItem(@NonNull String name, @NonNull String imageUrl, int price, int quantity,
+                     @NonNull String variant, @NonNull String productId, @NonNull String variantId) {
         this.name = name;
         this.imageUrl = imageUrl;
         this.price = price;
         this.quantity = quantity;
         this.variant = variant;
+        this.productId = productId;
+        this.variantId = variantId;
     }
 
-    // Constructor nếu không có variant
-    public OrderItem(String name, String imageUrl, int price, int quantity) {
-        this(name, imageUrl, price, quantity, null);
-    }
-
-    // Getters
+    // ✅ Getters
     public String getName() { return name; }
     public String getImageUrl() { return imageUrl; }
     public int getPrice() { return price; }
     public int getQuantity() { return quantity; }
     public String getVariant() { return variant; }
+    public String getProductId() { return productId; }
+    public String getVariantId() { return variantId; }
 
     // -------- Parcelable implementation --------
     protected OrderItem(Parcel in) {
@@ -37,6 +42,8 @@ public class OrderItem implements Parcelable {
         price = in.readInt();
         quantity = in.readInt();
         variant = in.readString();
+        productId = in.readString();
+        variantId = in.readString();
     }
 
     public static final Creator<OrderItem> CREATOR = new Creator<OrderItem>() {
@@ -58,6 +65,8 @@ public class OrderItem implements Parcelable {
         dest.writeInt(price);
         dest.writeInt(quantity);
         dest.writeString(variant);
+        dest.writeString(productId);
+        dest.writeString(variantId);
     }
 
     @Override

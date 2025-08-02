@@ -77,9 +77,7 @@ public class CartItem implements Serializable {
         private double originalPrice;
         @SerializedName("discount_percent")
         private double discountPercent;
-        // Bỏ trường product_images ở đây nếu bạn không cần nó cho các ảnh phụ
-        // @SerializedName("product_images")
-        // private List<ProductImageInCart> productImages;
+
 
         public ProductInCart() {}
         public ProductInCart(String id, String productName, double originalPrice, double discountPercent /*, List<ProductImageInCart> productImages*/) {

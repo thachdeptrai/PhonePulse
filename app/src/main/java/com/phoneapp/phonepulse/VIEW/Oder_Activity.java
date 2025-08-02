@@ -1,5 +1,6 @@
 package com.phoneapp.phonepulse.VIEW;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,9 +19,21 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.phoneapp.phonepulse.Adapter.OrderItemAdapter;
 import com.phoneapp.phonepulse.R;
+import com.phoneapp.phonepulse.Response.ApiResponse;
+import com.phoneapp.phonepulse.data.api.ApiService;
+import com.phoneapp.phonepulse.data.api.RetrofitClient;
+import com.phoneapp.phonepulse.models.Cart;
+import com.phoneapp.phonepulse.models.Order;
+import com.phoneapp.phonepulse.request.CartRequest;
 import com.phoneapp.phonepulse.request.OrderItem;
+import com.phoneapp.phonepulse.request.OrderRequest;
+import com.phoneapp.phonepulse.utils.Constants;
 
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Oder_Activity extends AppCompatActivity {
 
@@ -64,6 +77,72 @@ public class Oder_Activity extends AppCompatActivity {
         tvTotalAmount = findViewById(R.id.tv_total_amount);
         tvAddCoupon = findViewById(R.id.tv_add_coupon);
 
+        btnPlaceOrder.setOnClickListener(v -> {
+            String token = Constants.getToken(Oder_Activity.this);
+            if (token == null || token.isEmpty()) {
+                Log.e("Order", "Token không tồn tại.");
+                return;
+            }
+
+            String shippingAddress = tvShippingAddress.getText().toString();
+            String paymentMethod = radioCod.isChecked() ? "COD" : "MOMO";
+            String note = etOrderNote.getText().toString();
+            int discount = 0;
+            int finalPrice = extractPrice(tvFinalPrice.getText().toString());
+
+            ArrayList<OrderItem> orderItems = (ArrayList<OrderItem>) getIntent().getSerializableExtra("order_items");
+            if (orderItems == null || orderItems.isEmpty()) {
+                Log.e("Order", "Không có sản phẩm nào.");
+                return;
+            }
+
+            OrderRequest request = new OrderRequest(orderItems, discount, finalPrice, shippingAddress, paymentMethod, note);
+
+            ApiService apiService = RetrofitClient.getApiService(token);
+            apiService.createOrder("Bearer " + token, request).enqueue(new Callback<ApiResponse<Order>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<Order>> call, Response<ApiResponse<Order>> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        Log.d("Order", "Đặt hàng thành công.");
+
+                        // 🧹 Xóa toàn bộ giỏ hàng sau khi đặt hàng thành công
+                        CartRequest.RemoveCartItem clearAllCartRequest = new CartRequest.RemoveCartItem(null, null); // Truyền null để xóa toàn bộ
+                        apiService.removeFromCart(clearAllCartRequest).enqueue(new Callback<ApiResponse<Cart>>() {
+                            @Override
+                            public void onResponse(Call<ApiResponse<Cart>> call, Response<ApiResponse<Cart>> response) {
+                                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                                    Log.d("Cart", "Đã xóa toàn bộ giỏ hàng.");
+                                } else {
+                                    Log.e("Cart", "Không xóa được giỏ hàng: " + response.message());
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<ApiResponse<Cart>> call, Throwable t) {
+                                Log.e("Cart", "Lỗi khi xóa giỏ hàng: " + t.getMessage());
+                            }
+                        });
+
+                        // Gửi kết quả về CartActivity
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra("order_success", true);
+                        setResult(RESULT_OK, resultIntent);
+                        finish();
+                    } else {
+                        Log.e("Order", "Đặt hàng thất bại: " + response.message());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse<Order>> call, Throwable t) {
+                    Log.e("Order", "Lỗi mạng: " + t.getMessage());
+                }
+            });
+        });
+
+
+
+
 
         // Gán dữ liệu người dùng vào giao diện
         bindUserToUI();
@@ -100,6 +179,15 @@ public class Oder_Activity extends AppCompatActivity {
         tvFullName.setText(!fullname.isEmpty() ? fullname : "Chưa có tên");
         tvPhoneNumber.setText(!phone.isEmpty() ? phone : "Chưa có số điện thoại");
         tvShippingAddress.setText(!address.isEmpty() ? address : "Chưa có địa chỉ");
+    }
+    private int extractPrice(String formattedPrice) {
+        try {
+            // Xoá dấu chấm, đ ký tự "đ", khoảng trắng... rồi parse thành số nguyên
+            return Integer.parseInt(formattedPrice.replace(".", "").replace("đ", "").replace(" ", "").trim());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
 }

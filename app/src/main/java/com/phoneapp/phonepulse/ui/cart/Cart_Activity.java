@@ -96,7 +96,7 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
             Intent intent = new Intent(Cart_Activity.this, Oder_Activity.class);
             intent.putParcelableArrayListExtra("order_items", new ArrayList<>(orderItemList));
             intent.putExtra("total_price", totalPrice);
-            startActivity(intent);
+            startActivityForResult(intent, 1001);
         });
 
 
@@ -152,10 +152,13 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
                                     String imageUrl = cartItem.getProductImage();
                                     int price = (int) cartItem.getVariant().getPrice();
                                     int quantity = cartItem.getQuantity();
+                                    String variantLabel = String.valueOf(cartItem.getVariant().getStockQuantity());       // ⬅️ Lấy nhãn variant
+                                    String productId = cartItem.getProduct().getId();            // ⬅️ Lấy productId
+                                    String variantId = cartItem.getVariant().getId();            // ⬅️ Lấy variantId
 
-
-                                    orderItemList.add(new OrderItem(name, imageUrl, price, quantity));
+                                    orderItemList.add(new OrderItem(name, imageUrl, price, quantity, variantLabel, productId, variantId));
                                 } else {
+                                    Log.e("CartError", "Thiếu dữ liệu product hoặc variant trong cartItem.");
                                 }
                             }
 
@@ -168,6 +171,7 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
                             showEmptyCartView(true);
                             updateTotalPrice();
                         }
+
                     } else {
                         Toast.makeText(Cart_Activity.this, apiResponse.getMessage() != null ? apiResponse.getMessage() : "Lỗi khi lấy giỏ hàng", Toast.LENGTH_SHORT).show();
                         showEmptyCartView(true);
@@ -369,4 +373,50 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
     public void onItemSelected(CartItem item, boolean isSelected) {
         // Logic cho checkbox chọn item (nếu được triển khai)
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1001 && resultCode == RESULT_OK && data != null) {
+            boolean orderSuccess = data.getBooleanExtra("order_success", false);
+            if (orderSuccess) {
+                String token = Constants.getToken(this);
+                if (token == null || token.isEmpty()) {
+                    Toast.makeText(this, "Bạn cần đăng nhập để cập nhật giỏ hàng.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                apiService = RetrofitClient.getApiService(token);
+                progressBar.setVisibility(View.VISIBLE);
+
+                // Gọi API xóa toàn bộ giỏ hàng
+                CartRequest.RemoveCartItem clearCartRequest = new CartRequest.RemoveCartItem(); // constructor không có tham số
+                apiService.removeFromCart(clearCartRequest).enqueue(new Callback<ApiResponse<Cart>>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse<Cart>> call, Response<ApiResponse<Cart>> response) {
+                        progressBar.setVisibility(View.GONE);
+                        if (response.isSuccessful() && response.body() != null) {
+                            Log.e("API_RESPONSE", "Body: " + new Gson().toJson(response.body()));  // 👈 thêm log tại đây
+
+                            if (response.body().isSuccess()) {
+                                // xử lý thành công
+                            } else {
+                                Toast.makeText(Cart_Activity.this, "Đặt hàng thành công nhưng không thể làm trống giỏ hàng.", Toast.LENGTH_SHORT).show();
+                                Log.e("Cart_Activity", "Failed to clear cart after order");
+                            }
+                        }
+                    }
+
+
+                    @Override
+                    public void onFailure(Call<ApiResponse<Cart>> call, Throwable t) {
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(Cart_Activity.this, "Lỗi khi làm trống giỏ hàng: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                        Log.e("Cart_Activity", "Clear cart failure: ", t);
+                    }
+                });
+            }
+        }
+    }
+
+
 }

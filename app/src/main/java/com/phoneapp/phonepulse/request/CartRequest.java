@@ -62,13 +62,20 @@ public class CartRequest {
         @SerializedName("variantId")
         private String variantId;
 
+        // Constructor cho xóa 1 sản phẩm cụ thể
         public RemoveCartItem(String productId, String variantId) {
             this.productId = productId;
             this.variantId = variantId;
         }
 
-        // Getters
+        // ✅ Constructor dành cho xóa toàn bộ giỏ hàng
+        public RemoveCartItem() {
+            this.productId = null;
+            this.variantId = null;
+        }
+
         public String getProductId() { return productId; }
         public String getVariantId() { return variantId; }
     }
+
 }

@@ -1,50 +1,73 @@
 package com.phoneapp.phonepulse.request;
 
-public class    OrderRequest {
-    private String shippingAddress;
-    private String phone;
-    private String voucherCode; // Optional
-    private String paymentMethod;
+import java.util.List;
+
+public class OrderRequest {
+    private List<OrderItem> items;
+    private int discount_amount;
+    private int final_price;
+    private String shipping_address;
+    private String payment_method;
+    private String note;
 
     public OrderRequest() {}
 
-    public OrderRequest(String shippingAddress, String phone, String voucherCode, String paymentMethod) {
-        this.shippingAddress = shippingAddress;
-        this.phone = phone;
-        this.voucherCode = voucherCode;
-        this.paymentMethod = paymentMethod;
+    public OrderRequest(List<OrderItem> items, int discount_amount, int final_price,
+                        String shipping_address, String payment_method, String note) {
+        this.items = items;
+        this.discount_amount = discount_amount;
+        this.final_price = final_price;
+        this.shipping_address = shipping_address;
+        this.payment_method = payment_method;
+        this.note = note;
     }
 
-    public String getShippingAddress() {
-        return shippingAddress;
+    // Getters and Setters
+    public List<OrderItem> getItems() {
+        return items;
     }
 
-    public void setShippingAddress(String shippingAddress) {
-        this.shippingAddress = shippingAddress;
+    public void setItems(List<OrderItem> items) {
+        this.items = items;
     }
 
-    public String getPhone() {
-        return phone;
+    public int getDiscount_amount() {
+        return discount_amount;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setDiscount_amount(int discount_amount) {
+        this.discount_amount = discount_amount;
     }
 
-    public String getVoucherCode() {
-        return voucherCode;
+    public int getFinal_price() {
+        return final_price;
     }
 
-    public void setVoucherCode(String voucherCode) {
-        this.voucherCode = voucherCode;
+    public void setFinal_price(int final_price) {
+        this.final_price = final_price;
     }
 
-    public String getPaymentMethod() {
-        return paymentMethod;
+    public String getShipping_address() {
+        return shipping_address;
     }
 
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
+    public void setShipping_address(String shipping_address) {
+        this.shipping_address = shipping_address;
+    }
+
+    public String getPayment_method() {
+        return payment_method;
+    }
+
+    public void setPayment_method(String payment_method) {
+        this.payment_method = payment_method;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 }
-
