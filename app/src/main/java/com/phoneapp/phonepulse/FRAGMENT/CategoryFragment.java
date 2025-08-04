@@ -26,6 +26,7 @@ import com.phoneapp.phonepulse.data.api.RetrofitClient;
 import com.phoneapp.phonepulse.models.Cart;
 import com.phoneapp.phonepulse.models.Category;
 import com.phoneapp.phonepulse.models.Product;
+import com.phoneapp.phonepulse.request.CartItem;
 import com.phoneapp.phonepulse.request.CartRequest;
 import com.phoneapp.phonepulse.request.DataConverter;
 import com.phoneapp.phonepulse.request.ProductGirdItem;
@@ -171,8 +172,68 @@ public class CategoryFragment extends Fragment implements ItemProduct_ADAPTER.On
                 return;
             }
 
-            callAddToCartApi(item.get_id(), item.getVariant_id(), 1);
+            fetchVariantAndAddToCart(item.get_id(), item.getVariant_id(), 1);
         }
+    }
+
+    private void fetchVariantAndAddToCart(String productId, String variantId, int addedQuantity) {
+        if (authToken == null || authToken.isEmpty()) {
+            Toast.makeText(requireContext(), "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        apiService.getCart().enqueue(new Callback<ApiResponse<Cart>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<Cart>> call, @NonNull Response<ApiResponse<Cart>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    Cart currentCart = response.body().getData();
+                    int existingQuantity = 0;
+
+                    if (currentCart.getItems() != null) {
+                        for (CartItem item : currentCart.getItems()) {
+                            if (item.getVariant() != null && variantId.equals(item.getVariant().getId())) {
+                                existingQuantity = item.getQuantity();
+                                break;
+                            }
+                        }
+                    }
+
+                    int finalExistingQuantity = existingQuantity;
+
+                    apiService.getVariantForProductById(productId, variantId).enqueue(new Callback<com.phoneapp.phonepulse.models.Variant>() {
+                        @Override
+                        public void onResponse(@NonNull Call<com.phoneapp.phonepulse.models.Variant> call, @NonNull Response<com.phoneapp.phonepulse.models.Variant> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                com.phoneapp.phonepulse.models.Variant variant = response.body();
+                                int stockQuantity = variant.getQuantity();
+                                int totalRequested = finalExistingQuantity + addedQuantity;
+
+                                if (totalRequested > stockQuantity) {
+                                    Toast.makeText(requireContext(), "Không thể thêm. Số lượng vượt quá tồn kho (" + stockQuantity + ").", Toast.LENGTH_LONG).show();
+                                } else {
+                                    callAddToCartApi(productId, variantId, addedQuantity);
+                                }
+                            } else {
+                                Toast.makeText(requireContext(), "Không thể lấy thông tin tồn kho.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<com.phoneapp.phonepulse.models.Variant> call, @NonNull Throwable t) {
+                            Toast.makeText(requireContext(), "Lỗi mạng khi kiểm tra tồn kho: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                } else {
+                    Toast.makeText(requireContext(), "Không thể lấy giỏ hàng hiện tại.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<Cart>> call, @NonNull Throwable t) {
+                Toast.makeText(requireContext(), "Lỗi mạng khi lấy giỏ hàng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void callAddToCartApi(String productId, String variantId, int quantity) {

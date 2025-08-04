@@ -23,6 +23,7 @@ import com.phoneapp.phonepulse.models.Cart;
 import com.phoneapp.phonepulse.models.Product;
 import com.phoneapp.phonepulse.models.Variant;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
+import com.phoneapp.phonepulse.request.CartItem;
 import com.phoneapp.phonepulse.request.CartRequest;
 import com.phoneapp.phonepulse.utils.Constants; // <-- Đảm bảo import Constants
 
@@ -123,16 +124,12 @@ public class ProductDetailActivity extends AppCompatActivity {
         // Đặt lắng nghe sự kiện click cho các nút
         btnAddToCart.setOnClickListener(v -> {
             if (currentProduct != null && displayedVariant != null) {
-                String productId = currentProduct.getId();          // Lấy ID sản phẩm
-                String variantId = displayedVariant.getId();        // Lấy ID biến thể (màu, dung lượng, v.v.)
-                int quantity = 1;                                   // Số lượng mặc định là 1
-
-                // Gọi hàm thực hiện API thêm vào giỏ hàng
-                callAddToCartApi(productId, variantId, quantity);
+                checkStockAndAddToCart(currentProduct.getId(), displayedVariant.getId(), 1);
             } else {
                 Toast.makeText(ProductDetailActivity.this, "Thông tin sản phẩm chưa tải xong.", Toast.LENGTH_SHORT).show();
             }
         });
+
 
         btnBuyNow.setOnClickListener(v -> {
             if (currentProduct != null) {
@@ -411,6 +408,70 @@ public class ProductDetailActivity extends AppCompatActivity {
             public void onFailure(@androidx.annotation.NonNull Call<ApiResponse<com.phoneapp.phonepulse.models.Cart>> call, @androidx.annotation.NonNull Throwable t) {
                 Toast.makeText(ProductDetailActivity.this, "Lỗi mạng khi thêm vào giỏ hàng: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 Log.e(TAG, "Add to cart network failure: ", t);
+            }
+        });
+    }
+    private void checkStockAndAddToCart(String productId, String variantId, int addedQuantity) {
+        if (authToken == null || authToken.isEmpty()) {
+            Toast.makeText(this, "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        apiService = RetrofitClient.getApiService(authToken);
+
+        apiService.getCart().enqueue(new Callback<ApiResponse<Cart>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<Cart>> call, @NonNull Response<ApiResponse<Cart>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    Cart cart = response.body().getData();
+                    int existingQuantity = 0;
+
+                    if (cart.getItems() != null) {
+                        for (CartItem item : cart.getItems()) {
+                            if (item.getVariant() != null && variantId.equals(item.getVariant().getId())) {
+                                existingQuantity = item.getQuantity();
+                                break;
+                            }
+                        }
+                    }
+
+                    int finalExistingQuantity = existingQuantity;
+
+                    // Gọi API lấy thông tin biến thể để kiểm tra tồn kho
+                    apiService.getVariantForProductById(productId, variantId).enqueue(new Callback<Variant>() {
+                        @Override
+                        public void onResponse(@NonNull Call<Variant> call, @NonNull Response<Variant> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                Variant variant = response.body();
+                                int stockQuantity = variant.getQuantity();
+                                int totalRequested = finalExistingQuantity + addedQuantity;
+
+                                if (totalRequested > stockQuantity) {
+                                    Toast.makeText(ProductDetailActivity.this,
+                                            "Không thể thêm. Số lượng vượt quá tồn kho (" + stockQuantity + ").",
+                                            Toast.LENGTH_LONG).show();
+                                } else {
+                                    // Tồn kho đủ → gọi API thêm vào giỏ
+                                    callAddToCartApi(productId, variantId, addedQuantity);
+                                }
+                            } else {
+                                Toast.makeText(ProductDetailActivity.this, "Không thể lấy thông tin tồn kho.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<Variant> call, @NonNull Throwable t) {
+                            Toast.makeText(ProductDetailActivity.this, "Lỗi mạng khi kiểm tra tồn kho: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                } else {
+                    Toast.makeText(ProductDetailActivity.this, "Không thể lấy giỏ hàng hiện tại.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<Cart>> call, @NonNull Throwable t) {
+                Toast.makeText(ProductDetailActivity.this, "Lỗi mạng khi lấy giỏ hàng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

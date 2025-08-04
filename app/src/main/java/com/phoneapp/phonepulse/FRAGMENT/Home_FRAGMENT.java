@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.phoneapp.phonepulse.Adapter.BannerAdapter;
+import com.phoneapp.phonepulse.Adapter.CartAdapter;
 import com.phoneapp.phonepulse.Adapter.ItemProduct_ADAPTER;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.Response.ApiResponse;
@@ -28,9 +29,13 @@ import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
 import com.phoneapp.phonepulse.models.Cart;
 import com.phoneapp.phonepulse.models.Product;
+import com.phoneapp.phonepulse.models.Variant;
+import com.phoneapp.phonepulse.request.CartItem;
 import com.phoneapp.phonepulse.request.CartRequest;
 import com.phoneapp.phonepulse.request.DataConverter;
 import com.phoneapp.phonepulse.request.ProductGirdItem;
+import com.phoneapp.phonepulse.utils.CartManager;
+import com.phoneapp.phonepulse.utils.CartUtils;
 import com.phoneapp.phonepulse.utils.Constants;
 import com.phoneapp.phonepulse.VIEW.DashBoar_Activity;
 import com.phoneapp.phonepulse.VIEW.Cart_Activity;
@@ -70,6 +75,9 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnIte
     private ApiService apiService;
     private String authToken;
     private int cartItemCount = 0;
+    private CartAdapter cartAdapter;
+    private List<CartItem> cartItemList = new ArrayList<>();
+
 
 
     // Khởi tạo Gson ở đây
@@ -131,6 +139,7 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnIte
             etSearchProduct = hostingActivity.findViewById(R.id.et_search_product);
             ivCartIcon = hostingActivity.findViewById(R.id.iv_cart_icon);
             frameCart = hostingActivity.findViewById(R.id.frame_cart);
+            cartAdapter = new CartAdapter(cartItemList);
 
 
             if (etSearchProduct != null) {
@@ -275,55 +284,109 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnIte
     @Override
     public void onAddToCartClick(ProductGirdItem item) {
         if (isAdded() && getContext() != null) {
-            Log.d(TAG, "Add to cart clicked for: " + item.getProduct_name() + " with Product ID: " + item.get_id() + ", Variant ID: " + item.getVariant_id());
-
             if (item.get_id() == null || item.getVariant_id() == null) {
                 Toast.makeText(requireContext(), "Không thể thêm sản phẩm này vào giỏ hàng (thiếu ID).", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            callAddToCartApi(item.get_id(), item.getVariant_id(), 1);
+            fetchVariantAndAddToCart(item.get_id(), item.getVariant_id(), 1);
         }
     }
 
-    private void callAddToCartApi(String productId, String variantId, int quantity) {
+    private void fetchVariantAndAddToCart(String productId, String variantId, int addedQuantity) {
         if (authToken == null || authToken.isEmpty()) {
             Toast.makeText(requireContext(), "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.", Toast.LENGTH_LONG).show();
             return;
         }
 
-        apiService = RetrofitClient.getApiService(authToken);
+        ApiService apiService = RetrofitClient.getApiService(authToken);
 
-        CartRequest.AddToCart request = new CartRequest.AddToCart(productId, variantId, quantity);
-
-
-        apiService.addToCart(request).enqueue(new Callback<ApiResponse<Cart>>() {
+        // 1. Lấy giỏ hàng hiện tại
+        apiService.getCart().enqueue(new Callback<ApiResponse<Cart>>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<com.phoneapp.phonepulse.models.Cart>> call, @NonNull Response<ApiResponse<com.phoneapp.phonepulse.models.Cart>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<Cart>> call, @NonNull Response<ApiResponse<Cart>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Toast.makeText(requireContext(), "Thêm vào giỏ hàng thành công!", Toast.LENGTH_SHORT).show();
-                } else {
-                    String errorMsg = "Lỗi khi thêm vào giỏ hàng.";
-                    if (response.body() != null && response.body().getMessage() != null) {
-                        errorMsg = response.body().getMessage();
-                    } else if (response.errorBody() != null) {
-                        try {
-                            errorMsg += " " + response.errorBody().string();
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error parsing error body for add to cart", e);
+                    Cart currentCart = response.body().getData();
+
+                    int existingQuantity = 0;
+
+                    // 2. Tìm biến thể đã có trong giỏ hàng
+                    if (currentCart.getItems() != null) {
+                        for (CartItem item : currentCart.getItems()) {
+                            if (item.getVariant() != null && variantId.equals(item.getVariant().getId())) {
+                                existingQuantity = item.getQuantity();
+                                break;
+                            }
                         }
                     }
-                    Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show();
+
+                    // 3. Lấy thông tin biến thể từ server
+                    int finalExistingQuantity = existingQuantity;
+                    apiService.getVariantForProductById(productId, variantId).enqueue(new Callback<Variant>() {
+                        @Override
+                        public void onResponse(@NonNull Call<Variant> call, @NonNull Response<Variant> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                Variant variant = response.body();
+                                int stockQuantity = variant.getQuantity(); // tồn kho
+
+                                int totalRequestedQuantity = finalExistingQuantity + addedQuantity;
+
+                                // 4. Kiểm tra tồn kho
+                                if (totalRequestedQuantity > stockQuantity) {
+                                    Toast.makeText(requireContext(),
+                                            "Không thể thêm. Số lượng vượt quá tồn kho (" + stockQuantity + ").",
+                                            Toast.LENGTH_LONG).show();
+                                } else {
+                                    // OK → gọi API thêm vào giỏ
+                                    callAddToCartApi(productId, variantId, addedQuantity);
+                                }
+
+                            } else {
+                                Toast.makeText(requireContext(), "Không thể lấy thông tin biến thể sản phẩm.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<Variant> call, @NonNull Throwable t) {
+                            Toast.makeText(requireContext(), "Lỗi mạng khi lấy biến thể: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                } else {
+                    Toast.makeText(requireContext(), "Không thể lấy giỏ hàng hiện tại.", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<com.phoneapp.phonepulse.models.Cart>> call, @NonNull Throwable t) {
-                Toast.makeText(requireContext(), "Lỗi mạng khi thêm vào giỏ hàng: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                Log.e(TAG, "Add to cart network failure: ", t);
+            public void onFailure(@NonNull Call<ApiResponse<Cart>> call, @NonNull Throwable t) {
+                Toast.makeText(requireContext(), "Lỗi mạng khi lấy giỏ hàng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
+
+
+
+    private void callAddToCartApi(String productId, String variantId, int quantity) {
+        CartRequest.AddToCart request = new CartRequest.AddToCart(productId, variantId, quantity);
+        apiService.addToCart(request).enqueue(new Callback<ApiResponse<Cart>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<Cart>> call, @NonNull Response<ApiResponse<Cart>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    Toast.makeText(requireContext(), "Thêm vào giỏ hàng thành công!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(requireContext(), "Lỗi khi thêm vào giỏ hàng.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<Cart>> call, @NonNull Throwable t) {
+                Toast.makeText(requireContext(), "Lỗi mạng khi thêm vào giỏ hàng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+
 
 
     @Override

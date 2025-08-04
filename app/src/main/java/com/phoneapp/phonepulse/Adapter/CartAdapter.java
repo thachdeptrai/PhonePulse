@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
+
 
     private static final String TAG = "CartAdapter"; // Thêm TAG cho Logcat
 
@@ -47,6 +50,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         this.cartItemList = newCartItemList;
         notifyDataSetChanged();
     }
+
 
     @NonNull
     @Override
@@ -154,11 +158,21 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
         holder.btnIncrease.setOnClickListener(v -> {
             if (listener != null) {
-                int currentQuantity = currentItem.getQuantity();
-                listener.onQuantityChange(currentItem, currentQuantity + 1);
+                int currentQuantity = currentItem.getQuantity(); // số lượng hiện tại trong giỏ
+                int stock = currentItem.getVariant().getStockQuantity(); // số lượng tồn kho từ variant
+
+                if (currentQuantity < stock) {
+                    listener.onQuantityChange(currentItem, currentQuantity + 1);
+                } else {
+                    Toast.makeText(context, "Không thể tăng thêm. Đã đạt số lượng tồn kho tối đa.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
+
+
+
         holder.btnDelete.setOnClickListener(v -> showRemoveConfirmationDialog(currentItem));
+
 
     }
 

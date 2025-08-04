@@ -152,7 +152,7 @@ public class CartItem implements Serializable {
         private String id;
         @SerializedName("price")
         private double price;
-        @SerializedName("stock_quantity")
+        @SerializedName("quantity")
         private int stockQuantity;
         @SerializedName("color_id")
         private ColorInCart color;

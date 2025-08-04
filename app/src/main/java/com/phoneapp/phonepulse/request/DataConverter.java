@@ -23,6 +23,12 @@ public class DataConverter {
             String imageUrl = product.getImageUrlSafe();
             List<Variant> variants = product.getVariants();
 
+            // Lấy category_id từ object Category
+            String categoryId = null;
+            if (product.getCategory() != null) {
+                categoryId = product.getCategory().getId();
+            }
+
             if (variants != null && !variants.isEmpty()) {
                 for (Variant variant : variants) {
                     String colorName = (variant.getColor() != null) ? variant.getColor().getColorName() : null;
@@ -51,6 +57,7 @@ public class DataConverter {
                             images
                     );
 
+                    item.setCategory_id(categoryId); // Gán đúng category_id
 
                     gridItems.add(item);
                 }
@@ -58,4 +65,5 @@ public class DataConverter {
         }
         return gridItems;
     }
+
 }

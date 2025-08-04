@@ -1,7 +1,10 @@
 package com.phoneapp.phonepulse.Adapter;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -57,6 +60,12 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         } else {
             holder.ivCategoryIcon.setImageResource(R.drawable.ic_default_category);
         }
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(category);
+            }
+        });
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
