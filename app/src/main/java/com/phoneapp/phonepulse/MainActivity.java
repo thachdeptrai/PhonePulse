@@ -7,7 +7,7 @@ import android.os.Looper;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.phoneapp.phonepulse.ui.product.ProductDetailActivity;
+import com.phoneapp.phonepulse.VIEW.ProductDetailActivity;
 
 public class MainActivity extends AppCompatActivity {
 

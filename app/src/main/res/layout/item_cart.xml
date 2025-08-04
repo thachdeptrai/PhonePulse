@@ -16,6 +16,7 @@
         android:padding="12dp"
         android:gravity="center_vertical">
 
+        <!-- Ảnh sản phẩm -->
         <ImageView
             android:id="@+id/iv_product_image"
             android:layout_width="80dp"
@@ -26,6 +27,7 @@
             tools:srcCompat="@tools:sample/backgrounds/scenic"
             android:contentDescription="Product Image" />
 
+        <!-- Thông tin sản phẩm -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -53,23 +55,24 @@
                 android:textSize="14sp"
                 android:layout_marginTop="2dp"
                 android:visibility="gone"
-                tools:visibility="visible"/> <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="4dp">
-            <TextView
-                android:id="@+id/tv_product_price"
-                android:layout_width="wrap_content"
+                tools:visibility="visible"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="₫24.990.000"
-                android:textColor="#FF6B00"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp">
 
-        </LinearLayout>
-
+                <TextView
+                    android:id="@+id/tv_product_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₫24.990.000"
+                    android:textColor="#FF6B00"
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -108,6 +111,27 @@
             </LinearLayout>
         </LinearLayout>
 
+        <androidx.cardview.widget.CardView
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_marginStart="8dp"
+            app:cardCornerRadius="21dp"
+            app:cardElevation="4dp"
+            android:layout_gravity="center_vertical"
+            app:cardBackgroundColor="@android:color/white">
+
+            <ImageView
+                android:id="@+id/btn_delete"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp"
+                android:src="@drawable/xoa"
+                android:contentDescription="Delete item"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/red"
+                android:scaleType="centerInside"
+                tools:ignore="UseAppTint" />
+        </androidx.cardview.widget.CardView>
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

@@ -9,12 +9,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.bumptech.glide.Glide;
 import com.phoneapp.phonepulse.R;
@@ -26,7 +30,6 @@ import com.phoneapp.phonepulse.utils.Constants;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -38,6 +41,9 @@ public class Profile_FRAGMENT extends Fragment {
     private CircleImageView imgAvatar;
     private TextView tvFullName, tvEmail, tvPhone, tvAddress, tvGender, tvBirthday, tvRole;
     private Button btnEdit;
+     private ImageView btn_settings;
+     private LinearLayout history_order_layout;
+
 
     private static final String TAG = "ProfileFragment";
 
@@ -51,6 +57,7 @@ public class Profile_FRAGMENT extends Fragment {
 
         initViews(view);
         loadUserProfile();
+        NextHistory_Oder();
 
         return view;
     }
@@ -63,7 +70,9 @@ public class Profile_FRAGMENT extends Fragment {
         tvAddress = view.findViewById(R.id.tv_address);
         tvGender = view.findViewById(R.id.tv_gender);
         tvBirthday = view.findViewById(R.id.tv_birthday);
-        btnEdit = view.findViewById(R.id.btn_edit_profile);
+        btn_settings = view.findViewById(R.id.btn_settings);
+        history_order_layout = view.findViewById(R.id.history_order_layout);
+
 
     }
 
@@ -164,5 +173,45 @@ public class Profile_FRAGMENT extends Fragment {
     private String nonNull(String value, String fallback) {
         return (value != null && !value.trim().isEmpty()) ? value : fallback;
     }
+
+    private void NextHistory_Oder() {
+        history_order_layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                OrderHistory_FRAGMENT fragment = new OrderHistory_FRAGMENT();
+                FragmentManager fm = getSupportFragmentManager();
+                if (fm != null) {
+                    fm.beginTransaction()
+                            .replace(R.id.fragment_container, fragment)
+                            .addToBackStack(null)
+                            .commit();
+                }
+
+                // Cập nhật tiêu đề toolbar
+                TextView tvGreeting = requireActivity().findViewById(R.id.tv_greeting);
+                if (tvGreeting != null) {
+                    tvGreeting.setText("Lịch sử đơn hàng");
+                }
+
+                // Ẩn thanh tìm kiếm nếu có
+                EditText etSearch = requireActivity().findViewById(R.id.et_search_product);
+                if (etSearch != null) {
+                    etSearch.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+    }
+
+
+
+    private FragmentManager getSupportFragmentManager() {
+        if (getActivity() != null) {
+            return getActivity().getSupportFragmentManager();
+        } else {
+            Log.e(TAG, "❌ getActivity() is null, cannot get FragmentManager");
+            return null;
+        }
+    }
+
 
 }

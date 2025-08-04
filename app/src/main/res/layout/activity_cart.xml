@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F5F5"
-    tools:context=".ui.cart.Cart_Activity">
+    tools:context=".VIEW.Cart_Activity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_cart"
@@ -176,6 +176,7 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
+
         <Button
             android:id="@+id/btn_checkout"
             android:layout_width="wrap_content"
@@ -186,6 +187,8 @@
             android:textSize="16sp"
             android:paddingStart="24dp"
             android:paddingEnd="24dp" />
+
     </LinearLayout>
+
 
 </LinearLayout>

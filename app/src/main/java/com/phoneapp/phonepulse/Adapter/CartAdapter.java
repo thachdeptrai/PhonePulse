@@ -158,6 +158,8 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                 listener.onQuantityChange(currentItem, currentQuantity + 1);
             }
         });
+        holder.btnDelete.setOnClickListener(v -> showRemoveConfirmationDialog(currentItem));
+
     }
 
     @Override
@@ -186,6 +188,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         ImageView btnDecrease;
         TextView tvQuantity;
         ImageView btnIncrease;
+        ImageView btnDelete;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -196,6 +199,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             btnDecrease = itemView.findViewById(R.id.btn_decrease);
             tvQuantity = itemView.findViewById(R.id.tv_quantity);
             btnIncrease = itemView.findViewById(R.id.btn_increase);
+            btnDelete = itemView.findViewById(R.id.btn_delete);
         }
     }
 }

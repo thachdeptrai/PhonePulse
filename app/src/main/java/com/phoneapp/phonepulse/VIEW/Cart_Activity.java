@@ -1,4 +1,4 @@
-package com.phoneapp.phonepulse.ui.cart;
+package com.phoneapp.phonepulse.VIEW;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,7 +20,6 @@ import com.google.gson.Gson;
 import com.phoneapp.phonepulse.Adapter.CartAdapter;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.Response.ApiResponse;
-import com.phoneapp.phonepulse.VIEW.Oder_Activity;
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
 import com.phoneapp.phonepulse.models.Cart;

@@ -1,7 +1,6 @@
-package com.phoneapp.phonepulse.ui.product;
+package com.phoneapp.phonepulse.VIEW;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
+import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
@@ -46,6 +45,8 @@ public class ProductDetailActivity extends AppCompatActivity {
     private TextView tvProductSpecs; // TextView cho thông số kỹ thuật chi tiết
     private LinearLayout llColorOptions, llStorageOptions; // Layouts cho lựa chọn biến thể (hiện tại là tĩnh)
     private com.google.android.material.button.MaterialButton btnAddToCart, btnBuyNow;
+    private ImageView iv_cart_icon;
+
 
     // Data
     private String variantId;
@@ -109,6 +110,15 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         llColorOptions = findViewById(R.id.ll_color_options);
         llStorageOptions = findViewById(R.id.ll_storage_options);
+        iv_cart_icon = findViewById(R.id.iv_cart_icon);
+        // Đặt lắng nghe sự kiện click cho biểu tượng giỏ hàng
+        iv_cart_icon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ProductDetailActivity.this, Cart_Activity.class);
+                startActivity(intent);
+            }
+        });
 
         // Đặt lắng nghe sự kiện click cho các nút
         btnAddToCart.setOnClickListener(v -> {

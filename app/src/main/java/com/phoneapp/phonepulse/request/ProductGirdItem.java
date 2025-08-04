@@ -36,6 +36,8 @@ public class ProductGirdItem implements Serializable {
     // ✅ THÊM: Danh sách ảnh
     @SerializedName("images")
     private List<ProductImage> images;
+    @SerializedName("category_id")
+    private String category_id;
 
     public ProductGirdItem() {
     }
@@ -67,6 +69,14 @@ public class ProductGirdItem implements Serializable {
 
     public String getVariant_id() {
         return variant_id;
+    }
+
+    public String getCategory_id() {
+        return category_id;
+    }
+
+    public void setCategory_id(String category_id) {
+        this.category_id = category_id;
     }
 
     public void setVariant_id(String variant_id) {

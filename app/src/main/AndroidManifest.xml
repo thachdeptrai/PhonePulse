@@ -27,7 +27,7 @@
             android:name=".VIEW.DashBoar_Activity"
             android:exported="false" />
         <activity
-            android:name=".ui.cart.Cart_Activity"
+            android:name=".VIEW.Cart_Activity"
             android:exported="false" />
         <activity
             android:name=".ui.admin.AdminActivity"
@@ -39,7 +39,7 @@
             android:name=".ui.checkout.CheckoutActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.product.ProductDetailActivity"
+            android:name=".VIEW.ProductDetailActivity"
             android:exported="false" />
         <activity
             android:name=".VIEW.RegisterActivity"

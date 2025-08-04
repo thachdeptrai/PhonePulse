@@ -17,7 +17,7 @@ import com.bumptech.glide.Glide;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.models.Product;
 import com.phoneapp.phonepulse.models.Variant;
-import com.phoneapp.phonepulse.ui.product.ProductDetailActivity;
+import com.phoneapp.phonepulse.VIEW.ProductDetailActivity;
 
 import java.text.NumberFormat;
 import java.util.List;

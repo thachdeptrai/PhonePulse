@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -37,7 +36,6 @@ import retrofit2.Response;
 
 public class Oder_Activity extends AppCompatActivity {
 
-    // Khai báo các View
     private MaterialToolbar toolbar;
     private TextView tvFullName, tvPhoneNumber, tvShippingAddress;
     private Button btnChangeAddress, btnPlaceOrder;
@@ -54,13 +52,13 @@ public class Oder_Activity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_oder);
 
-        // Ánh xạ Toolbar
+        // Toolbar
         toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("Thanh toán đơn hàng");
         setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(v -> finish()); // Nút quay lại
+        toolbar.setNavigationOnClickListener(v -> finish());
 
-        // Ánh xạ các View
+        // Ánh xạ view
         tvFullName = findViewById(R.id.tv_full_name);
         tvPhoneNumber = findViewById(R.id.tv_phone_number);
         tvShippingAddress = findViewById(R.id.tv_shipping_address);
@@ -77,6 +75,30 @@ public class Oder_Activity extends AppCompatActivity {
         tvTotalAmount = findViewById(R.id.tv_total_amount);
         tvAddCoupon = findViewById(R.id.tv_add_coupon);
 
+        // Gán dữ liệu người dùng
+        bindUserToUI();
+
+        // Nhận sản phẩm từ giỏ hàng
+        ArrayList<OrderItem> orderItemList = (ArrayList<OrderItem>) getIntent().getSerializableExtra("order_items");
+
+        if (orderItemList != null && !orderItemList.isEmpty()) {
+            OrderItemAdapter adapter = new OrderItemAdapter(orderItemList);
+            rvCheckoutProducts.setLayoutManager(new LinearLayoutManager(this));
+            rvCheckoutProducts.setAdapter(adapter);
+
+            int total = 0;
+            for (OrderItem item : orderItemList) {
+                total += item.getPrice() * item.getQuantity();
+            }
+
+            tvTotalAmount.setText(String.format("%,d đ", total).replace(",", "."));
+            tvSubtotal.setText(tvTotalAmount.getText());
+            tvFinalPrice.setText(tvTotalAmount.getText());
+        } else {
+            Log.w("OderActivity", "Không có sản phẩm trong đơn hàng.");
+        }
+
+        // Xử lý khi nhấn nút đặt hàng
         btnPlaceOrder.setOnClickListener(v -> {
             String token = Constants.getToken(Oder_Activity.this);
             if (token == null || token.isEmpty()) {
@@ -97,23 +119,32 @@ public class Oder_Activity extends AppCompatActivity {
             }
 
             OrderRequest request = new OrderRequest(orderItems, discount, finalPrice, shippingAddress, paymentMethod, note);
-
             ApiService apiService = RetrofitClient.getApiService(token);
+
             apiService.createOrder("Bearer " + token, request).enqueue(new Callback<ApiResponse<Order>>() {
                 @Override
                 public void onResponse(Call<ApiResponse<Order>> call, Response<ApiResponse<Order>> response) {
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                         Log.d("Order", "Đặt hàng thành công.");
 
-                        // 🧹 Xóa toàn bộ giỏ hàng sau khi đặt hàng thành công
-                        CartRequest.RemoveCartItem clearAllCartRequest = new CartRequest.RemoveCartItem(null, null); // Truyền null để xóa toàn bộ
-                        apiService.removeFromCart(clearAllCartRequest).enqueue(new Callback<ApiResponse<Cart>>() {
+                        for (OrderItem item : orderItems) {
+                            Log.d("OrderItem", "Sản phẩm: " +
+                                    "ID = " + item.getProductId() +
+                                    ", Tên = " + item.getName() +
+                                    ", Giá = " + item.getPrice() +
+                                    ", Số lượng = " + item.getQuantity() +
+                                    ", Hình ảnh = " + item.getImageUrl());
+                        }
+
+                        // Xoá toàn bộ giỏ hàng
+                        CartRequest.RemoveCartItem clearCartRequest = new CartRequest.RemoveCartItem("", "");
+                        apiService.removeFromCart(clearCartRequest).enqueue(new Callback<ApiResponse<Cart>>() {
                             @Override
                             public void onResponse(Call<ApiResponse<Cart>> call, Response<ApiResponse<Cart>> response) {
                                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                                     Log.d("Cart", "Đã xóa toàn bộ giỏ hàng.");
                                 } else {
-                                    Log.e("Cart", "Không xóa được giỏ hàng: " + response.message());
+                                    Log.e("Cart", "Không thể xóa giỏ hàng: " + response.code() + " - " + response.message());
                                 }
                             }
 
@@ -123,11 +154,13 @@ public class Oder_Activity extends AppCompatActivity {
                             }
                         });
 
-                        // Gửi kết quả về CartActivity
-                        Intent resultIntent = new Intent();
-                        resultIntent.putExtra("order_success", true);
-                        setResult(RESULT_OK, resultIntent);
-                        finish();
+
+                        Intent intent = new Intent(Oder_Activity.this, DashBoar_Activity.class); // hoặc MainActivity nếu tên bạn là vậy
+                        intent.putExtra("open_order_history", true); // cờ mở lịch sử đơn hàng
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finish(); // đóng Oder_Activity
+
                     } else {
                         Log.e("Order", "Đặt hàng thất bại: " + response.message());
                     }
@@ -139,32 +172,6 @@ public class Oder_Activity extends AppCompatActivity {
                 }
             });
         });
-
-
-
-
-
-        // Gán dữ liệu người dùng vào giao diện
-        bindUserToUI();
-        // Nhận dữ liệu truyền từ Intent
-        ArrayList<OrderItem> orderItemList = (ArrayList<OrderItem>) getIntent().getSerializableExtra("order_items");
-
-        if (orderItemList != null && !orderItemList.isEmpty()) {
-            OrderItemAdapter adapter = new OrderItemAdapter(orderItemList);
-            rvCheckoutProducts.setLayoutManager(new LinearLayoutManager(this));
-            rvCheckoutProducts.setAdapter(adapter);
-
-            // Tính tổng tiền
-            int total = 0;
-            for (OrderItem item : orderItemList) {
-                total += item.getPrice() * item.getQuantity();
-            }
-            tvTotalAmount.setText(String.format("%,d đ", total).replace(",", "."));
-            tvSubtotal.setText(tvTotalAmount.getText());
-            tvFinalPrice.setText(tvTotalAmount.getText());
-        } else {
-            Log.w("OderActivity", "Không có sản phẩm trong đơn hàng.");
-        }
     }
 
     private void bindUserToUI() {
@@ -173,21 +180,19 @@ public class Oder_Activity extends AppCompatActivity {
         String phone = preferences.getString("phone", "");
         String address = preferences.getString("address", "");
 
-        // Debug log
         Log.d("USER_PREF", "Fullname: " + fullname + ", Phone: " + phone + ", Address: " + address);
 
         tvFullName.setText(!fullname.isEmpty() ? fullname : "Chưa có tên");
         tvPhoneNumber.setText(!phone.isEmpty() ? phone : "Chưa có số điện thoại");
         tvShippingAddress.setText(!address.isEmpty() ? address : "Chưa có địa chỉ");
     }
+
     private int extractPrice(String formattedPrice) {
         try {
-            // Xoá dấu chấm, đ ký tự "đ", khoảng trắng... rồi parse thành số nguyên
             return Integer.parseInt(formattedPrice.replace(".", "").replace("đ", "").replace(" ", "").trim());
         } catch (Exception e) {
             e.printStackTrace();
             return 0;
         }
     }
-
 }

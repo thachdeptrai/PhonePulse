@@ -39,6 +39,7 @@
                     android:text="Xin chào!"/>
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/card_search_view"
                     android:layout_width="0dp"
                     android:layout_height="44dp"
                     android:layout_weight="1"
@@ -75,7 +76,6 @@
                             android:singleLine="true"
                             android:imeOptions="actionSearch"
                             android:inputType="textFilter" />
-
                     </LinearLayout>
 
                 </androidx.cardview.widget.CardView>
@@ -97,17 +97,16 @@
                     <!-- Badge nằm đè lên góc trên cùng bên phải -->
                     <TextView
                         android:id="@+id/tv_cart_badge"
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
+                        android:layout_width="20dp"
+                        android:layout_height="28dp"
                         android:layout_gravity="top|end"
                         android:layout_marginTop="-4dp"
                         android:layout_marginEnd="-4dp"
-                        android:background="@drawable/cart_badge_bg"
+                        android:gravity="center"
                         android:text="3"
                         android:textColor="@android:color/white"
                         android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:gravity="center" />
+                        android:textStyle="bold" />
                 </FrameLayout>
             </LinearLayout>
 
@@ -126,5 +125,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="#E0DDF0" app:menu="@menu/bottom_navigation_menu"
+        android:background="@color/white"
+        app:menu="@menu/bottom_navigation_menu"
         /> </androidx.coordinatorlayout.widget.CoordinatorLayout>
