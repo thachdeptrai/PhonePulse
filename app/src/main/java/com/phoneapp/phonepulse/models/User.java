@@ -1,9 +1,11 @@
 package com.phoneapp.phonepulse.models;
 
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 import java.util.Date;
 
-public class User {
+public class User implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @SerializedName("_id")
     private String id;
@@ -18,7 +20,7 @@ public class User {
     private String passwordHash;
 
     @SerializedName("avatar_url")
-    private String avatar_url; // Đã đổi tên biến để khớp với tên phương thức
+    private String avatar_url;
 
     @SerializedName("phone")
     private String phone;
@@ -30,7 +32,7 @@ public class User {
     private String gender;
 
     @SerializedName("birthday")
-    private Date birthday;
+    private String birthday;
 
     @SerializedName("role")
     private boolean isAdmin;
@@ -46,6 +48,23 @@ public class User {
 
     @SerializedName("modified_date")
     private Date modifiedDate;
+
+
+
+    // Constructor rỗng để Gson và hệ thống sử dụng
+    public User() {
+    }
+
+    // Constructor đầy đủ cho việc tạo object thủ công
+    public User(String id, String name, String phone, String address, String gender, String birthday) {
+        this.id = id;
+        this.name = name;
+        this.phone = phone;
+        this.address = address;
+        this.gender = gender;
+        this.birthday = birthday;
+    }
+
 
     // Getters
     public String getId() {
@@ -64,7 +83,6 @@ public class User {
         return passwordHash;
     }
 
-    // Giữ nguyên tên phương thức theo yêu cầu
     public String getAvatar_url() {
         return avatar_url;
     }
@@ -81,7 +99,7 @@ public class User {
         return gender;
     }
 
-    public Date getBirthday() {
+    public String getBirthday() {
         return birthday;
     }
 
@@ -122,7 +140,6 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
-    // Giữ nguyên tên phương thức theo yêu cầu
     public void setAvatar_url(String avatar_url) {
         this.avatar_url = avatar_url;
     }
@@ -139,7 +156,7 @@ public class User {
         this.gender = gender;
     }
 
-    public void setBirthday(Date birthday) {
+    public void setBirthday(String birthday) {
         this.birthday = birthday;
     }
 

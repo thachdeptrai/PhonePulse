@@ -1,6 +1,7 @@
 package com.phoneapp.phonepulse.FRAGMENT;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -23,6 +24,7 @@ import androidx.fragment.app.FragmentManager;
 import com.bumptech.glide.Glide;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.Response.ApiResponse; // Import ApiResponse
+import com.phoneapp.phonepulse.VIEW.EditProfileActivity;
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
 import com.phoneapp.phonepulse.models.User;
@@ -38,6 +40,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class Profile_FRAGMENT extends Fragment {
+    private User currentUser;
+
     private CircleImageView imgAvatar;
     private TextView tvFullName, tvEmail, tvPhone, tvAddress, tvGender, tvBirthday, tvRole;
     private Button btnEdit;
@@ -59,8 +63,19 @@ public class Profile_FRAGMENT extends Fragment {
         loadUserProfile();
         NextHistory_Oder();
 
+
+
         return view;
     }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1001 && resultCode == getActivity().RESULT_OK && data != null) {
+            // Chỉnh sửa thành công → cập nhật giao diện
+            loadUserProfile(); // Gọi lại API để lấy dữ liệu mới nhất
+        }
+    }
+
 
     private void initViews(View view) {
         imgAvatar = view.findViewById(R.id.img_avatar);
@@ -73,8 +88,29 @@ public class Profile_FRAGMENT extends Fragment {
         btn_settings = view.findViewById(R.id.btn_settings);
         history_order_layout = view.findViewById(R.id.history_order_layout);
 
-
+        // Gắn sự kiện click vào các TextView
+        tvFullName.setOnClickListener(v -> goToEditProfile());
+        tvPhone.setOnClickListener(v -> goToEditProfile());
+        tvAddress.setOnClickListener(v -> goToEditProfile());
+        tvGender.setOnClickListener(v -> goToEditProfile());
+        tvBirthday.setOnClickListener(v -> goToEditProfile());
     }
+
+    private void goToEditProfile() {
+        if (currentUser == null) {
+            Toast.makeText(requireContext(), "Chưa có dữ liệu user để chỉnh sửa", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(requireContext(), EditProfileActivity.class);
+        String userJson = new com.google.gson.Gson().toJson(currentUser);
+        intent.putExtra("user_json", userJson);
+        startActivityForResult(intent, 1001);
+    }
+
+
+
+
 
     private void loadUserProfile() {
         String token = Constants.getToken(requireContext());
@@ -128,30 +164,50 @@ public class Profile_FRAGMENT extends Fragment {
     }
 
     private void bindUserToUI(User user) {
+        this.currentUser = user;
+
         Context context = requireContext();
         SharedPreferences preferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
 
         editor.putString("fullname", user.getName());
-        editor.putString("phone", String.valueOf(user.getPhone())); // Đảm bảo ép thành String
+        editor.putString("phone", String.valueOf(user.getPhone()));
         editor.putString("address", user.getAddress());
         editor.apply();
 
-        // Log để kiểm tra
         Log.d("USER_PREF", "✅ Saved to prefs → Fullname: " + user.getName() +
                 ", Phone: " + user.getPhone() +
                 ", Address: " + user.getAddress());
 
-        // Gán giá trị hiển thị lên UI
         tvFullName.setText(nonNull(user.getName(), "Không có tên"));
         tvEmail.setText(nonNull(user.getEmail(), "Không có email"));
-        tvPhone.setText(nonNull(String.valueOf(user.getPhone()), "Không có số điện thoại"));
+        tvPhone.setText(nonNull(user.getPhone(), "Không có số điện thoại"));
         tvAddress.setText(nonNull(user.getAddress(), "Chưa có địa chỉ"));
         tvGender.setText(nonNull(user.getGender(), "Không chia sẻ"));
 
-        if (user.getBirthday() != null) {
-            String formattedDate = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                    .format(user.getBirthday());
+//        // ✅ Đoạn sửa lỗi
+//        if (!TextUtils.isEmpty(user.getBirthday())) {
+//            tvBirthday.setText(user.getBirthday());
+//        } else {
+//            tvBirthday.setText("Chưa có ngày sinh");
+//        }
+        if (!TextUtils.isEmpty(user.getBirthday())) {
+            String rawBirthday = user.getBirthday();
+            String formattedDate;
+
+            try {
+                // Parse chuỗi ngày ISO từ backend
+                SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+                isoFormat.setLenient(false);  // Giúp phát hiện lỗi định dạng
+                java.util.Date date = isoFormat.parse(rawBirthday);
+
+                // Format lại kiểu bạn muốn (ví dụ: "dd/MM/yyyy")
+                SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                formattedDate = outputFormat.format(date);
+            } catch (Exception e) {
+                formattedDate = rawBirthday.split("T")[0]; // fallback: chỉ lấy phần yyyy-MM-dd nếu lỗi
+            }
+
             tvBirthday.setText(formattedDate);
         } else {
             tvBirthday.setText("Chưa có ngày sinh");
@@ -167,6 +223,8 @@ public class Profile_FRAGMENT extends Fragment {
             imgAvatar.setImageResource(R.drawable.avatar_circle);
         }
     }
+
+
 
 
     // Hàm tiện ích tránh lặp null check
