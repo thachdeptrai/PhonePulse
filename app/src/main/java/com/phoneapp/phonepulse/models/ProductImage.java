@@ -1,8 +1,9 @@
 package com.phoneapp.phonepulse.models;
 
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 
-public class ProductImage {
+public class ProductImage implements Serializable {
 
     @SerializedName("_id")
     private String id;
@@ -13,18 +14,15 @@ public class ProductImage {
     @SerializedName("image_url")
     private String imageUrl;
 
-    // Default constructor
     public ProductImage() {
     }
 
-    // Full constructor
     public ProductImage(String id, String productId, String imageUrl) {
         this.id = id;
         this.productId = productId;
         this.imageUrl = imageUrl;
     }
 
-    // --- Getters & Setters ---
     public String getId() {
         return id;
     }
@@ -49,7 +47,6 @@ public class ProductImage {
         this.imageUrl = imageUrl;
     }
 
-    // Optional: toString() for debugging/logging
     @Override
     public String toString() {
         return "ProductImage{" +

@@ -12,4 +12,17 @@
     <string name="back_button">Nút quay lại</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="back_button_description">Quay lại</string>
+    <string name="search_hint">Tìm kiếm sản phẩm</string>
+    <string name="search_input_description">Nhập từ khóa để tìm kiếm sản phẩm</string>
+    <string name="sort_ascending">Giá tăng dần</string>
+    <string name="sort_ascending_description">Sắp xếp sản phẩm theo giá tăng dần</string>
+    <string name="sort_descending">Giá giảm dần</string>
+    <string name="sort_descending_description">Sắp xếp sản phẩm theo giá giảm dần</string>
+    <string name="no_results_message">Không tìm thấy sản phẩm phù hợp</string>
+    <string name="no_results_description">Thông báo không tìm thấy sản phẩm</string>
+    <string name="product_list_description">Danh sách sản phẩm</string>
+    <string name="suggestions_title">Gợi ý sản phẩm</string>
+    <string name="suggestions_title_description">Tiêu đề danh sách sản phẩm gợi ý</string>
+    <string name="suggestions_list_description">Danh sách sản phẩm gợi ý</string>
 </resources>

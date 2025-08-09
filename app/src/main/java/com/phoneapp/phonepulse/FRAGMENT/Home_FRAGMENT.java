@@ -25,6 +25,7 @@ import com.phoneapp.phonepulse.Adapter.CartAdapter;
 import com.phoneapp.phonepulse.Adapter.ItemProduct_ADAPTER;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.Response.ApiResponse;
+import com.phoneapp.phonepulse.VIEW.SearchProductActivity;
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
 import com.phoneapp.phonepulse.models.Cart;
@@ -43,6 +44,8 @@ import com.phoneapp.phonepulse.VIEW.ProductDetailActivity;
 
 import com.google.gson.Gson; // <-- THÊM IMPORT NÀY
 import com.google.gson.GsonBuilder; // <-- THÊM IMPORT NÀY
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -195,18 +198,16 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnIte
 
     private void setupSearchFunction() {
         if (etSearchProduct != null) {
-            etSearchProduct.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) { }
-                @Override
-                public void afterTextChanged(Editable s) {
-                    filterProducts(s.toString());
-                }
+            etSearchProduct.setFocusable(false); // Ngăn không cho gõ tại chỗ
+            etSearchProduct.setOnClickListener(v -> {
+                // Mở SearchProductActivity khi click vào ô tìm kiếm
+                Intent intent = new Intent(requireContext(), SearchProductActivity.class);
+                intent.putExtra("product_list", (Serializable) allProductsGridItems);
+                startActivity(intent);
             });
         }
     }
+
 
     private void filterProducts(String query) {
         String lowerCaseQuery = query.toLowerCase(Locale.getDefault());
