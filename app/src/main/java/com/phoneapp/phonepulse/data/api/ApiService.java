@@ -167,7 +167,7 @@ public interface ApiService {
     // Backend route: GET /api/products/:id/variants/:variantId
     // LƯU Ý: Hàm này chỉ populate color_id và size_id ở backend, không có product_name hay image_url.
     @GET("/api/products/{productId}/variants/{variantId}")
-    Call<Variant> getVariantForProductById(@Path("productId") String productId, @Path("variantId") String variantId); // <-- Đã sửa lỗi tại đây!
+    Call<Variant> getVariantForProductById(@Path("productId") String productId, @Path("variantId") String variantId);
 
     // Cập nhật một variant cụ thể qua product_id và variant_id
     // Backend route: PUT /api/products/:id/variants/:variantId

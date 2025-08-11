@@ -1,0 +1,132 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/white">
+
+    <!-- Header with Back Button and Search Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
+
+        <ImageButton
+            android:id="@+id/back_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="12dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/back_button_description"
+            android:padding="12dp"
+            android:src="@drawable/ic_back"
+            app:tint="?attr/colorOnSurface"
+            android:scaleType="centerInside"
+            android:importantForAccessibility="yes" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_search"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/search_hint"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:boxStrokeColor="?attr/colorPrimary"
+            app:startIconDrawable="@android:drawable/ic_menu_search"
+            app:startIconTint="?attr/colorOnSurface"
+            app:boxCornerRadiusTopStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusBottomEnd="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:textSize="16sp"
+                android:textColor="?attr/colorOnSurface"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:contentDescription="@string/search_input_description" />
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+
+    <!-- Sort buttons with Material Design and better spacing -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="12dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_sort_asc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Giá tăng dần"
+            android:textSize="14sp"
+            app:cornerRadius="8dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:icon="@android:drawable/ic_menu_sort_by_size"
+            app:iconGravity="start" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_sort_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="Giá giảm dần"
+            android:textSize="14sp"
+            app:cornerRadius="8dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:icon="@android:drawable/ic_menu_sort_by_size"
+            app:iconGravity="start" />
+    </LinearLayout>
+
+    <!-- No result message with better styling -->
+    <TextView
+        android:id="@+id/tv_no_results"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Không tìm thấy sản phẩm phù hợp"
+        android:visibility="gone"
+        android:textColor="@android:color/holo_red_light"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:padding="16dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:drawableTop="@android:drawable/ic_dialog_alert"
+        android:drawablePadding="8dp" />
+
+    <!-- Product list with RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_products"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp" />
+    <TextView
+        android:id="@+id/tv_suggestions_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Gợi ý sản phẩm"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_suggestions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:visibility="gone" />
+
+</LinearLayout>
