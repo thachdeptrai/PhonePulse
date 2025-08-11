@@ -1,175 +1,102 @@
 package com.phoneapp.phonepulse.models;
 
+import com.google.gson.annotations.SerializedName;
+import com.phoneapp.phonepulse.request.OrderItem;
+
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-public class Order {
-    private String _id;
+public class Order implements Serializable {
+
+    @SerializedName("_id")
+    private String id;
+
+    @SerializedName("user_id")
     private String userId;
-    private List<OrderItem> items;
-    private double discount_amount;
-    private double final_price;
+
+    @SerializedName("items")
+    private List<OrderItem> items;  // ✅ Dùng class từ package request
+
+    @SerializedName("discount_amount")
+    private double discountAmount;
+
+    @SerializedName("final_price")
+    private double finalPrice;
+
+    @SerializedName("status")
     private String status;
-    private String shipping_address;
-    private String payment_method;
-    private String payment_status;
-    private String shipping_status;
+
+    @SerializedName("shipping_address")
+    private String shippingAddress;
+
+    @SerializedName("payment_method")
+    private String paymentMethod;
+
+    @SerializedName("payment_status")
+    private String paymentStatus;
+
+    @SerializedName("shipping_status")
+    private String shippingStatus;
+
+    @SerializedName("note")
     private String note;
-    private Date shipping_date;
-    private Date delivered_date;
-    private Date created_date;
-    private Date modified_date;
 
-    // Cần tạo class OrderItem tương ứng với cấu trúc trong backend
-    public static class OrderItem {
-        private String productId;
-        private String variantId;
-        private int quantity;
+    @SerializedName("shipping_date")
+    private Date shippingDate;
 
-        // Getters and Setters cho OrderItem
-        public String getProductId() {
-            return productId;
-        }
+    @SerializedName("delivered_date")
+    private Date deliveredDate;
 
-        public void setProductId(String productId) {
-            this.productId = productId;
-        }
+    @SerializedName("created_date")
+    private Date createdDate;
 
-        public String getVariantId() {
-            return variantId;
-        }
+    @SerializedName("modified_date")
+    private Date modifiedDate;
 
-        public void setVariantId(String variantId) {
-            this.variantId = variantId;
-        }
+    // --- Getters & Setters ---
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-        public int getQuantity() {
-            return quantity;
-        }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
-        public void setQuantity(int quantity) {
-            this.quantity = quantity;
-        }
-    }
+    public List<OrderItem> getItems() { return items; }
+    public void setItems(List<OrderItem> items) { this.items = items; }
 
-    // Getters and Setters cho Order
-    public String get_id() {
-        return _id;
-    }
+    public double getDiscountAmount() { return discountAmount; }
+    public void setDiscountAmount(double discountAmount) { this.discountAmount = discountAmount; }
 
-    public void set_id(String _id) {
-        this._id = _id;
-    }
+    public double getFinalPrice() { return finalPrice; }
+    public void setFinalPrice(double finalPrice) { this.finalPrice = finalPrice; }
 
-    public String getUserId() {
-        return userId;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+    public String getShippingAddress() { return shippingAddress; }
+    public void setShippingAddress(String shippingAddress) { this.shippingAddress = shippingAddress; }
 
-    public List<OrderItem> getItems() {
-        return items;
-    }
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
 
-    public void setItems(List<OrderItem> items) {
-        this.items = items;
-    }
+    public String getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
 
-    public double getDiscount_amount() {
-        return discount_amount;
-    }
+    public String getShippingStatus() { return shippingStatus; }
+    public void setShippingStatus(String shippingStatus) { this.shippingStatus = shippingStatus; }
 
-    public void setDiscount_amount(double discount_amount) {
-        this.discount_amount = discount_amount;
-    }
+    public String getNote() { return note; }
+    public void setNote(String note) { this.note = note; }
 
-    public double getFinal_price() {
-        return final_price;
-    }
+    public Date getShippingDate() { return shippingDate; }
+    public void setShippingDate(Date shippingDate) { this.shippingDate = shippingDate; }
 
-    public void setFinal_price(double final_price) {
-        this.final_price = final_price;
-    }
+    public Date getDeliveredDate() { return deliveredDate; }
+    public void setDeliveredDate(Date deliveredDate) { this.deliveredDate = deliveredDate; }
 
-    public String getStatus() {
-        return status;
-    }
+    public Date getCreatedDate() { return createdDate; }
+    public void setCreatedDate(Date createdDate) { this.createdDate = createdDate; }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getShipping_address() {
-        return shipping_address;
-    }
-
-    public void setShipping_address(String shipping_address) {
-        this.shipping_address = shipping_address;
-    }
-
-    public String getPayment_method() {
-        return payment_method;
-    }
-
-    public void setPayment_method(String payment_method) {
-        this.payment_method = payment_method;
-    }
-
-    public String getPayment_status() {
-        return payment_status;
-    }
-
-    public void setPayment_status(String payment_status) {
-        this.payment_status = payment_status;
-    }
-
-    public String getShipping_status() {
-        return shipping_status;
-    }
-
-    public void setShipping_status(String shipping_status) {
-        this.shipping_status = shipping_status;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public Date getShipping_date() {
-        return shipping_date;
-    }
-
-    public void setShipping_date(Date shipping_date) {
-        this.shipping_date = shipping_date;
-    }
-
-    public Date getDelivered_date() {
-        return delivered_date;
-    }
-
-    public void setDelivered_date(Date delivered_date) {
-        this.delivered_date = delivered_date;
-    }
-
-    public Date getCreated_date() {
-        return created_date;
-    }
-
-    public void setCreated_date(Date created_date) {
-        this.created_date = created_date;
-    }
-
-    public Date getModified_date() {
-        return modified_date;
-    }
-
-    public void setModified_date(Date modified_date) {
-        this.modified_date = modified_date;
-    }
+    public Date getModifiedDate() { return modifiedDate; }
+    public void setModifiedDate(Date modifiedDate) { this.modifiedDate = modifiedDate; }
 }

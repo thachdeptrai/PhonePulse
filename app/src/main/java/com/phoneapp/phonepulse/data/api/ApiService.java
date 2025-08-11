@@ -39,6 +39,7 @@ public interface ApiService {
     @DELETE("/api/users/delete-self")
     Call<ApiResponse> deleteAccount(@Header("Authorization") String token);
 
+    // ========== PRODUCTS ==========
     @GET("/api/products")
     Call<List<Product>> getAllProductsRaw();
 

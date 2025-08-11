@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class Constants {
-      public static final String BASE_URL = "http://192.168.1.9:5000";
-   // public static final String BASE_URL = "http://10.24.9.66:5000";
+     // public static final String BASE_URL = "http://192.168.1.9:5000";
+  //  public static final String BASE_URL = "http://10.24.32.145:5000";
+  public static final String BASE_URL = "http://192.168.1.9:5000";
+    //     public static final String BASE_URL = "http://192.168.100.188:5000";
 
     public static final int TIMEOUT = 30;
     public static final String SHARED_PREFS = "app_prefs";
