@@ -13,11 +13,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.phoneapp.phonepulse.Adapter.OrderAdapter;
+import com.phoneapp.phonepulse.Adapter.OrderItemAdapter;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
 import com.phoneapp.phonepulse.models.Order;
+import com.phoneapp.phonepulse.request.OrderItem;
 import com.phoneapp.phonepulse.utils.Constants;
 
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
     private static final String TAG = "TatCaDonHang_FRAGMENT";
     private RecyclerView rvOrderItem;
     private OrderAdapter orderAdapter;
+    private OrderItemAdapter orderItemAdapter;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -40,21 +43,32 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
         rvOrderItem = view.findViewById(R.id.rv_order_item);
         rvOrderItem.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // 📌 Kiểm tra nếu có dữ liệu Order truyền từ Activity
+        // 1️⃣ Kiểm tra nếu Activity gửi dữ liệu sản phẩm vừa đặt
         Bundle bundle = getArguments();
-        if (bundle != null && bundle.containsKey("order_detail")) {
-            Log.d(TAG, "Nhận dữ liệu order_detail từ Bundle");
-            Order order = (Order) bundle.getSerializable("order_detail");
-            if (order != null) {
-                List<Order> orders = new ArrayList<>();
-                orders.add(order); // hiển thị 1 đơn mới
-                orderAdapter = new OrderAdapter(getContext(), orders);
-                rvOrderItem.setAdapter(orderAdapter);
-                return view;
+        if (bundle != null) {
+            if (bundle.containsKey("order_items")) {
+                ArrayList<OrderItem> orderItems = bundle.getParcelableArrayList("order_items");
+                if (orderItems != null && !orderItems.isEmpty()) {
+                    Log.d(TAG, "Nhận được " + orderItems.size() + " sản phẩm từ Order");
+                    orderItemAdapter = new OrderItemAdapter(orderItems);
+                    rvOrderItem.setAdapter(orderItemAdapter);
+                    return view;
+                }
+            }
+            // Fallback: nhận từng Order (nếu Activity gửi)
+            if (bundle.containsKey("order_detail")) {
+                Order order = (Order) bundle.getSerializable("order_detail");
+                if (order != null) {
+                    List<Order> orders = new ArrayList<>();
+                    orders.add(order);
+                    orderAdapter = new OrderAdapter(getContext(), orders);
+                    rvOrderItem.setAdapter(orderAdapter);
+                    return view;
+                }
             }
         }
 
-        // Nếu không có dữ liệu truyền sang thì gọi API
+        // 2️⃣ Nếu không có dữ liệu truyền sang thì gọi API
         fetchOrdersFromApi();
 
         return view;
@@ -67,9 +81,8 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
             return;
         }
 
-        String bearerToken = "Bearer " + rawToken;
         ApiService service = RetrofitClient.getApiService(rawToken);
-        Call<ApiResponse<List<Order>>> call = service.getUserOrders(bearerToken);
+        Call<ApiResponse<List<Order>>> call = service.getUserOrders();
 
         call.enqueue(new Callback<ApiResponse<List<Order>>>() {
             @Override

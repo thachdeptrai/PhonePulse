@@ -8,7 +8,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class OrderItem implements Parcelable {
 
-    @SerializedName("_id") // Nếu API yêu cầu "id" thì đổi lại
+    @SerializedName("_id")
     private String id;
 
     @SerializedName("name")
@@ -32,6 +32,10 @@ public class OrderItem implements Parcelable {
     @SerializedName("variantId")
     private String variantId;
 
+    public OrderItem() {
+        // Constructor mặc định cần cho Gson
+    }
+
     public OrderItem(String id, String name, String imageUrl,
                      int price, int quantity, String variant,
                      String productId, String variantId) {
@@ -47,27 +51,38 @@ public class OrderItem implements Parcelable {
         Log.d("OrderItem_Init", toString());
     }
 
-    // Constructor không có id
     public OrderItem(String name, String imageUrl,
                      int price, int quantity, String variant,
                      String productId, String variantId) {
         this(null, name, imageUrl, price, quantity, variant, productId, variantId);
     }
 
-    // Getter
+    // --- Getters & Setters ---
     public String getId() { return id; }
-    public String getName() { return name; }
-    public String getImageUrl() { return imageUrl; }
-    public int getPrice() { return price; }
-    public int getQuantity() { return quantity; }
-    public String getVariant() { return variant; }
-    public String getProductId() { return productId; }
-    public String getVariantId() { return variantId; }
-
-    // Setter cho id để có thể gán lại khi cần
     public void setId(String id) { this.id = id; }
 
-    // Hàm xóa id rỗng/null
+    public String getName() { return name != null ? name : ""; }
+    public void setName(String name) { this.name = name; }
+
+    public String getImageUrl() { return imageUrl != null ? imageUrl : ""; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public int getPrice() { return price; }
+    public void setPrice(int price) { this.price = price; }
+
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
+
+    public String getVariant() { return variant != null ? variant : ""; }
+    public void setVariant(String variant) { this.variant = variant; }
+
+    public String getProductId() { return productId; }
+    public void setProductId(String productId) { this.productId = productId; }
+
+    public String getVariantId() { return variantId; }
+    public void setVariantId(String variantId) { this.variantId = variantId; }
+
+    // Xóa id rỗng/null
     public void sanitize() {
         if (id != null && id.trim().isEmpty()) {
             Log.w("OrderItem_Sanitize", "Phát hiện _id rỗng, đặt lại thành null.");

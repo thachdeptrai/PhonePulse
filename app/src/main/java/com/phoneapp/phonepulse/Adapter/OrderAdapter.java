@@ -1,12 +1,13 @@
 package com.phoneapp.phonepulse.Adapter;
 
-import android.util.Log;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull; // ✅ Import đúng
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,17 +16,18 @@ import com.phoneapp.phonepulse.models.Order;
 import com.phoneapp.phonepulse.request.OrderItem;
 
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import io.reactivex.annotations.NonNull;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
 
     private final List<Order> orderList;
     private static final String TAG = "OrderAdapter";
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+    private final SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+    private final SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
 
     public OrderAdapter(Context context, List<Order> orderList) {
         this.orderList = orderList;
@@ -51,56 +53,27 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
         Order order = orderList.get(position);
         Log.d(TAG, "----------------------------------------------");
-        Log.d(TAG, "📌 ĐANG BIND ĐƠN HÀNG [" + position + "]");
-        Log.d(TAG, "🆔 ID: " + order.getId());
-        Log.d(TAG, "👤 UserID: " + order.getUserId());
-        Log.d(TAG, "📅 Ngày tạo: " + order.getCreatedDate());
-        Log.d(TAG, "💰 Tổng tiền: " + order.getFinalPrice());
-        Log.d(TAG, "🎯 Trạng thái: " + order.getStatus());
-        Log.d(TAG, "🚚 ShippingStatus: " + order.getShippingStatus());
-        Log.d(TAG, "💳 PaymentStatus: " + order.getPaymentStatus());
-        Log.d(TAG, "🏠 Địa chỉ giao hàng: " + order.getShippingAddress());
-        Log.d(TAG, "📝 Ghi chú: " + order.getNote());
+        Log.d(TAG, "📌 ĐANG BIND ĐƠN HÀNG [" + position + "] - ID: " + order.getId());
 
         // Bind UI
         holder.tvOrderId.setText("Đơn hàng #" + order.getId());
-        holder.tvOrderDate.setText("Ngày đặt: " +
-                (order.getCreatedDate() != null ? dateFormat.format(order.getCreatedDate()) : "N/A"));
-        holder.tvOrderStatus.setText("Trạng thái: " + (order.getStatus() != null ? order.getStatus() : "Chưa xác định"));
-        holder.tvOrderTotal.setText("Tổng tiền: " + formatCurrency((int) order.getFinalPrice()));
+        holder.tvOrderDate.setText("Ngày đặt: " + formatDate(order.getCreatedDate()));
+        holder.tvOrderStatus.setText("Trạng thái: " + safeString(order.getStatus()));
+        holder.tvOrderTotal.setText("Tổng tiền: " + formatCurrency(order.getFinalPrice()));
 
-        // Log chi tiết các sản phẩm trong đơn
+        // Adapter con cho sản phẩm
         List<OrderItem> items = order.getItems();
         if (items != null && !items.isEmpty()) {
-            Log.d(TAG, "📦 Số sản phẩm trong đơn: " + items.size());
-            for (int i = 0; i < items.size(); i++) {
-                OrderItem it = items.get(i);
-                Log.d(TAG, "   ├─ Sản phẩm [" + i + "]");
-                Log.d(TAG, "   │   ID: " + it.getId());
-                Log.d(TAG, "   │   Tên: " + it.getName());
-                Log.d(TAG, "   │   SL: " + it.getQuantity());
-                Log.d(TAG, "   │   Giá: " + it.getPrice());
-                Log.d(TAG, "   │   Thành tiền: " + (it.getQuantity() * it.getPrice()));
-                Log.d(TAG, "   │   Variant: " + it.getVariant());
-                Log.d(TAG, "   │   ProductID: " + it.getProductId());
-                Log.d(TAG, "   │   VariantID: " + it.getVariantId());
-                Log.d(TAG, "   │   ImageURL: " + it.getImageUrl());
-            }
+            holder.rvOrderItems.setLayoutManager(new LinearLayoutManager(holder.itemView.getContext()));
+            holder.rvOrderItems.setAdapter(new OrderItemAdapter(items));
         } else {
             Log.w(TAG, "⚠ order.getItems() rỗng hoặc null cho đơn hàng: " + order.getId());
         }
-
-        // Adapter cho danh sách sản phẩm
-        OrderItemAdapter itemAdapter = new OrderItemAdapter(items);
-        holder.rvOrderItems.setLayoutManager(new LinearLayoutManager(holder.itemView.getContext()));
-        holder.rvOrderItems.setAdapter(itemAdapter);
     }
 
     @Override
     public int getItemCount() {
-        int count = orderList != null ? orderList.size() : 0;
-        Log.d(TAG, "📊 getItemCount() = " + count);
-        return count;
+        return orderList != null ? orderList.size() : 0;
     }
 
     public static class OrderViewHolder extends RecyclerView.ViewHolder {
@@ -117,7 +90,27 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         }
     }
 
-    private String formatCurrency(int amount) {
+    private String safeString(String text) {
+        return text != null ? text : "N/A";
+    }
+
+    private String formatDate(Object dateObj) {
+        if (dateObj == null) return "N/A";
+
+        if (dateObj instanceof Date) {
+            return outputFormat.format((Date) dateObj);
+        } else if (dateObj instanceof String) {
+            try {
+                Date date = inputFormat.parse((String) dateObj);
+                return outputFormat.format(date);
+            } catch (ParseException e) {
+                return dateObj.toString();
+            }
+        }
+        return dateObj.toString();
+    }
+
+    private String formatCurrency(double amount) {
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         return formatter.format(amount);
     }

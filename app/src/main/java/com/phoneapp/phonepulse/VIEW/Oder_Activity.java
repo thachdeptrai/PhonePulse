@@ -150,8 +150,23 @@ public class Oder_Activity extends AppCompatActivity {
             public void onResponse(Call<ApiResponse<Order>> call, Response<ApiResponse<Order>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     Toast.makeText(Oder_Activity.this, "Đặt hàng thành công!", Toast.LENGTH_SHORT).show();
-                    // Xóa giỏ hàng sau khi đặt thành công
+
+                    // Lấy danh sách các item vừa đặt
+                    ArrayList<OrderItem> orderedItems = new ArrayList<>();
+                    if (response.body().getData() != null && response.body().getData().getItems() != null) {
+                        orderedItems.addAll(response.body().getData().getItems());
+                    }
+
+                    // Xóa giỏ hàng
                     clearCartAfterOrderSuccess();
+
+                    // Truyền danh sách item này sang màn hình khác (ví dụ DashBoar_Activity)
+                    Intent intent = new Intent(Oder_Activity.this, DashBoar_Activity.class);
+                    intent.putExtra("navigate_to_history", true);
+                    intent.putParcelableArrayListExtra("ordered_items", orderedItems); // <-- thêm dòng này
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+
                 } else {
                     String errorMsg = "Đặt hàng thất bại.";
                     if (response.body() != null && response.body().getMessage() != null) {
@@ -168,6 +183,7 @@ public class Oder_Activity extends AppCompatActivity {
                 Toast.makeText(Oder_Activity.this, "Lỗi kết nối. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
             }
         });
+
     }
 
     private void clearCartAfterOrderSuccess() {

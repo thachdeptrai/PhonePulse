@@ -15,9 +15,18 @@ import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.phoneapp.phonepulse.R;
+import com.phoneapp.phonepulse.data.api.ApiService;
+import com.phoneapp.phonepulse.data.api.RetrofitClient;
+import com.phoneapp.phonepulse.models.Product;
+import com.phoneapp.phonepulse.models.Variant;
 import com.phoneapp.phonepulse.request.OrderItem;
+import com.phoneapp.phonepulse.utils.Constants;
 
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.OrderViewHolder> {
 
@@ -26,13 +35,13 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
 
     public OrderItemAdapter(List<OrderItem> orderItems) {
         this.orderItems = orderItems;
-        Log.d(TAG, "Constructor - orderItems size = " + (orderItems != null ? orderItems.size() : 0));
+        Log.d(TAG, "✅ Constructor - orderItems size = " + (orderItems != null ? orderItems.size() : 0));
     }
 
     @NonNull
     @Override
     public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.d(TAG, "onCreateViewHolder() called for viewType=" + viewType);
+        Log.d(TAG, "📦 onCreateViewHolder()");
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_order_product, parent, false);
         return new OrderViewHolder(view);
@@ -40,119 +49,81 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
 
     @Override
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
-        Log.d(TAG, "onBindViewHolder() position=" + position + " / adapterCount=" + getItemCount());
-
-        if (orderItems == null) {
-            Log.e(TAG, "orderItems is null -> nothing to bind");
-            return;
-        }
-        if (position < 0 || position >= orderItems.size()) {
-            Log.e(TAG, "Invalid position: " + position);
-            return;
-        }
+        if (orderItems == null || position < 0 || position >= orderItems.size()) return;
 
         OrderItem item = orderItems.get(position);
         if (item == null) {
-            Log.w(TAG, "OrderItem at position " + position + " is null");
-            // reset UI to defaults
-            holder.tvName.setText("Sản phẩm");
-            holder.tvQuantity.setText("Số lượng: 0");
-            holder.tvPrice.setText("Giá: 0 đ");
-            holder.tvVariant.setVisibility(View.GONE);
-            holder.ivImage.setImageResource(R.drawable.placeholder_product);
+            setDefaultUI(holder);
             return;
         }
 
-        // pretty JSON debug
-        try {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            String json = gson.toJson(item);
-            Log.d(TAG, "Raw OrderItem JSON at pos " + position + ":\n" + json);
-        } catch (Exception e) {
-            Log.w(TAG, "Gson serialization failed: " + e.getMessage(), e);
-        }
+        // Bind quantity tạm thời
+        holder.tvQuantity.setText("Số lượng: " + Math.max(item.getQuantity(), 0));
+        holder.tvPrice.setText("Giá: " + formatCurrency(Math.max(item.getPrice(), 0) * item.getQuantity()));
 
-        // Read fields safely
-        String id = safeString(item.getId());
-        String name = safeString(item.getName());
-        String imageUrl = safeString(item.getImageUrl());
-        int price = item.getPrice();
-        int quantity = item.getQuantity();
-        String variant = safeString(item.getVariant());
-        String productId = safeString(item.getProductId());
-        String variantId = safeString(item.getVariantId());
+        // Nếu chưa có name hoặc imageUrl hoặc giá = 0 -> gọi API
+        if (TextUtils.isEmpty(item.getName()) || TextUtils.isEmpty(item.getImageUrl()) || item.getPrice() <= 0) {
+            String token = Constants.getToken(holder.itemView.getContext());
+            ApiService service = RetrofitClient.getApiService(token);
+            service.getProductById(item.getProductId()).enqueue(new Callback<Product>() {
+                @Override
+                public void onResponse(Call<Product> call, Response<Product> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        Product product = response.body();
 
-        // Detailed field log
-        Log.d(TAG, String.format("Fields (pos=%d): id=%s, productId=%s, variantId=%s, name=%s, quantity=%d, price=%d, variant=%s, imageUrl=%s, objHash=%d",
-                position, id, productId, variantId, name, quantity, price, variant, imageUrl, System.identityHashCode(item)));
+                        // Set tên sản phẩm
+                        item.setName(product.getName());
+                        item.setImageUrl(product.getImageUrlSafe());
 
-        // Warnings for suspicious values
-        if (TextUtils.isEmpty(name)) Log.w(TAG, "Name is empty/null for item at pos " + position);
-        if (price <= 0) Log.w(TAG, "Price is zero or negative for item at pos " + position);
-        if (quantity <= 0) Log.w(TAG, "Quantity is zero or negative for item at pos " + position);
-        if (TextUtils.isEmpty(imageUrl)) Log.w(TAG, "ImageURL is empty/null for item at pos " + position);
+                        // Lấy variant theo variantId
+                        String variantName = "";
+                        int price = 0;
+                        if (product.getVariants() != null) {
+                            for (Variant v : product.getVariants()) {
+                                if (v.getId().equals(item.getVariantId())) {
+                                    variantName = v.getProductId();
+                                    price = (int) v.getPrice();
+                                    break;
+                                }
+                            }
+                        }
+                        item.setVariant(variantName);
+                        item.setPrice(price);
 
-        boolean imageLooksValid = imageUrl.startsWith("http://") || imageUrl.startsWith("https://");
-        Log.d(TAG, "Image URL looks valid: " + imageLooksValid + " ('" + imageUrl + "')");
+                        // Cập nhật UI
+                        holder.tvName.setText(item.getName());
+                        holder.tvVariant.setVisibility(!TextUtils.isEmpty(variantName) ? View.VISIBLE : View.GONE);
+                        holder.tvPrice.setText("Giá: " + formatCurrency(price * item.getQuantity()));
+                        Glide.with(holder.itemView.getContext())
+                                .load(item.getImageUrl())
+                                .placeholder(R.drawable.placeholder_product)
+                                .error(R.drawable.placeholder_product)
+                                .into(holder.ivImage);
+                    }
+                }
 
-        // UI binding (safe)
-        holder.tvName.setText(!TextUtils.isEmpty(name) ? name : "Sản phẩm");
-        holder.tvQuantity.setText("Số lượng: " + quantity);
-
-        int totalItemPrice = price * Math.max(0, quantity); // guard quantity negative
-        holder.tvPrice.setText("Giá: " + formatCurrency(totalItemPrice));
-
-        if (!TextUtils.isEmpty(variant)) {
-            holder.tvVariant.setText("Phân loại: " + variant);
-            holder.tvVariant.setVisibility(View.VISIBLE);
+                @Override
+                public void onFailure(Call<Product> call, Throwable t) {
+                    Log.e(TAG, "❌ Lỗi lấy sản phẩm: " + t.getMessage());
+                }
+            });
         } else {
-            holder.tvVariant.setVisibility(View.GONE);
-        }
-
-        // Load image with Glide and detailed logs
-        try {
-            if (imageLooksValid) {
-                Log.d(TAG, "Glide load (URL) for pos " + position + ": " + imageUrl);
-                Glide.with(holder.itemView.getContext())
-                        .load(imageUrl)
-                        .placeholder(R.drawable.placeholder_product)
-                        .error(R.drawable.placeholder_product)
-                        .into(holder.ivImage);
-            } else {
-                Log.d(TAG, "Glide load (placeholder) for pos " + position + " because imageUrl invalid/empty");
-                Glide.with(holder.itemView.getContext())
-                        .load(R.drawable.placeholder_product)
-                        .into(holder.ivImage);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Glide failed for pos " + position + ": " + e.getMessage(), e);
-            holder.ivImage.setImageResource(R.drawable.placeholder_product);
+            // Nếu đã có dữ liệu -> bind trực tiếp
+            holder.tvName.setText(item.getName());
+            holder.tvVariant.setVisibility(!TextUtils.isEmpty(item.getVariant()) ? View.VISIBLE : View.GONE);
+            holder.tvPrice.setText("Giá: " + formatCurrency(item.getPrice() * item.getQuantity()));
+            Glide.with(holder.itemView.getContext())
+                    .load(item.getImageUrl())
+                    .placeholder(R.drawable.placeholder_product)
+                    .error(R.drawable.placeholder_product)
+                    .into(holder.ivImage);
         }
     }
+
 
     @Override
     public int getItemCount() {
-        int cnt = (orderItems != null) ? orderItems.size() : 0;
-        Log.v(TAG, "getItemCount() = " + cnt);
-        return cnt;
-    }
-
-    @Override
-    public void onViewRecycled(@NonNull OrderViewHolder holder) {
-        super.onViewRecycled(holder);
-        Log.d(TAG, "onViewRecycled() position=" + holder.getAdapterPosition() + " / viewHash=" + holder.hashCode());
-    }
-
-    @Override
-    public void onViewAttachedToWindow(@NonNull OrderViewHolder holder) {
-        super.onViewAttachedToWindow(holder);
-        Log.d(TAG, "onViewAttachedToWindow() position=" + holder.getAdapterPosition());
-    }
-
-    @Override
-    public void onViewDetachedFromWindow(@NonNull OrderViewHolder holder) {
-        super.onViewDetachedFromWindow(holder);
-        Log.d(TAG, "onViewDetachedFromWindow() position=" + holder.getAdapterPosition());
+        return orderItems != null ? orderItems.size() : 0;
     }
 
     static class OrderViewHolder extends RecyclerView.ViewHolder {
@@ -169,17 +140,20 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
         }
     }
 
-    // Format tiền kiểu 1.500.000 đ
     private String formatCurrency(int amount) {
         try {
             return String.format("%,d đ", amount).replace(",", ".");
         } catch (Exception e) {
-            Log.w(TAG, "formatCurrency failed for amount=" + amount + ": " + e.getMessage());
+            Log.w(TAG, "⚠ formatCurrency failed: " + e.getMessage());
             return amount + " đ";
         }
     }
 
-    private String safeString(String s) {
-        return s != null ? s : "";
+    private void setDefaultUI(OrderViewHolder holder) {
+        holder.tvName.setText("Sản phẩm");
+        holder.tvQuantity.setText("Số lượng: 0");
+        holder.tvPrice.setText("Giá: 0 đ");
+        holder.tvVariant.setVisibility(View.GONE);
+        holder.ivImage.setImageResource(R.drawable.placeholder_product);
     }
 }

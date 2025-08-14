@@ -110,7 +110,8 @@ public interface ApiService {
 
     // Đã sửa lỗi kiểu trả về để khớp với backend
     @GET("/api/orders")
-    Call<ApiResponse<List<Order>>> getUserOrders(@Header("Authorization") String token);
+    Call<ApiResponse<List<Order>>> getUserOrders();
+
 
     @PUT("/api/orders/{id}/cancel")
     Call<ApiResponse> cancelOrder(@Header("Authorization") String token, @Path("id") String id);

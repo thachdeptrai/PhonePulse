@@ -21,6 +21,9 @@ import com.phoneapp.phonepulse.FRAGMENT.Home_FRAGMENT;
 import com.phoneapp.phonepulse.FRAGMENT.Profile_FRAGMENT;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.FRAGMENT.OrderHistory_FRAGMENT; // Thêm import cho OrderHistory_FRAGMENT
+import com.phoneapp.phonepulse.request.OrderItem;
+
+import java.util.ArrayList;
 
 public class DashBoar_Activity extends AppCompatActivity {
 
@@ -98,16 +101,37 @@ public class DashBoar_Activity extends AppCompatActivity {
     }
 
     private void handleIntent(Intent intent) {
-        if (intent != null && intent.getBooleanExtra("navigate_to_history", false)) {
-            // Cập nhật trạng thái BottomNavigationView
-            bottomNavigationView.setSelectedItemId(R.id.nav_profile);
-            // Chuyển đến Fragment Lịch sử đơn hàng
-            replaceFragment(new OrderHistory_FRAGMENT(), "Lịch sử đơn hàng", false);
-        } else if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) == null) {
-            // Chỉ load Home_FRAGMENT mặc định nếu chưa có fragment nào được load
+        if (intent != null) {
+            // Nhận danh sách OrderItem từ Oder_Activity
+            ArrayList<OrderItem> orderItems = intent.getParcelableArrayListExtra("order_items");
+            if (orderItems != null && !orderItems.isEmpty()) {
+                Log.d("DashBoar_Activity", "Nhận được " + orderItems.size() + " item từ Oder_Activity");
+                // Bạn có thể truyền orderItems này cho fragment OrderHistory_FRAGMENT
+                OrderHistory_FRAGMENT fragment = new OrderHistory_FRAGMENT();
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList("order_items", orderItems);
+                fragment.setArguments(bundle);
+
+                // Chuyển sang fragment lịch sử đơn hàng
+                bottomNavigationView.setSelectedItemId(R.id.nav_profile);
+                replaceFragment(fragment, "Lịch sử đơn hàng", false);
+                return;
+            }
+
+            // Nếu intent yêu cầu chỉ chuyển sang lịch sử đơn hàng
+            if (intent.getBooleanExtra("navigate_to_history", false)) {
+                bottomNavigationView.setSelectedItemId(R.id.nav_profile);
+                replaceFragment(new OrderHistory_FRAGMENT(), "Lịch sử đơn hàng", false);
+                return;
+            }
+        }
+
+        // Load Home mặc định nếu chưa có fragment nào
+        if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) == null) {
             replaceFragment(new Home_FRAGMENT(), "Trang Chủ", true);
         }
     }
+
 
     /**
      * Thay thế Fragment và cập nhật trạng thái UI tương ứng.
