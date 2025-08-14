@@ -87,15 +87,37 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/cart_action_bar"
+                    android:id="@+id/ll_clear_cart"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:padding="12dp"
-                    android:layout_marginBottom="12dp"
-                    android:elevation="2dp">
-                    </LinearLayout>
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:background="@android:color/white"
+                    android:elevation="2dp"
+                    android:layout_marginBottom="8dp">
+
+                    <CheckBox
+                        android:id="@+id/cb_select_all"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/colorPrimary" />
+
+                    <TextView
+                        android:id="@+id/tv_clear_cart"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Xóa giỏ hàng"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:layout_marginStart="8dp"
+                        android:clickable="true"
+                        android:focusable="true" />
+                </LinearLayout>
+
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_cart_items"

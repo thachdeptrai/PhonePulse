@@ -1,5 +1,7 @@
 package com.phoneapp.phonepulse.VIEW;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,6 +10,7 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.phoneapp.phonepulse.Adapter.OrderItemAdapter;
-import com.phoneapp.phonepulse.FRAGMENT.HISTORY_ORDER_FRAGMENT.TatCaDonHang_FRAGMENT;
+import com.phoneapp.phonepulse.MainActivity;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.data.api.ApiService;
@@ -29,6 +32,7 @@ import com.phoneapp.phonepulse.request.OrderRequest;
 import com.phoneapp.phonepulse.utils.Constants;
 
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -45,6 +49,9 @@ public class Oder_Activity extends AppCompatActivity {
     private RadioButton radioCod, radioMomo;
     private TextView tvSubtotal, tvDiscount, tvFinalPrice, tvTotalAmount;
     private TextView tvAddCoupon;
+
+    private ArrayList<OrderItem> orderItemList;
+    private ApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +86,7 @@ public class Oder_Activity extends AppCompatActivity {
         bindUserToUI();
 
         // Nhận sản phẩm từ giỏ hàng
-        ArrayList<OrderItem> orderItemList = (ArrayList<OrderItem>) getIntent().getSerializableExtra("order_items");
+        orderItemList = getIntent().getParcelableArrayListExtra("order_items");
 
         if (orderItemList != null && !orderItemList.isEmpty()) {
             OrderItemAdapter adapter = new OrderItemAdapter(orderItemList);
@@ -91,9 +98,10 @@ public class Oder_Activity extends AppCompatActivity {
                 total += item.getPrice() * item.getQuantity();
             }
 
-            tvTotalAmount.setText(String.format("%,d đ", total).replace(",", "."));
-            tvSubtotal.setText(tvTotalAmount.getText());
-            tvFinalPrice.setText(tvTotalAmount.getText());
+            String formattedTotal = String.format("%,d đ", total).replace(",", ".");
+            tvTotalAmount.setText(formattedTotal);
+            tvSubtotal.setText(formattedTotal);
+            tvFinalPrice.setText(formattedTotal);
         } else {
             Log.w("OderActivity", "Không có sản phẩm trong đơn hàng.");
         }
@@ -105,63 +113,118 @@ public class Oder_Activity extends AppCompatActivity {
     private void placeOrder() {
         String token = Constants.getToken(Oder_Activity.this);
         if (token == null || token.isEmpty()) {
-            Log.e("Order", "Token không tồn tại. Không thể đặt hàng.");
+            Toast.makeText(this, "Vui lòng đăng nhập để đặt hàng.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String shippingAddress = tvShippingAddress.getText().toString();
         String paymentMethod = radioCod.isChecked() ? "COD" : "MOMO";
         String note = etOrderNote.getText().toString();
-        int discount = 0;
+        int discount = 0; // Tạm thời là 0
         int finalPrice = extractPrice(tvFinalPrice.getText().toString());
 
-        ArrayList<OrderItem> orderItems = (ArrayList<OrderItem>) getIntent().getSerializableExtra("order_items");
-        if (orderItems == null || orderItems.isEmpty()) {
-            Log.e("Order", "Không có sản phẩm nào để đặt hàng.");
+        if (orderItemList == null || orderItemList.isEmpty()) {
+            Toast.makeText(this, "Không có sản phẩm nào để đặt hàng.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        OrderRequest request = new OrderRequest(orderItems, discount, finalPrice, shippingAddress, paymentMethod, note);
-        ApiService apiService = RetrofitClient.getApiService(token);
+        // Tạo danh sách OrderItem mới để gửi đi
+        ArrayList<OrderItem> validOrderItems = new ArrayList<>();
+        for (OrderItem item : orderItemList) {
+            validOrderItems.add(new OrderItem(
+                    item.getName(),
+                    item.getImageUrl(),
+                    item.getPrice(),
+                    item.getQuantity(),
+                    item.getVariant(),
+                    item.getProductId(),
+                    item.getVariantId()
+            ));
+        }
 
-        apiService.createOrder("Bearer " + token, request).enqueue(new Callback<ApiResponse<Order>>() {
+        OrderRequest request = new OrderRequest(validOrderItems, discount, finalPrice, shippingAddress, paymentMethod, note);
+
+        apiService = RetrofitClient.getApiService(token);
+        apiService.createOrder(request).enqueue(new Callback<ApiResponse<Order>>() {
             @Override
             public void onResponse(Call<ApiResponse<Order>> call, Response<ApiResponse<Order>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    // Xóa giỏ hàng
-                    clearCart(apiService);
-
-                    // Chuyển sang fragment tất cả đơn hàng
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.fragment_container, new TatCaDonHang_FRAGMENT())
-                            .addToBackStack(null)
-                            .commit();
+                    Toast.makeText(Oder_Activity.this, "Đặt hàng thành công!", Toast.LENGTH_SHORT).show();
+                    // Xóa giỏ hàng sau khi đặt thành công
+                    clearCartAfterOrderSuccess();
                 } else {
-                    Log.e("Order", "Đặt hàng thất bại: " + (response.body() != null ? response.body().getMessage() : "Lỗi không xác định"));
+                    String errorMsg = "Đặt hàng thất bại.";
+                    if (response.body() != null && response.body().getMessage() != null) {
+                        errorMsg = response.body().getMessage();
+                    }
+                    Log.e("OrderDebug", "Đặt hàng thất bại: " + errorMsg);
+                    Toast.makeText(Oder_Activity.this, errorMsg, Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<Order>> call, Throwable t) {
-                Log.e("Order", "Lỗi mạng khi gọi API createOrder: " + t.getMessage(), t);
+                Log.e("OrderDebug", "Lỗi mạng khi gọi API createOrder: " + t.getMessage(), t);
+                Toast.makeText(Oder_Activity.this, "Lỗi kết nối. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
             }
         });
     }
 
-    private void clearCart(ApiService apiService) {
-        CartRequest.RemoveCartItem clearCartRequest = new CartRequest.RemoveCartItem("", "");
-        apiService.removeFromCart(clearCartRequest).enqueue(new Callback<ApiResponse<Cart>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<Cart>> call, Response<ApiResponse<Cart>> response) {
-                Log.d("Cart", "Giỏ hàng đã được xóa.");
-            }
+    private void clearCartAfterOrderSuccess() {
+        if (orderItemList == null || orderItemList.isEmpty()) {
+            navigateToOrderHistory();
+            return;
+        }
 
-            @Override
-            public void onFailure(Call<ApiResponse<Cart>> call, Throwable t) {
-                Log.e("Cart", "Lỗi khi xóa giỏ hàng: " + t.getMessage());
+        ApiService apiService = RetrofitClient.getApiService(Constants.getToken(this));
+        final CountDownLatch latch = new CountDownLatch(orderItemList.size());
+
+        for (OrderItem orderItem : orderItemList) {
+            CartRequest.RemoveCartItem removeItemRequest = new CartRequest.RemoveCartItem(
+                    orderItem.getProductId(),
+                    orderItem.getVariantId()
+            );
+
+            apiService.removeFromCart(removeItemRequest).enqueue(new Callback<ApiResponse<Cart>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<Cart>> call, Response<ApiResponse<Cart>> response) {
+                    if (!response.isSuccessful() || response.body() == null || !response.body().isSuccess()) {
+                        Log.e("Oder_Activity", "Failed to remove an item after order: " + (response.body() != null ? response.body().getMessage() : "Unknown error"));
+                    }
+                    latch.countDown();
+                }
+                @Override
+                public void onFailure(Call<ApiResponse<Cart>> call, Throwable t) {
+                    Log.e("Oder_Activity", "Failed to remove an item after order due to network error", t);
+                    latch.countDown();
+                }
+            });
+        }
+
+        new Thread(() -> {
+            try {
+                latch.await();
+                runOnUiThread(() -> {
+                    Log.d("Oder_Activity", "Đã xóa toàn bộ sản phẩm khỏi giỏ hàng.");
+                    navigateToOrderHistory();
+                });
+            } catch (InterruptedException e) {
+                Log.e("Oder_Activity", "Lỗi khi chờ xóa giỏ hàng.", e);
+                runOnUiThread(this::navigateToOrderHistory);
             }
-        });
+        }).start();
+    }
+
+    private void navigateToOrderHistory() {
+        // Tạo Intent để quay về MainActivity
+        Intent intent = new Intent(this, DashBoar_Activity.class);
+        // Thêm cờ để chỉ định rằng bạn muốn chuyển sang TatCaDonHang_FRAGMENT
+        intent.putExtra("navigate_to_history", true);
+        // Xóa tất cả các Activity khác trên stack và khởi chạy MainActivity
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        // Kết thúc Activity hiện tại
+        finish();
     }
 
     private void bindUserToUI() {

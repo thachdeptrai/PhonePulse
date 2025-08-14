@@ -106,7 +106,7 @@ public interface ApiService {
 
     // ========== ORDER ==========
     @POST("/api/orders")
-    Call<ApiResponse<Order>> createOrder(@Header("Authorization") String token, @Body OrderRequest body);
+    Call<ApiResponse<Order>> createOrder(@Body OrderRequest body);
 
     // Đã sửa lỗi kiểu trả về để khớp với backend
     @GET("/api/orders")

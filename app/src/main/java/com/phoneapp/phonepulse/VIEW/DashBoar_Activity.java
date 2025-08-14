@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -21,6 +20,7 @@ import com.phoneapp.phonepulse.FRAGMENT.CategoryFragment;
 import com.phoneapp.phonepulse.FRAGMENT.Home_FRAGMENT;
 import com.phoneapp.phonepulse.FRAGMENT.Profile_FRAGMENT;
 import com.phoneapp.phonepulse.R;
+import com.phoneapp.phonepulse.FRAGMENT.OrderHistory_FRAGMENT; // Thêm import cho OrderHistory_FRAGMENT
 
 public class DashBoar_Activity extends AppCompatActivity {
 
@@ -59,18 +59,9 @@ public class DashBoar_Activity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // Load Fragment mặc định khi lần đầu vào
-        if (savedInstanceState == null) {
-            replaceFragment(new Home_FRAGMENT(), "Trang Chủ", true);
-        }
-        Intent intent = getIntent();
-        if (intent != null && intent.getBooleanExtra("open_order_history", false)) {
-            // Nếu có cờ mở Order History, load fragment tương ứng
-            replaceFragment(new com.phoneapp.phonepulse.FRAGMENT.OrderHistory_FRAGMENT(), "Lịch sử đơn hàng", false);
-            // Đặt chọn bottom nav về profile nếu cần (nếu fragment nằm trong tab đó)
-            bottomNavigationView.setSelectedItemId(R.id.nav_profile);
-            return; // không load Home_FRAGMENT nữa
-        }
+        // Xử lý Intent đến từ Oder_Activity
+        handleIntent(getIntent());
+
         // Xử lý chọn BottomNavigationView
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -99,6 +90,25 @@ public class DashBoar_Activity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        // Xử lý Intent nếu Activity đã tồn tại
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (intent != null && intent.getBooleanExtra("navigate_to_history", false)) {
+            // Cập nhật trạng thái BottomNavigationView
+            bottomNavigationView.setSelectedItemId(R.id.nav_profile);
+            // Chuyển đến Fragment Lịch sử đơn hàng
+            replaceFragment(new OrderHistory_FRAGMENT(), "Lịch sử đơn hàng", false);
+        } else if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) == null) {
+            // Chỉ load Home_FRAGMENT mặc định nếu chưa có fragment nào được load
+            replaceFragment(new Home_FRAGMENT(), "Trang Chủ", true);
+        }
+    }
+
     /**
      * Thay thế Fragment và cập nhật trạng thái UI tương ứng.
      * @param fragment Fragment mới sẽ được hiển thị.
@@ -120,9 +130,8 @@ public class DashBoar_Activity extends AppCompatActivity {
         }
 
         // Ẩn hoặc hiện thanh tìm kiếm
-        if (et_search_product != null) {
-            et_search_product.setVisibility(showSearchBar ? View.VISIBLE : View.GONE);
+        if (card_search_view != null) {
+            card_search_view.setVisibility(showSearchBar ? View.VISIBLE : View.GONE);
         }
     }
-
 }
