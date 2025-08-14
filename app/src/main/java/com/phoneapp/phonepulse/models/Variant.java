@@ -29,7 +29,7 @@ public class Variant {
     private String modifiedDate; // Ngày chỉnh sửa gần nhất
 
     // --- Constructors (tùy chọn) ---
-    public Variant() {
+    public Variant(int newQuantity) {
         // Constructor mặc định cần thiết cho Gson
     }
 

@@ -26,12 +26,15 @@ import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
 import com.phoneapp.phonepulse.models.Cart;
 import com.phoneapp.phonepulse.models.Order;
+import com.phoneapp.phonepulse.models.Variant; // Thêm import cho Variant
 import com.phoneapp.phonepulse.request.CartRequest;
 import com.phoneapp.phonepulse.request.OrderItem;
 import com.phoneapp.phonepulse.request.OrderRequest;
+import com.phoneapp.phonepulse.utils.CartUtils;
 import com.phoneapp.phonepulse.utils.Constants;
 
 import java.util.ArrayList;
+import java.util.List; // Thêm import cho List
 import java.util.concurrent.CountDownLatch;
 
 import retrofit2.Call;
@@ -52,6 +55,11 @@ public class Oder_Activity extends AppCompatActivity {
 
     private ArrayList<OrderItem> orderItemList;
     private ApiService apiService;
+
+    // TODO: ✅ Thêm một biến để lưu trữ toàn bộ danh sách biến thể sản phẩm.
+    // Trong một ứng dụng thực tế, bạn sẽ lấy dữ liệu này từ API hoặc từ một repository.
+    // Ở đây, chúng ta sẽ mô phỏng một danh sách rỗng để tránh lỗi biên dịch.
+    private List<Variant> allVariants = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +95,10 @@ public class Oder_Activity extends AppCompatActivity {
 
         // Nhận sản phẩm từ giỏ hàng
         orderItemList = getIntent().getParcelableArrayListExtra("order_items");
+
+        // TODO: ✅ Lấy danh sách variants từ một nguồn dữ liệu nào đó.
+        // Ví dụ: lấy từ Intent hoặc từ API. Giả sử ta đã lấy được danh sách.
+        // allVariants = getIntent().getParcelableArrayListExtra("all_variants");
 
         if (orderItemList != null && !orderItemList.isEmpty()) {
             OrderItemAdapter adapter = new OrderItemAdapter(orderItemList);
@@ -151,23 +163,16 @@ public class Oder_Activity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     Toast.makeText(Oder_Activity.this, "Đặt hàng thành công!", Toast.LENGTH_SHORT).show();
 
-                    // Lấy danh sách các item vừa đặt
+                    // Lấy danh sách các item từ phản hồi của API để đảm bảo chính xác
                     ArrayList<OrderItem> orderedItems = new ArrayList<>();
                     if (response.body().getData() != null && response.body().getData().getItems() != null) {
                         orderedItems.addAll(response.body().getData().getItems());
                     }
 
-                    // Xóa giỏ hàng
-                    clearCartAfterOrderSuccess();
-
-                    // Truyền danh sách item này sang màn hình khác (ví dụ DashBoar_Activity)
-                    Intent intent = new Intent(Oder_Activity.this, DashBoar_Activity.class);
-                    intent.putExtra("navigate_to_history", true);
-                    intent.putParcelableArrayListExtra("ordered_items", orderedItems); // <-- thêm dòng này
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-
-                } else {
+                    // Bắt đầu cập nhật tồn kho trên server
+                    updateVariantStockOnServer(orderedItems);
+                }
+                else {
                     String errorMsg = "Đặt hàng thất bại.";
                     if (response.body() != null && response.body().getMessage() != null) {
                         errorMsg = response.body().getMessage();
@@ -185,6 +190,84 @@ public class Oder_Activity extends AppCompatActivity {
         });
 
     }
+
+    /**
+     * Cập nhật tồn kho trên server cho tất cả các sản phẩm trong đơn hàng.
+     * Sử dụng CountDownLatch để đảm bảo tất cả các request API đều hoàn tất
+     * trước khi chuyển sang bước tiếp theo.
+     * @param orderedItems Danh sách các sản phẩm đã đặt hàng.
+     */
+    private void updateVariantStockOnServer(ArrayList<OrderItem> orderedItems) {
+        if (orderedItems == null || orderedItems.isEmpty()) {
+            clearCartAfterOrderSuccess();
+            return;
+        }
+
+        final CountDownLatch stockUpdateLatch = new CountDownLatch(orderedItems.size());
+
+        for (OrderItem item : orderedItems) {
+            // Lấy variant ID và productId từ OrderItem
+            String variantId = item.getVariantId();
+            String productId = item.getProductId();
+
+            if (variantId == null || productId == null) {
+                Log.w("OrderDebug", "Không thể cập nhật tồn kho: thiếu variantId hoặc productId cho sản phẩm: " + item.getName());
+                stockUpdateLatch.countDown();
+                continue;
+            }
+
+            // --- ĐÃ SỬA LỖI Ở ĐÂY ---
+            // Lấy số lượng tồn kho hiện tại của variant từ đối tượng Variant
+            int currentQuantity = item.getQuantity();
+            // Lấy số lượng sản phẩm đã đặt hàng từ đối tượng OrderItem
+            int quantityOrdered = item.getQuantity();
+            // Tính số lượng tồn kho mới
+            int newQuantity = currentQuantity - quantityOrdered;
+
+            // TODO: ✅ Log lại thông tin để kiểm tra trên backend
+            Log.d("OrderDebug", String.format("Cập nhật tồn kho cho Variant ID: %s. Tồn kho cũ: %d, Số lượng đặt: %d, Tồn kho mới: %d",
+                    variantId, currentQuantity, quantityOrdered, newQuantity));
+
+            // Tạo đối tượng Variant chỉ với số lượng mới để gửi lên server.
+            // Vì chỉ gửi trường "quantity", nên giá (price) sẽ không bị thay đổi.
+            Variant updatedVariant = new Variant(newQuantity);
+            updatedVariant.setQuantity(newQuantity);
+
+            apiService.updateVariantForProductById(productId, variantId, updatedVariant).enqueue(new Callback<ApiResponse<Variant>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<Variant>> call, Response<ApiResponse<Variant>> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        Log.i("OrderDebug", "Cập nhật tồn kho thành công cho variant ID: " + variantId);
+                    } else {
+                        Log.e("OrderDebug", "Cập nhật tồn kho thất bại cho variant ID: " + variantId + ". Lỗi: " + (response.body() != null ? response.body().getMessage() : "Không rõ"));
+                    }
+                    stockUpdateLatch.countDown();
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse<Variant>> call, Throwable t) {
+                    Log.e("OrderDebug", "Lỗi mạng khi cập nhật tồn kho cho variant ID: " + variantId, t);
+                    stockUpdateLatch.countDown();
+                }
+            });
+        }
+
+        // Chờ tất cả các request cập nhật tồn kho hoàn thành
+        new Thread(() -> {
+            try {
+                stockUpdateLatch.await();
+                runOnUiThread(() -> {
+                    Log.d("OrderDebug", "Tất cả các cập nhật tồn kho đã hoàn tất.");
+                    // Sau khi cập nhật tồn kho thành công, tiến hành xóa giỏ hàng
+                    clearCartAfterOrderSuccess();
+                });
+            } catch (InterruptedException e) {
+                Log.e("OrderDebug", "Lỗi khi chờ cập nhật tồn kho.", e);
+                runOnUiThread(this::clearCartAfterOrderSuccess);
+            }
+        }).start();
+    }
+
 
     private void clearCartAfterOrderSuccess() {
         if (orderItemList == null || orderItemList.isEmpty()) {

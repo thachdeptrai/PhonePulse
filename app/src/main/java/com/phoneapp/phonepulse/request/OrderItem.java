@@ -2,7 +2,8 @@ package com.phoneapp.phonepulse.request;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -32,10 +33,11 @@ public class OrderItem implements Parcelable {
     @SerializedName("variantId")
     private String variantId;
 
+    // Constructor mặc định cho Gson
     public OrderItem() {
-        // Constructor mặc định cần cho Gson
     }
 
+    // Constructor đầy đủ
     public OrderItem(String id, String name, String imageUrl,
                      int price, int quantity, String variant,
                      String productId, String variantId) {
@@ -47,50 +49,81 @@ public class OrderItem implements Parcelable {
         this.variant = variant;
         this.productId = productId;
         this.variantId = variantId;
-
-        Log.d("OrderItem_Init", toString());
     }
 
+    // Constructor không có id
     public OrderItem(String name, String imageUrl,
                      int price, int quantity, String variant,
                      String productId, String variantId) {
         this(null, name, imageUrl, price, quantity, variant, productId, variantId);
     }
 
-    // --- Getters & Setters ---
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-
-    public String getName() { return name != null ? name : ""; }
-    public void setName(String name) { this.name = name; }
-
-    public String getImageUrl() { return imageUrl != null ? imageUrl : ""; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-
-    public int getPrice() { return price; }
-    public void setPrice(int price) { this.price = price; }
-
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
-
-    public String getVariant() { return variant != null ? variant : ""; }
-    public void setVariant(String variant) { this.variant = variant; }
-
-    public String getProductId() { return productId; }
-    public void setProductId(String productId) { this.productId = productId; }
-
-    public String getVariantId() { return variantId; }
-    public void setVariantId(String variantId) { this.variantId = variantId; }
-
-    // Xóa id rỗng/null
-    public void sanitize() {
-        if (id != null && id.trim().isEmpty()) {
-            Log.w("OrderItem_Sanitize", "Phát hiện _id rỗng, đặt lại thành null.");
-            id = null;
-        }
+    // --------- GETTERS & SETTERS ---------
+    public String getId() {
+        return id != null ? id : "";
     }
 
-    // Parcelable
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name != null ? name : "";
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getImageUrl() {
+        return imageUrl != null ? imageUrl : "";
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public String getVariant() {
+        return variant != null ? variant : "";
+    }
+
+    public void setVariant(String variant) {
+        this.variant = variant;
+    }
+
+    public String getProductId() {
+        return productId != null ? productId : "";
+    }
+
+    public void setProductId(String productId) {
+        this.productId = productId;
+    }
+
+    public String getVariantId() {
+        return variantId != null ? variantId : "";
+    }
+
+    public void setVariantId(String variantId) {
+        this.variantId = variantId;
+    }
+
+    // --------- PARCELABLE ---------
     protected OrderItem(Parcel in) {
         id = in.readString();
         name = in.readString();
@@ -131,6 +164,8 @@ public class OrderItem implements Parcelable {
         return 0;
     }
 
+    // --------- DEBUG ---------
+    @NonNull
     @Override
     public String toString() {
         return "OrderItem{" +
