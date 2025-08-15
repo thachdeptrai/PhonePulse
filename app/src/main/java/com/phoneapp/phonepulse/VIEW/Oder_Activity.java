@@ -22,8 +22,10 @@ import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
+import com.phoneapp.phonepulse.models.Cart;
 import com.phoneapp.phonepulse.models.Order;
 import com.phoneapp.phonepulse.models.Variant;
+import com.phoneapp.phonepulse.request.CartRequest;
 import com.phoneapp.phonepulse.request.OrderItem;
 import com.phoneapp.phonepulse.request.OrderRequest;
 import com.phoneapp.phonepulse.utils.Constants;
@@ -417,8 +419,8 @@ public class Oder_Activity extends AppCompatActivity {
             try {
                 stockUpdateLatch.await();
                 runOnUiThread(() -> {
-                    Log.d(TAG, "✅ Tất cả cập nhật tồn kho đã hoàn tất. Chuyển hướng đến lịch sử đơn hàng.");
-                    navigateToOrderHistory();
+                    Log.d(TAG, "✅ Tất cả cập nhật tồn kho đã hoàn tất. Bắt đầu xóa giỏ hàng.");
+                    clearCartOnServer(); // Gọi phương thức xóa giỏ hàng
                 });
             } catch (InterruptedException e) {
                 Log.e(TAG, "⚠️ Luồng bị gián đoạn khi chờ cập nhật tồn kho.", e);
@@ -426,6 +428,72 @@ public class Oder_Activity extends AppCompatActivity {
             }
         }).start();
     }
+
+    private void clearCartOnServer() {
+        if (orderItemList == null || orderItemList.isEmpty()) {
+            Log.d(TAG, "Giỏ hàng đã rỗng. Chuyển hướng.");
+            navigateToOrderHistory();
+            return;
+        }
+
+        // Sử dụng CountDownLatch để đợi tất cả các yêu cầu xóa hoàn tất
+        final CountDownLatch cartRemovalLatch = new CountDownLatch(orderItemList.size());
+        Log.d(TAG, "Bắt đầu xóa " + orderItemList.size() + " sản phẩm khỏi giỏ hàng.");
+
+        for (OrderItem item : orderItemList) {
+            String productId = item.getProductId();   // ✅ Lấy productId từ OrderItem
+            String variantId = item.getVariantId();
+
+            // Kiểm tra tính hợp lệ của cả productId và variantId
+            if (productId == null || productId.trim().isEmpty() ||
+                    variantId == null || variantId.trim().isEmpty()) {
+                Log.w(TAG, "❌ Bỏ qua xóa giỏ hàng: Thiếu productId hoặc variantId cho sản phẩm: " + item.getName());
+                cartRemovalLatch.countDown(); // Giảm bộ đếm ngay lập tức nếu dữ liệu không hợp lệ
+                continue;
+            }
+
+            // ✅ Tạo request với cả productId và variantId
+            CartRequest.RemoveCartItem request = new CartRequest.RemoveCartItem(productId, variantId);
+
+            apiService.removeFromCart(request).enqueue(new Callback<ApiResponse<Cart>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<Cart>> call, Response<ApiResponse<Cart>> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        Log.i(TAG, "✅ Đã xóa thành công sản phẩm với productId: " + productId + ", variantId: " + variantId + " khỏi giỏ hàng.");
+                    } else {
+                        String errorDetail = (response.body() != null ? response.body().getMessage() : "Không rõ lỗi.");
+                        Log.e(TAG, "⚠️ Lỗi xóa sản phẩm khỏi giỏ hàng cho productId: " + productId + ", variantId: " + variantId +
+                                ". Mã lỗi: " + response.code() + ". Chi tiết: " + errorDetail);
+                    }
+                    cartRemovalLatch.countDown(); // Giảm bộ đếm sau mỗi phản hồi API
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse<Cart>> call, Throwable t) {
+                    Log.e(TAG, "🌐 Lỗi mạng/API khi xóa sản phẩm khỏi giỏ hàng cho productId: " + productId + ", variantId: " + variantId + ": " + t.getMessage(), t);
+                    cartRemovalLatch.countDown(); // Giảm bộ đếm ngay cả khi lỗi mạng
+                }
+            });
+        }
+
+        // Luồng chờ tất cả các yêu cầu xóa hoàn tất
+        new Thread(() -> {
+            try {
+                cartRemovalLatch.await(); // Chờ cho đến khi tất cả các countDown() được gọi
+                runOnUiThread(() -> {
+                    Log.d(TAG, "✅ Tất cả các sản phẩm đã được xử lý xong. Chuyển hướng đến lịch sử đơn hàng.");
+                    // Có thể cần tải lại giỏ hàng một lần nữa để đảm bảo UI trống
+                    // fetchCartData();
+                    navigateToOrderHistory();
+                });
+            } catch (InterruptedException e) {
+                Log.e(TAG, "⚠️ Luồng bị gián đoạn khi chờ xóa giỏ hàng.", e);
+                // Nếu luồng bị gián đoạn, vẫn cố gắng chuyển hướng
+                runOnUiThread(this::navigateToOrderHistory);
+            }
+        }).start();
+    }
+
 
     /**
      * Tìm một biến thể (Variant) trong danh sách dựa trên ID của nó.

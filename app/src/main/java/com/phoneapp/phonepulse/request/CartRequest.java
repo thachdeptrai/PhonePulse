@@ -57,25 +57,26 @@ public class CartRequest {
      * Request body cho API Xóa sản phẩm khỏi giỏ hàng (DELETE /api/cart)
      */
     public static class RemoveCartItem {
-        @SerializedName("productId")
+        @SerializedName("productId") // ✅ Thêm lại trường productId
         private String productId;
+
         @SerializedName("variantId")
         private String variantId;
 
-        // Constructor cho xóa 1 sản phẩm cụ thể
+        // ✅ Chỉ giữ lại constructor nhận cả hai ID, vì backend yêu cầu cả hai.
         public RemoveCartItem(String productId, String variantId) {
-            this.productId = productId;
+            this.productId = productId; // ✅ Gán productId
             this.variantId = variantId;
         }
 
-        // ✅ Constructor dành cho xóa toàn bộ giỏ hàng
-        public RemoveCartItem() {
-            this.productId = null;
-            this.variantId = null;
+        // Getters (Nếu cần để truy cập các trường này bên ngoài)
+        public String getProductId() {
+            return productId;
         }
 
-        public String getProductId() { return productId; }
-        public String getVariantId() { return variantId; }
+        public String getVariantId() {
+            return variantId;
+        }
     }
 
 }
