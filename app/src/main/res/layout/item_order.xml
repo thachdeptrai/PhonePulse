@@ -72,14 +72,39 @@
             tools:itemCount="2"
             tools:listitem="@layout/item_checkout_product" />
 
-        <TextView
-            android:id="@+id/tv_order_total"
+        <!-- Tổng tiền + Trạng thái thanh toán -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tổng tiền: 520.000đ"
-            android:textSize="15sp"
-            android:textColor="#FF6B00"
-            android:textStyle="bold"
-            android:layout_marginTop="6dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical|end"
+            android:layout_marginTop="6dp">
+
+            <TextView
+                android:id="@+id/tv_order_total"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Tổng tiền: 520.000đ"
+                android:textSize="20sp"
+                android:textColor="#FF6B00"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_payment_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chưa thanh toán"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:background="@drawable/bg_payment_status"
+                android:gravity="center"/>
+        </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

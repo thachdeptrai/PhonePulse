@@ -1,13 +1,15 @@
 package com.phoneapp.phonepulse.Adapter;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull; // ✅ Import đúng
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,8 +28,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
     private final List<Order> orderList;
     private static final String TAG = "OrderAdapter";
-    private final SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
-    private final SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+    private final SimpleDateFormat inputFormat =
+            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+    private final SimpleDateFormat outputFormat =
+            new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
 
     public OrderAdapter(Context context, List<Order> orderList) {
         this.orderList = orderList;
@@ -55,13 +59,30 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         Log.d(TAG, "----------------------------------------------");
         Log.d(TAG, "📌 ĐANG BIND ĐƠN HÀNG [" + position + "] - ID: " + order.getId());
 
-        // Bind UI
+        // ===== Bind dữ liệu đơn hàng =====
         holder.tvOrderId.setText("Đơn hàng #" + order.getId());
         holder.tvOrderDate.setText("Ngày đặt: " + formatDate(order.getCreatedDate()));
-        holder.tvOrderStatus.setText("Trạng thái: " + safeString(order.getStatus()));
+        holder.tvOrderStatus.setText("Trạng thái: " + mapTrangThaiDonHang(order.getStatus()));
         holder.tvOrderTotal.setText("Tổng tiền: " + formatCurrency(order.getFinalPrice()));
 
-        // Adapter con cho sản phẩm
+        // ===== Trạng thái thanh toán =====
+        String paymentStatus = safeString(order.getPaymentStatus());
+        switch (paymentStatus) {
+            case "paid":
+                holder.tvPaymentStatus.setText("Đã thanh toán");
+                holder.tvPaymentStatus.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#4CAF50"))); // xanh lá
+                break;
+            case "refunded":
+                holder.tvPaymentStatus.setText("Hoàn tiền");
+                holder.tvPaymentStatus.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2196F3"))); // xanh dương
+                break;
+            default:
+                holder.tvPaymentStatus.setText("Chưa thanh toán");
+                holder.tvPaymentStatus.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#F44336"))); // đỏ
+                break;
+        }
+
+        // ===== Adapter con cho danh sách sản phẩm =====
         List<OrderItem> items = order.getItems();
         if (items != null && !items.isEmpty()) {
             holder.rvOrderItems.setLayoutManager(new LinearLayoutManager(holder.itemView.getContext()));
@@ -76,8 +97,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         return orderList != null ? orderList.size() : 0;
     }
 
+    // ================== ViewHolder ==================
     public static class OrderViewHolder extends RecyclerView.ViewHolder {
-        TextView tvOrderId, tvOrderDate, tvOrderStatus, tvOrderTotal;
+        TextView tvOrderId, tvOrderDate, tvOrderStatus, tvOrderTotal, tvPaymentStatus;
         RecyclerView rvOrderItems;
 
         public OrderViewHolder(@NonNull View itemView) {
@@ -86,10 +108,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             tvOrderDate = itemView.findViewById(R.id.tv_order_date);
             tvOrderStatus = itemView.findViewById(R.id.tv_order_status);
             tvOrderTotal = itemView.findViewById(R.id.tv_order_total);
+            tvPaymentStatus = itemView.findViewById(R.id.tv_payment_status);
             rvOrderItems = itemView.findViewById(R.id.rv_order_items);
         }
     }
 
+    // ================== Utils ==================
     private String safeString(String text) {
         return text != null ? text : "N/A";
     }
@@ -114,4 +138,26 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         return formatter.format(amount);
     }
+    // ================== Utils ==================
+    private String mapTrangThaiDonHang(String status) {
+        if (status == null) return "Không xác định";
+
+        switch (status.toLowerCase()) {
+            case "pending":
+                return "Đang chờ xử lý";
+            case "confirmed":
+                return "Đã xác nhận";
+            case "shipping":
+                return "Đang giao hàng";
+            case "delivered":
+                return "Đã giao hàng";
+            case "cancelled":
+                return "Đã hủy";
+            case "returned":
+                return "Đã trả hàng";
+            default:
+                return status; // fallback, để nếu backend trả ra trạng thái lạ
+        }
+    }
+
 }
