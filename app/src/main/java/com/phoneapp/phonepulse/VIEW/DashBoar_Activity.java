@@ -17,6 +17,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.phoneapp.phonepulse.FRAGMENT.CategoryFragment;
+import com.phoneapp.phonepulse.FRAGMENT.FavouriteFragment;
 import com.phoneapp.phonepulse.FRAGMENT.Home_FRAGMENT;
 import com.phoneapp.phonepulse.FRAGMENT.Profile_FRAGMENT;
 import com.phoneapp.phonepulse.R;
@@ -77,9 +78,13 @@ public class DashBoar_Activity extends AppCompatActivity {
             } else if (id == R.id.nav_profile) {
                 replaceFragment(new Profile_FRAGMENT(), "Tài khoản", false);
                 return true;
+            } else if (id == R.id.nav_favorites) {
+                replaceFragment(new FavouriteFragment(), "Yêu thích", true);
+                return true;
             }
             return false;
         });
+
 
         // Theo dõi để ẩn BottomNavigation nếu đang ở Fragment toàn màn hình
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {

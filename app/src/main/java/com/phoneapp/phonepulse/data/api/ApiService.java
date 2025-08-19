@@ -32,10 +32,8 @@ public interface ApiService {
     @PUT("/api/users/profile")
     Call<ApiResponse<User>> updateProfile(@Header("Authorization") String token, @Body User user);
 
-
-
     @PUT("/api/users/change-password")
-    Call<ApiResponse> changePassword(@Header("Authorization") String token, @Body ChangePasswordRequest body);
+    Call<ApiResponse<Void>> changePassword(@Body ChangePasswordRequest body);
 
     @DELETE("/api/users/delete-self")
     Call<ApiResponse> deleteAccount(@Header("Authorization") String token);
@@ -78,14 +76,18 @@ public interface ApiService {
 
 
     // ========== FAVOURITES ==========
-    @GET("/api/favourites")
-    Call<List<Product>> getFavourites(@Header("Authorization") String token);
+//    @GET("/api/favourite")
+//    Call<List<Product>> getFavourites(@Header("Authorization") String token);
 
-    @POST("/api/favourites")
-    Call<ApiResponse> addFavourite(@Header("Authorization") String token, @Body FavouriteRequest body);
 
-    @HTTP(method = "DELETE", path = "/api/favourites", hasBody = true)
-    Call<ApiResponse> removeFavourite(@Header("Authorization") String token, @Body FavouriteRequest body);
+    @GET("api/favourite") // Hoặc đường dẫn API đúng của bạn
+    Call<ApiResponse<List<Favourite>>> getFavourites();
+
+    @POST("/api/favourite")
+    Call<ApiResponse> addFavourite(@Body FavouriteRequest body);
+
+    @HTTP(method = "DELETE", path = "/api/favourite", hasBody = true)
+    Call<ApiResponse> removeFavourite(@Body FavouriteRequest body);
 
 
     // ========== CART ==========

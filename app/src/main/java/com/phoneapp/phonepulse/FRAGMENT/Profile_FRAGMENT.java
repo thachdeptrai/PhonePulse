@@ -24,6 +24,7 @@ import androidx.fragment.app.FragmentManager;
 import com.bumptech.glide.Glide;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.Response.ApiResponse; // Import ApiResponse
+import com.phoneapp.phonepulse.VIEW.ChangePasswordActivity;
 import com.phoneapp.phonepulse.VIEW.EditProfileActivity;
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
@@ -41,14 +42,11 @@ import retrofit2.Response;
 
 public class Profile_FRAGMENT extends Fragment {
     private User currentUser;
-
     private CircleImageView imgAvatar;
     private TextView tvFullName, tvEmail, tvPhone, tvAddress, tvGender, tvBirthday, tvRole;
     private Button btnEdit;
-     private ImageView btn_settings;
-     private LinearLayout history_order_layout;
-
-
+    private ImageView btn_settings;
+    private LinearLayout history_order_layout;
     private static final String TAG = "ProfileFragment";
 
     @Nullable
@@ -62,8 +60,6 @@ public class Profile_FRAGMENT extends Fragment {
         initViews(view);
         loadUserProfile();
         NextHistory_Oder();
-
-
 
         return view;
     }
@@ -94,6 +90,13 @@ public class Profile_FRAGMENT extends Fragment {
         tvAddress.setOnClickListener(v -> goToEditProfile());
         tvGender.setOnClickListener(v -> goToEditProfile());
         tvBirthday.setOnClickListener(v -> goToEditProfile());
+        //mmở dialog đổi mật khẩu
+        LinearLayout changePasswordLayout = view.findViewById(R.id.change_password_layout);
+        changePasswordLayout.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), ChangePasswordActivity.class);
+            startActivity(intent);
+        });
+
     }
 
     private void goToEditProfile() {
@@ -107,10 +110,6 @@ public class Profile_FRAGMENT extends Fragment {
         intent.putExtra("user_json", userJson);
         startActivityForResult(intent, 1001);
     }
-
-
-
-
 
     private void loadUserProfile() {
         String token = Constants.getToken(requireContext());
@@ -259,6 +258,8 @@ public class Profile_FRAGMENT extends Fragment {
             }
         });
     }
+
+
 
 
 

@@ -13,21 +13,25 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat; // Thêm import này
+import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.models.Cart;
+import com.phoneapp.phonepulse.models.Favourite; // Import Favourite model
 import com.phoneapp.phonepulse.models.Product;
 import com.phoneapp.phonepulse.models.Variant;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
 import com.phoneapp.phonepulse.request.CartItem;
 import com.phoneapp.phonepulse.request.CartRequest;
-import com.phoneapp.phonepulse.utils.Constants; // <-- Đảm bảo import Constants
+import com.phoneapp.phonepulse.request.FavouriteRequest;
+import com.phoneapp.phonepulse.utils.Constants;
 
+import java.io.IOException;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Locale;
 
 import io.reactivex.annotations.NonNull;
@@ -42,60 +46,61 @@ public class ProductDetailActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private ImageView ivProductImage;
     private TextView tvProductName, tvOriginalPrice, tvDiscountPrice, tvDiscountPercent, tvStock;
-    private TextView tvProductDescription; // TextView cho mô tả sản phẩm
-    private TextView tvProductSpecs; // TextView cho thông số kỹ thuật chi tiết
-    private LinearLayout llColorOptions, llStorageOptions; // Layouts cho lựa chọn biến thể (hiện tại là tĩnh)
+    private TextView tvProductDescription;
+    private TextView tvProductSpecs;
+    private LinearLayout llColorOptions, llStorageOptions;
     private com.google.android.material.button.MaterialButton btnAddToCart, btnBuyNow;
     private ImageView iv_cart_icon;
-
+    private ImageView ivFavourite;
 
     // Data
-    private String variantId;
-    private String productId;
-    private Product currentProduct; // Đối tượng Product chứa thông tin chung của sản phẩm
-    private Variant displayedVariant; // Đối tượng Variant chứa thông tin biến thể cụ thể
+    private String initialVariantIdFromIntent; // Variant ID passed from Intent (could be null)
+    private String productIdFromIntent;
+    private Product currentProduct;       // Full product details from API /products/{id}
+    private Variant displayedVariant;     // Variant currently being displayed
     private NumberFormat numberFormat;
     private ApiService apiService;
     private String authToken;
+    private boolean isFavourite = false;
 
+    private boolean isLoadingInitialFavouriteStatus = false;
+    private boolean isTogglingFavourite = false;
+    private boolean isLoadingProduct = false;
+    private boolean isLoadingVariant = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_detail);
 
-        // Lấy variantId và productId từ Intent (Sử dụng Constants keys)
-        variantId = getIntent().getStringExtra(Constants.VARIANT_ID);
-        productId = getIntent().getStringExtra(Constants.PRODUCT_ID);
+        initialVariantIdFromIntent = getIntent().getStringExtra(Constants.VARIANT_ID);
+        productIdFromIntent = getIntent().getStringExtra(Constants.PRODUCT_ID);
         authToken = Constants.getToken(this);
+
         if (authToken != null) {
             Log.d(TAG, "Auth Token loaded successfully.");
         } else {
-            Log.w(TAG, "No auth token found. User might not be logged in or token expired.");
+            Log.w(TAG, "No auth token found.");
         }
-        // Kiểm tra xem dữ liệu có bị null không
-        if (variantId == null || productId == null) {
-            Toast.makeText(this, "Không tìm thấy biến thể hoặc sản phẩm. Dữ liệu không hợp lệ.", Toast.LENGTH_LONG).show();
-            Log.e(TAG, "onCreate: Missing variantId or productId. variantId: " + variantId + ", productId: " + productId);
-            finish(); // Đóng activity nếu không có dữ liệu cần thiết
+
+        if (productIdFromIntent == null) {
+            Toast.makeText(this, "ID sản phẩm không hợp lệ.", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "onCreate: Missing productIdFromIntent.");
+            finish();
             return;
         }
 
-        Log.d(TAG, "onCreate: Variant ID received: " + variantId + ", Product ID received: " + productId);
+        Log.d(TAG, "onCreate: Product ID received: " + productIdFromIntent + ", Initial Variant ID (from Intent): " + initialVariantIdFromIntent);
 
         initViews();
         setupToolbar();
-        // Lấy token để gọi API (nếu API yêu cầu xác thực)
-        apiService = RetrofitClient.getApiService(Constants.getToken(this));
-        numberFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN")); // Định dạng tiền tệ Việt Nam
-        numberFormat.setMaximumFractionDigits(0); // Không hiển thị phần thập phân cho tiền tệ
+        apiService = RetrofitClient.getApiService(authToken);
+        numberFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+        numberFormat.setMaximumFractionDigits(0);
 
-        loadProductAndVariantDetails();
+        loadProductDetailsAndThenVariant(); // New loading sequence
     }
 
-    /**
-     * Khởi tạo và ánh xạ các thành phần UI từ layout.
-     */
     private void initViews() {
         toolbar = findViewById(R.id.toolbar_product_detail);
         ivProductImage = findViewById(R.id.iv_product_image);
@@ -103,285 +108,372 @@ public class ProductDetailActivity extends AppCompatActivity {
         tvOriginalPrice = findViewById(R.id.tv_original_price);
         tvDiscountPrice = findViewById(R.id.tv_discount_price);
         tvDiscountPercent = findViewById(R.id.tv_discount_percent);
-        tvProductDescription = findViewById(R.id.tv_product_description); // Ánh xạ TextView mô tả
-        tvProductSpecs = findViewById(R.id.tv_product_specs); // Ánh xạ TextView thông số kỹ thuật
+        tvProductDescription = findViewById(R.id.tv_product_description);
+        tvProductSpecs = findViewById(R.id.tv_product_specs);
         tvStock = findViewById(R.id.tv_stock);
         btnAddToCart = findViewById(R.id.btn_add_to_cart);
         btnBuyNow = findViewById(R.id.btn_buy_now);
-
-        llColorOptions = findViewById(R.id.ll_color_options);
-        llStorageOptions = findViewById(R.id.ll_storage_options);
         iv_cart_icon = findViewById(R.id.iv_cart_icon);
-        // Đặt lắng nghe sự kiện click cho biểu tượng giỏ hàng
-        iv_cart_icon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(ProductDetailActivity.this, Cart_Activity.class);
-                startActivity(intent);
+        ivFavourite = findViewById(R.id.iv_favourite);
+
+        ivFavourite.setEnabled(false);
+        btnAddToCart.setEnabled(false); // Disable until product and variant are loaded
+        btnBuyNow.setEnabled(false);  // Disable until product and variant are loaded
+
+        ivFavourite.setOnClickListener(v -> {
+            if (isLoadingInitialFavouriteStatus || isLoadingProduct) {
+                Toast.makeText(ProductDetailActivity.this, "Đang tải dữ liệu...", Toast.LENGTH_SHORT).show();
+                return;
             }
+            if (isTogglingFavourite) {
+                Toast.makeText(ProductDetailActivity.this, "Đang xử lý yêu thích...", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            toggleFavouriteStatus();
         });
 
-        // Đặt lắng nghe sự kiện click cho các nút
+        iv_cart_icon.setOnClickListener(view -> {
+            Intent intent = new Intent(ProductDetailActivity.this, Cart_Activity.class);
+            startActivity(intent);
+        });
+
         btnAddToCart.setOnClickListener(v -> {
             if (currentProduct != null && displayedVariant != null) {
                 checkStockAndAddToCart(currentProduct.getId(), displayedVariant.getId(), 1);
             } else {
-                Toast.makeText(ProductDetailActivity.this, "Thông tin sản phẩm chưa tải xong.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ProductDetailActivity.this, "Thông tin sản phẩm/biến thể chưa tải xong.", Toast.LENGTH_SHORT).show();
             }
         });
 
-
         btnBuyNow.setOnClickListener(v -> {
-            if (currentProduct != null) {
+            if (currentProduct != null && displayedVariant != null) {
                 Toast.makeText(ProductDetailActivity.this, "Mua ngay " + currentProduct.getName(), Toast.LENGTH_SHORT).show();
                 // TODO: Triển khai logic mua ngay
             } else {
-                Toast.makeText(ProductDetailActivity.this, "Thông tin sản phẩm chưa tải xong.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ProductDetailActivity.this, "Thông tin sản phẩm/biến thể chưa tải xong.", Toast.LENGTH_SHORT).show();
             }
         });
-
-        Log.d(TAG, "initViews: Tất cả các views đã được khởi tạo.");
+        Log.d(TAG, "initViews: All views initialized.");
     }
 
-    /**
-     * Thiết lập Toolbar cho Activity, bao gồm nút quay lại.
-     */
     private void setupToolbar() {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true); // Hiển thị nút quay lại
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
-            getSupportActionBar().setTitle("Đang tải..."); // Tiêu đề tạm thời
+            getSupportActionBar().setTitle("Đang tải...");
         }
-        // Xử lý sự kiện click cho nút quay lại trên Toolbar
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
-        Log.d(TAG, "setupToolbar: Toolbar đã được cấu hình.");
+        Log.d(TAG, "setupToolbar: Toolbar configured.");
     }
 
-    /**
-     * Tải chi tiết sản phẩm và chi tiết biến thể từ API.
-     */
-    private void loadProductAndVariantDetails() {
-        loadProductDetails(); // Tải chi tiết sản phẩm
-        loadVariantDetails(); // Tải chi tiết biến thể
-    }
+    private void loadProductDetailsAndThenVariant() {
+        isLoadingProduct = true;
+        updateLoadingState();
+        Log.d(TAG, "loadProductDetailsAndThenVariant: Fetching product details for ID: " + productIdFromIntent);
 
-    /**
-     * Lấy chi tiết sản phẩm (tên, hình ảnh, mô tả, giảm giá) bằng productId.
-     */
-    private void loadProductDetails() {
-        Log.d(TAG, "loadProductDetails: Đang lấy chi tiết sản phẩm với ID: " + productId);
-        apiService.getProductById(productId).enqueue(new Callback<Product>() {
+        apiService.getProductById(productIdFromIntent).enqueue(new Callback<Product>() {
             @Override
             public void onResponse(@NonNull Call<Product> call, @NonNull Response<Product> response) {
+                isLoadingProduct = false;
                 if (response.isSuccessful() && response.body() != null) {
                     currentProduct = response.body();
-                    Log.d(TAG, "onResponse: Tải chi tiết sản phẩm thành công: " + currentProduct.getName());
-                    updateUIFromProduct(); // Cập nhật UI từ thông tin Product
-                    // Nếu dữ liệu biến thể đã được tải, gọi lại displayPriceAndSpecs để đồng bộ giá/thông số
-                    if (displayedVariant != null) {
-                        displayPriceAndSpecs();
-                    }
-                } else {
-                    String errorMsg = "Không thể tải chi tiết sản phẩm. Mã lỗi: " + response.code();
-                    try {
-                        if (response.errorBody() != null) {
-                            errorMsg += " - " + response.errorBody().string();
+                    Log.d(TAG, "onResponse: Product details loaded successfully: " + currentProduct.getName());
+                    updateUIFromProduct(); // Update name, image, description first
+                    checkIfProductIsFavourite(); // Check favourite status once product is known
+
+                    String variantIdToLoad = initialVariantIdFromIntent;
+                    if (variantIdToLoad == null) { // Variant ID was not passed via Intent
+                        if (currentProduct.getVariants() != null && !currentProduct.getVariants().isEmpty()) {
+                            variantIdToLoad = currentProduct.getVariants().get(0).getId();
+                            Log.d(TAG, "No initial variant ID from intent. Using first variant from product: " + variantIdToLoad);
+                        } else {
+                            Log.e(TAG, "Product has no variants. Cannot load variant details.");
+                            showError("Sản phẩm này không có biến thể nào.");
+                            updateLoadingState(); // Re-enable buttons if needed, even if variant fails
+                            return;
                         }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Lỗi khi phân tích body lỗi cho chi tiết sản phẩm", e);
                     }
-                    Log.e(TAG, "onResponse: " + errorMsg);
+                    loadVariantDetails(variantIdToLoad);
+                } else {
+                    String errorMsg = "Could not load product details. Error code: " + response.code();
+                    try {
+                        if (response.errorBody() != null) errorMsg += " - " + response.errorBody().string();
+                    } catch (Exception e) { Log.e(TAG, "Error parsing error body for product", e); }
+                    Log.e(TAG, "onResponse (Product): " + errorMsg);
                     showError("Không thể tải thông tin sản phẩm.");
+                    updateLoadingState();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<Product> call, @NonNull Throwable t) {
-                Log.e(TAG, "onFailure: Lỗi kết nối mạng khi tải sản phẩm: " + t.getMessage(), t);
-                showError("Lỗi kết nối mạng khi tải thông tin sản phẩm.");
+                isLoadingProduct = false;
+                Log.e(TAG, "onFailure (Product): Network error: " + t.getMessage(), t);
+                showError("Lỗi mạng khi tải thông tin sản phẩm.");
+                updateLoadingState();
             }
         });
     }
 
-    /**
-     * Lấy chi tiết biến thể (giá, số lượng, màu sắc, kích thước) bằng productId và variantId.
-     */
-    private void loadVariantDetails() {
-        Log.d(TAG, "loadVariantDetails: Đang lấy chi tiết biến thể cho Sản phẩm ID: " + productId + ", Biến thể ID: " + variantId);
-        apiService.getVariantForProductById(productId, variantId).enqueue(new Callback<Variant>() {
+    private void loadVariantDetails(String variantIdToLoad) {
+        if (variantIdToLoad == null) {
+            Log.e(TAG, "loadVariantDetails: variantIdToLoad is null. Cannot proceed.");
+            showError("Không thể xác định biến thể để tải.");
+            updateLoadingState();
+            return;
+        }
+        isLoadingVariant = true;
+        updateLoadingState();
+        Log.d(TAG, "loadVariantDetails: Fetching variant details for Product ID: " + productIdFromIntent + ", Variant ID: " + variantIdToLoad);
+
+        apiService.getVariantForProductById(productIdFromIntent, variantIdToLoad).enqueue(new Callback<Variant>() {
             @Override
             public void onResponse(@NonNull Call<Variant> call, @NonNull Response<Variant> response) {
+                isLoadingVariant = false;
                 if (response.isSuccessful() && response.body() != null) {
                     displayedVariant = response.body();
-                    Log.d(TAG, "onResponse: Tải chi tiết biến thể thành công cho ID: " + displayedVariant.getId());
-                    updateUIFromVariant(); // Cập nhật UI từ thông tin Variant
-                    // Nếu dữ liệu sản phẩm đã được tải, gọi lại displayPriceAndSpecs để đồng bộ giá/thông số
-                    if (currentProduct != null) {
-                        displayPriceAndSpecs();
-                    }
+                    Log.d(TAG, "onResponse: Variant details loaded successfully for ID: " + displayedVariant.getId());
+                    updateUIFromVariant(); // This will also call displayPriceAndSpecs
                 } else {
-                    String errorMsg = "Không thể tải chi tiết biến thể. Mã lỗi: " + response.code();
+                    String errorMsg = "Could not load variant details. Error code: " + response.code();
                     try {
-                        if (response.errorBody() != null) {
-                            errorMsg += " - " + response.errorBody().string();
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Lỗi khi phân tích body lỗi cho chi tiết biến thể", e);
-                    }
-                    Log.e(TAG, "onResponse: " + errorMsg);
+                        if (response.errorBody() != null) errorMsg += " - " + response.errorBody().string();
+                    } catch (Exception e) { Log.e(TAG, "Error parsing error body for variant", e); }
+                    Log.e(TAG, "onResponse (Variant): " + errorMsg);
                     showError("Không thể tải thông tin biến thể.");
                 }
+                updateLoadingState();
             }
 
             @Override
             public void onFailure(@NonNull Call<Variant> call, @NonNull Throwable t) {
-                Log.e(TAG, "onFailure: Lỗi kết nối mạng khi tải biến thể: " + t.getMessage(), t);
-                showError("Lỗi kết nối mạng khi tải thông tin biến thể.");
+                isLoadingVariant = false;
+                Log.e(TAG, "onFailure (Variant): Network error: " + t.getMessage(), t);
+                showError("Lỗi mạng khi tải thông tin biến thể.");
+                updateLoadingState();
             }
         });
     }
 
-    /**
-     * Cập nhật các thành phần UI phụ thuộc vào đối tượng Product (tên, hình ảnh, mô tả).
-     */
+    private void updateLoadingState() {
+        boolean isLoading = isLoadingProduct || isLoadingVariant || isLoadingInitialFavouriteStatus || isTogglingFavourite;
+        // Enable buttons only if not loading and both product and variant are successfully loaded
+        boolean dataLoaded = currentProduct != null && displayedVariant != null;
+        btnAddToCart.setEnabled(!isLoading && dataLoaded);
+        btnBuyNow.setEnabled(!isLoading && dataLoaded);
+        // Favourite button is enabled if not loading product and initial fav status check is done
+        ivFavourite.setEnabled(!isLoadingProduct && !isLoadingInitialFavouriteStatus && !isTogglingFavourite && currentProduct != null);
+    }
+
+
     private void updateUIFromProduct() {
-        if (currentProduct == null) {
-            Log.w(TAG, "updateUIFromProduct: currentProduct is null, không thể cập nhật UI.");
-            return;
-        }
-
-        // Cập nhật tên sản phẩm và tiêu đề toolbar
-        String productName = currentProduct.getName() != null ? currentProduct.getName() : "Tên sản phẩm không xác định";
+        if (currentProduct == null) return;
+        String productName = currentProduct.getName() != null ? currentProduct.getName() : "Tên sản phẩm không rõ";
         tvProductName.setText(productName);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(productName);
-        }
+        if (getSupportActionBar() != null) getSupportActionBar().setTitle(productName);
 
-        // Cập nhật hình ảnh sản phẩm
-        String imageUrl = currentProduct.getImageUrlSafe(); // Sử dụng hàm an toàn đã có trong Product
+        String imageUrl = currentProduct.getImageUrlSafe(); // Assumes Product model has getImageUrlSafe()
         if (imageUrl != null && !imageUrl.isEmpty()) {
-            Glide.with(this)
-                    .load(imageUrl)
-                    .placeholder(R.drawable.placeholder_product)
-                    .error(R.drawable.placeholder_product)
-                    .into(ivProductImage);
-            Log.d(TAG, "updateUIFromProduct: URL hình ảnh sản phẩm: " + imageUrl);
+            Glide.with(this).load(imageUrl).placeholder(R.drawable.placeholder_product).error(R.drawable.placeholder_product).into(ivProductImage);
         } else {
             ivProductImage.setImageResource(R.drawable.placeholder_product);
-            Log.w(TAG, "updateUIFromProduct: Không tìm thấy URL hình ảnh cho sản phẩm: " + productName + ". Sử dụng ảnh placeholder.");
+            Log.w(TAG, "updateUIFromProduct: Image URL not found for product: " + productName + ". Using placeholder.");
         }
-
-        // Cập nhật mô tả sản phẩm
-        if (currentProduct.getDescription() != null && !currentProduct.getDescription().isEmpty()) {
-            tvProductDescription.setText(currentProduct.getDescription());
-            tvProductDescription.setVisibility(View.VISIBLE);
-        } else {
-            tvProductDescription.setText("Chưa có mô tả chi tiết cho sản phẩm này.");
-            tvProductDescription.setVisibility(View.VISIBLE); // Giữ hiển thị với văn bản mặc định
-        }
-
-        // --- CẬP NHẬT PHẦN THÔNG SỐ KỸ THUẬT (tvProductSpecs) ---
-        // Dựa trên model Product hiện tại của bạn, không có trường 'specs' hay 'specsDetails'.
-        // Bạn cần quyết định dữ liệu nào sẽ hiển thị ở đây.
-        // Giả định: Backend của bạn có thể trả về thông số kỹ thuật dưới dạng một chuỗi trong `description`
-        // HOẶC bạn cần thêm một trường `specs` vào model `Product` hoặc `Variant` của bạn.
-        // TẠM THỜI: Để tránh lỗi, tôi sẽ đặt text mặc định.
-        // HOẶC nếu bạn muốn hiển thị thông tin màu sắc/dung lượng ở đây, bạn có thể làm như sau:
-        StringBuilder specsText = new StringBuilder();
-        if (displayedVariant != null) {
-            // Hiển thị thông tin từ biến thể nếu có
-            if (displayedVariant.getColor() != null && displayedVariant.getColor().getColorName() != null) {
-                specsText.append("Màu sắc: ").append(displayedVariant.getColor().getColorName()).append("\n");
-            }
-            if (displayedVariant.getSize() != null && displayedVariant.getSize().getStorage() != null) {
-                specsText.append("Dung lượng: ").append(displayedVariant.getSize().getStorage()).append("\n");
-            }
-            // Thêm các thông số khác nếu có trong Variant model của bạn
-        }
-
-        if (specsText.length() > 0) {
-            tvProductSpecs.setText(specsText.toString().trim());
-            tvProductSpecs.setVisibility(View.VISIBLE);
-        } else {
-            tvProductSpecs.setText("Chưa có thông số kỹ thuật chi tiết.");
-            tvProductSpecs.setVisibility(View.VISIBLE);
-        }
+        tvProductDescription.setText(currentProduct.getDescription() != null && !currentProduct.getDescription().isEmpty() ? currentProduct.getDescription() : "Chưa có mô tả.");
+        tvProductDescription.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * Cập nhật các thành phần UI phụ thuộc vào đối tượng Variant (giá, số lượng, màu sắc, kích thước).
-     */
     private void updateUIFromVariant() {
-        if (displayedVariant == null) {
-            Log.w(TAG, "updateUIFromVariant: displayedVariant is null, không thể cập nhật UI.");
-            return;
-        }
-        // Gọi hàm hiển thị giá, giảm giá, và số lượng tồn kho
+        if (displayedVariant == null) return;
         displayPriceAndSpecs();
-
-        // Cập nhật lại phần specs (tvProductSpecs) sau khi có dữ liệu variant
-        updateUIFromProduct(); // Gọi lại hàm này để nó cũng cập nhật specs từ variant nếu cần
+        updateLoadingState(); // Enable buttons after variant is loaded
     }
 
-    /**
-     * Hiển thị giá, giảm giá, và số lượng tồn kho.
-     * Hàm này kết hợp dữ liệu từ cả đối tượng Product và Variant.
-     */
     private void displayPriceAndSpecs() {
-        if (displayedVariant == null) {
-            Log.w(TAG, "displayPriceAndSpecs: displayedVariant is null. Không thể hiển thị giá và thông số.");
-            return;
-        }
-
+        if (displayedVariant == null) return;
         double originalPrice = displayedVariant.getPrice();
-        int discount = 0;
-        if (currentProduct != null) {
-            discount = currentProduct.getDiscount(); // Lấy giảm giá từ đối tượng Product
-        }
+        int discount = (currentProduct != null) ? currentProduct.getDiscount() : 0;
 
         if (discount > 0) {
             tvDiscountPercent.setVisibility(View.VISIBLE);
             tvOriginalPrice.setVisibility(View.VISIBLE);
             double discountedPrice = originalPrice * (100 - discount) / 100.0;
-
-            tvOriginalPrice.setText(numberFormat.format(originalPrice)); // Định dạng giá gốc
-            tvDiscountPrice.setText(numberFormat.format(discountedPrice)); // Định dạng giá đã giảm
+            tvOriginalPrice.setText(numberFormat.format(originalPrice));
+            tvDiscountPrice.setText(numberFormat.format(discountedPrice));
             tvDiscountPercent.setText("-" + discount + "%");
-
-            // Áp dụng gạch ngang cho giá gốc
             tvOriginalPrice.setPaintFlags(tvOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         } else {
             tvDiscountPercent.setVisibility(View.GONE);
             tvOriginalPrice.setVisibility(View.GONE);
-            tvDiscountPrice.setText(numberFormat.format(originalPrice)); // Hiển thị giá không giảm
-            tvOriginalPrice.setPaintFlags(0); // Bỏ gạch ngang nếu không có giảm giá
+            tvDiscountPrice.setText(numberFormat.format(originalPrice));
+            tvOriginalPrice.setPaintFlags(0);
         }
-        Log.d(TAG, "displayPriceAndSpecs: Giá đã cập nhật. Gốc: " + originalPrice + ", Giảm giá: " + discount);
-
-        // Cập nhật trạng thái tồn kho
         int stock = displayedVariant.getQuantity();
-        if (stock > 0) {
-            tvStock.setText("Còn " + stock + " sản phẩm");
-            tvStock.setTextColor(ContextCompat.getColor(this, R.color.success_green)); // Sử dụng ContextCompat
-        } else {
-            tvStock.setText("Hết hàng");
-            tvStock.setTextColor(ContextCompat.getColor(this, R.color.error_red)); // Sử dụng ContextCompat
+        tvStock.setText(stock > 0 ? "Còn " + stock + " sản phẩm" : "Hết hàng");
+        tvStock.setTextColor(ContextCompat.getColor(this, stock > 0 ? R.color.success_green : R.color.error_red));
+
+        StringBuilder specsText = new StringBuilder();
+        if (displayedVariant.getColor() != null && displayedVariant.getColor().getColorName() != null) {
+            specsText.append("Màu sắc: ").append(displayedVariant.getColor().getColorName()).append("\n");
         }
-        Log.d(TAG, "displayPriceAndSpecs: Tồn kho đã cập nhật: " + stock);
+        if (displayedVariant.getSize() != null && displayedVariant.getSize().getStorage() != null) {
+            specsText.append("Dung lượng: ").append(displayedVariant.getSize().getStorage()).append("\n");
+        }
+        tvProductSpecs.setText(specsText.length() > 0 ? specsText.toString().trim() : "Chưa có thông số chi tiết.");
+        tvProductSpecs.setVisibility(View.VISIBLE);
     }
+
+    private void checkIfProductIsFavourite() {
+        if (productIdFromIntent == null || authToken == null || authToken.isEmpty() || currentProduct == null) {
+            updateFavouriteIcon();
+            ivFavourite.setEnabled(currentProduct != null); // Enable only if product is loaded
+            return;
+        }
+        isLoadingInitialFavouriteStatus = true;
+        updateLoadingState();
+
+        // SỬA Ở ĐÂY: Thay đổi Callback để sử dụng List<Favourite>
+        apiService.getFavourites().enqueue(new Callback<ApiResponse<List<Favourite>>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<List<Favourite>>> call, @NonNull Response<ApiResponse<List<Favourite>>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    List<Favourite> favouriteEntries = response.body().getData(); // Danh sách các đối tượng Favourite
+                    isFavourite = false;
+                    if (favouriteEntries != null) {
+                        for (Favourite favEntry : favouriteEntries) {
+                            // Lấy đối tượng Product cơ bản từ favEntry
+                            Product productInFavList = favEntry.getProductDetails();
+                            if (productInFavList != null && productInFavList.getId() != null) {
+                                if (productInFavList.getId().equals(productIdFromIntent)) {
+                                    isFavourite = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    isFavourite = false; // Mặc định là false nếu có lỗi hoặc không thành công
+                    Log.e(TAG, "getFavourites API error: " + response.code() + (response.body() != null ? " - " + response.body().getMessage() : " (No error body)"));
+                }
+                isLoadingInitialFavouriteStatus = false;
+                updateFavouriteIcon();
+                updateLoadingState();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<List<Favourite>>> call, @NonNull Throwable t) {
+                isFavourite = false; // Mặc định là false nếu có lỗi mạng
+                isLoadingInitialFavouriteStatus = false;
+                updateFavouriteIcon();
+                updateLoadingState();
+                Log.e(TAG, "getFavourites network failure: " + t.getMessage(), t);
+                // Có thể hiển thị Toast cho người dùng nếu cần
+                // Toast.makeText(ProductDetailActivity.this, "Lỗi kiểm tra yêu thích.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void toggleFavouriteStatus() {
+        if (currentProduct == null || productIdFromIntent == null) {
+            Toast.makeText(this, "Thông tin sản phẩm không đầy đủ.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (authToken == null || authToken.isEmpty()) {
+            Toast.makeText(this, "Bạn cần đăng nhập.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        isTogglingFavourite = true;
+        updateLoadingState();
+        FavouriteRequest request = new FavouriteRequest(productIdFromIntent);
+
+        if (isFavourite) {
+            apiService.removeFavourite(request).enqueue(new Callback<ApiResponse>() {
+                @Override
+                public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        isFavourite = false;
+                        Toast.makeText(ProductDetailActivity.this, "Đã xóa khỏi yêu thích.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(ProductDetailActivity.this, "Lỗi khi xóa khỏi yêu thích.", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "removeFavourite API error: " + response.code() + (response.body() != null ? " - " + response.body().getMessage() : ""));
+                    }
+                    finishToggleFavourite();
+                }
+                @Override
+                public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable t) {
+                    Toast.makeText(ProductDetailActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    finishToggleFavourite();
+                }
+            });
+        } else {
+            apiService.addFavourite(request).enqueue(new Callback<ApiResponse>() {
+                @Override
+                public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        isFavourite = true;
+                        Toast.makeText(ProductDetailActivity.this, "Đã thêm vào yêu thích.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        String errorMessage = "Lỗi khi thêm vào yêu thích.";
+                        if (response.code() == 400) {
+                            try {
+                                if (response.errorBody() != null) {
+                                    String errorBodyString = response.errorBody().string();
+                                    // Kiểm tra xem có phải lỗi "đã tồn tại" không, nếu có thì cập nhật isFavourite = true
+                                    // Dựa trên response thực tế của bạn cho lỗi "đã tồn tại"
+                                    // Ví dụ: if (errorBodyString.contains("already in favourites"))
+                                    if (errorBodyString.contains("Sản phẩm đã có trong danh sách yêu thích")) { // Cập nhật theo message thực tế
+                                        isFavourite = true; // Set isFavourite to true if it was a 'duplicate' error
+                                        errorMessage = "Sản phẩm này đã ở trong danh sách yêu thích!";
+                                    }
+                                    Log.e(TAG, "addFavourite API error (400): " + errorBodyString);
+                                } else {
+                                    Log.e(TAG, "addFavourite API error (400) with no error body.");
+                                }
+                            } catch (IOException e) {
+                                Log.e(TAG, "Error parsing 400 error body", e);
+                            }
+                        } else {
+                            Log.e(TAG, "addFavourite API error: " + response.code() + (response.body() != null ? " - " + response.body().getMessage() : ""));
+                        }
+                        Toast.makeText(ProductDetailActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                    }
+                    finishToggleFavourite();
+                }
+                @Override
+                public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable t) {
+                    Toast.makeText(ProductDetailActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    finishToggleFavourite();
+                }
+            });
+        }
+    }
+    private void finishToggleFavourite() {
+        isTogglingFavourite = false;
+        updateFavouriteIcon();
+        updateLoadingState();
+    }
+
+    private void updateFavouriteIcon() {
+        if (isFinishing()) return;
+        if (isFavourite) {
+            ivFavourite.setImageResource(R.drawable.ic_heart_filled);
+            ivFavourite.setColorFilter(ContextCompat.getColor(this, R.color.red));
+        } else {
+            ivFavourite.setImageResource(R.drawable.ic_heart_outline);
+            ivFavourite.clearColorFilter();
+        }
+    }
+
     private void callAddToCartApi(String productId, String variantId, int quantity) {
+        // ... (existing addToCart logic - looks fine)
         if (authToken == null || authToken.isEmpty()) {
             Toast.makeText(ProductDetailActivity.this, "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.", Toast.LENGTH_LONG).show();
             return;
         }
-
-        apiService = RetrofitClient.getApiService(authToken);
-
         CartRequest.AddToCart request = new CartRequest.AddToCart(productId, variantId, quantity);
-
         Toast.makeText(ProductDetailActivity.this, "Đang thêm sản phẩm vào giỏ hàng...", Toast.LENGTH_SHORT).show();
-
         apiService.addToCart(request).enqueue(new Callback<ApiResponse<Cart>>() {
             @Override
             public void onResponse(@androidx.annotation.NonNull Call<ApiResponse<com.phoneapp.phonepulse.models.Cart>> call, @androidx.annotation.NonNull Response<ApiResponse<com.phoneapp.phonepulse.models.Cart>> response) {
@@ -403,7 +495,6 @@ public class ProductDetailActivity extends AppCompatActivity {
                     Log.e(TAG, "Add to cart API failed: " + response.code() + " - " + errorMsg);
                 }
             }
-
             @Override
             public void onFailure(@androidx.annotation.NonNull Call<ApiResponse<com.phoneapp.phonepulse.models.Cart>> call, @androidx.annotation.NonNull Throwable t) {
                 Toast.makeText(ProductDetailActivity.this, "Lỗi mạng khi thêm vào giỏ hàng: " + t.getMessage(), Toast.LENGTH_LONG).show();
@@ -411,22 +502,20 @@ public class ProductDetailActivity extends AppCompatActivity {
             }
         });
     }
+
     private void checkStockAndAddToCart(String productId, String variantId, int addedQuantity) {
+        // ... (existing checkStockAndAddToCart logic - looks fine)
         if (authToken == null || authToken.isEmpty()) {
             Toast.makeText(this, "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.", Toast.LENGTH_LONG).show();
             return;
         }
-
-        apiService = RetrofitClient.getApiService(authToken);
-
         apiService.getCart().enqueue(new Callback<ApiResponse<Cart>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<Cart>> call, @NonNull Response<ApiResponse<Cart>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     Cart cart = response.body().getData();
                     int existingQuantity = 0;
-
-                    if (cart.getItems() != null) {
+                    if (cart != null && cart.getItems() != null) {
                         for (CartItem item : cart.getItems()) {
                             if (item.getVariant() != null && variantId.equals(item.getVariant().getId())) {
                                 existingQuantity = item.getQuantity();
@@ -434,10 +523,7 @@ public class ProductDetailActivity extends AppCompatActivity {
                             }
                         }
                     }
-
                     int finalExistingQuantity = existingQuantity;
-
-                    // Gọi API lấy thông tin biến thể để kiểm tra tồn kho
                     apiService.getVariantForProductById(productId, variantId).enqueue(new Callback<Variant>() {
                         @Override
                         public void onResponse(@NonNull Call<Variant> call, @NonNull Response<Variant> response) {
@@ -445,57 +531,91 @@ public class ProductDetailActivity extends AppCompatActivity {
                                 Variant variant = response.body();
                                 int stockQuantity = variant.getQuantity();
                                 int totalRequested = finalExistingQuantity + addedQuantity;
-
                                 if (totalRequested > stockQuantity) {
                                     Toast.makeText(ProductDetailActivity.this,
-                                            "Không thể thêm. Số lượng vượt quá tồn kho (" + stockQuantity + ").",
+                                            "Không thể thêm. Số lượng vượt quá tồn kho (" + stockQuantity + "). Hiện có " + finalExistingQuantity + " trong giỏ.",
                                             Toast.LENGTH_LONG).show();
                                 } else {
-                                    // Tồn kho đủ → gọi API thêm vào giỏ
                                     callAddToCartApi(productId, variantId, addedQuantity);
                                 }
                             } else {
                                 Toast.makeText(ProductDetailActivity.this, "Không thể lấy thông tin tồn kho.", Toast.LENGTH_SHORT).show();
                             }
                         }
-
                         @Override
                         public void onFailure(@NonNull Call<Variant> call, @NonNull Throwable t) {
                             Toast.makeText(ProductDetailActivity.this, "Lỗi mạng khi kiểm tra tồn kho: " + t.getMessage(), Toast.LENGTH_LONG).show();
                         }
                     });
                 } else {
-                    Toast.makeText(ProductDetailActivity.this, "Không thể lấy giỏ hàng hiện tại.", Toast.LENGTH_SHORT).show();
+                    Log.w(TAG, "Could not get current cart. Proceeding to check stock and add.");
+                    apiService.getVariantForProductById(productId, variantId).enqueue(new Callback<Variant>() {
+                        @Override
+                        public void onResponse(@NonNull Call<Variant> call, @NonNull Response<Variant> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                Variant variant = response.body();
+                                int stockQuantity = variant.getQuantity();
+                                if (addedQuantity > stockQuantity) {
+                                    Toast.makeText(ProductDetailActivity.this,
+                                            "Không thể thêm. Số lượng vượt quá tồn kho (" + stockQuantity + ").",
+                                            Toast.LENGTH_LONG).show();
+                                } else {
+                                    callAddToCartApi(productId, variantId, addedQuantity);
+                                }
+                            } else {
+                                Toast.makeText(ProductDetailActivity.this, "Không thể lấy thông tin tồn kho.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        @Override
+                        public void onFailure(@NonNull Call<Variant> call, @NonNull Throwable t_inner) {
+                            Toast.makeText(ProductDetailActivity.this, "Lỗi mạng khi kiểm tra tồn kho: " + t_inner.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
             }
-
             @Override
             public void onFailure(@NonNull Call<ApiResponse<Cart>> call, @NonNull Throwable t) {
                 Toast.makeText(ProductDetailActivity.this, "Lỗi mạng khi lấy giỏ hàng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.w(TAG, "Network failure getting cart. Proceeding to check stock and add.", t);
+                apiService.getVariantForProductById(productId, variantId).enqueue(new Callback<Variant>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Variant> call, @NonNull Response<Variant> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Variant variant = response.body();
+                            int stockQuantity = variant.getQuantity();
+                            if (addedQuantity > stockQuantity) {
+                                Toast.makeText(ProductDetailActivity.this,
+                                        "Không thể thêm. Số lượng vượt quá tồn kho (" + stockQuantity + ").",
+                                        Toast.LENGTH_LONG).show();
+                            } else {
+                                callAddToCartApi(productId, variantId, addedQuantity);
+                            }
+                        } else {
+                            Toast.makeText(ProductDetailActivity.this, "Không thể lấy thông tin tồn kho.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    @Override
+                    public void onFailure(@NonNull Call<Variant> call, @NonNull Throwable t_inner) {
+                        Toast.makeText(ProductDetailActivity.this, "Lỗi mạng khi kiểm tra tồn kho: " + t_inner.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
             }
         });
     }
 
-    /**
-     * Xử lý các sự kiện click menu item (ví dụ: nút quay lại trên toolbar).
-     */
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed(); // Quay lại khi nhấn nút quay lại
+            onBackPressed();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Hiển thị tin nhắn Toast ngắn gọn cho các lỗi.
-     * @param msg Tin nhắn để hiển thị.
-     */
     private void showError(String msg) {
         if (!isFinishing()) {
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "showError: Hiển thị Toast: " + msg);
+            Log.e(TAG, "showError: Displaying Toast: " + msg);
         }
     }
 }
