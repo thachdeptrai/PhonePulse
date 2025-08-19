@@ -70,7 +70,7 @@ dependencies {
     // Okhpt
     implementation ("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation ("com.google.code.gson:gson:2.10.1")
-
+    implementation ("org.greenrobot:eventbus:3.3.1")
 
 
 

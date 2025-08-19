@@ -4,7 +4,7 @@
         <domain includeSubdomains="true">10.0.2.2</domain>
         <domain includeSubdomains="true">10.24.9.66</domain>
         <domain includeSubdomains="true">192.168.1.9</domain>
-<!--        <domain includeSubdomains="true">192.168.2.6</domain>-->
+        <domain includeSubdomains="true">10.128.57.42</domain>
         <domain includeSubdomains="true">10.24.60.244</domain>
         <domain includeSubdomains="true">10.24.32.145</domain>
         <domain includeSubdomains="true">192.168.100.188</domain>

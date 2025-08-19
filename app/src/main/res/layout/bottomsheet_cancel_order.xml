@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- Tiêu đề -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Chọn lý do hủy đơn hàng"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Nhóm lựa chọn -->
+    <RadioGroup
+        android:id="@+id/radioGroupReasons"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp">
+
+        <RadioButton
+            android:id="@+id/rbReason1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Đổi ý, không muốn mua nữa" />
+
+        <RadioButton
+            android:id="@+id/rbReason2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tìm được sản phẩm khác phù hợp hơn" />
+
+        <RadioButton
+            android:id="@+id/rbReason3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thời gian giao hàng quá lâu" />
+
+        <RadioButton
+            android:id="@+id/rbReason4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Muốn thay đổi địa chỉ giao hàng" />
+
+        <RadioButton
+            android:id="@+id/rbReason5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Khác (ghi chú riêng)" />
+    </RadioGroup>
+
+    <!-- Nút xác nhận -->
+    <Button
+        android:id="@+id/btnConfirmCancel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Xác nhận hủy"
+        app:layout_constraintTop_toBottomOf="@id/radioGroupReasons"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"
+        android:backgroundTint="@color/shopee_orange"
+        android:textColor="@android:color/white" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

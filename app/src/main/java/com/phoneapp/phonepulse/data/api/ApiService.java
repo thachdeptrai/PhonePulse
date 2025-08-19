@@ -155,6 +155,11 @@ public interface ApiService {
     // Dùng cho Home_FRAGMENT để lấy variants cho TỪNG sản phẩm cụ thể
     // Backend route: GET /api/products/:id/variants
     // LƯU Ý: Hàm này chỉ populate color_id và size_id ở backend, không có product_name hay image_url.
+    // Thêm vào interface ApiService
+// THÊM: Nếu bạn có endpoint để lấy TẤT CẢ variants (không theo product ID)
+    // Dùng cho fetchAllVariants() trong TatCaDonHang_FRAGMENT
+    @GET("/api/variants") // Hoặc endpoint tương ứng
+    Call<ApiResponse<List<Variant>>> getAllVariants(@Header("Authorization") String token);
     @GET("/api/products/{productId}/variants")
     Call<List<Variant>> getVariantsForProduct(@Path("productId") String productId);
 
@@ -163,6 +168,10 @@ public interface ApiService {
     // Backend route: POST /api/products/:id/variants
     @POST("/api/products/{productId}/variants")
     Call<ApiResponse<Variant>> addVariantForProduct(@Path("productId") String productId, @Body Variant variant);
+    // Lấy một variant cụ thể qua product_id và variant_id
+    // LƯU Ý: Hàm này chỉ populate color_id và size_id ở backend, không có product_name hay image_url.
+    @GET("/api/products/{productId}/variants/{variantId}")
+    Call<ApiResponse<Variant>> getVariantById(@Path("productId") String productId, @Path("variantId") String variantId); // 👈 TÊN HÀM NÀY PHẢI KHỚP VỚI CÁI TÔI DÙNG
 
     // Lấy một variant cụ thể qua product_id và variant_id
     // Backend route: GET /api/products/:id/variants/:variantId
@@ -173,7 +182,8 @@ public interface ApiService {
     // Cập nhật một variant cụ thể qua product_id và variant_id
     // Backend route: PUT /api/products/:id/variants/:variantId
     @PUT("/api/products/{productId}/variants/{variantId}")
-    Call<ApiResponse<Variant>> updateVariantForProductById(@Path("productId") String productId, @Path("variantId") String variantId, @Body Variant variant);
+    Call<ApiResponse<Variant>> updateVariantForProductById(@Path("productId") String productId,
+                                                           @Path("variantId") String variantId, @Body Variant variant);
 
     // Xoá một variant cụ thể qua product_id và variant_id
     // Backend route: DELETE /api/products/:id/variants/:variantId

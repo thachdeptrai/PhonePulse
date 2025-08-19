@@ -33,7 +33,7 @@ public class OrderHistory_FRAGMENT extends Fragment {
 
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
-                case 0: tab.setText("Chờ xác nhận"); break;
+                case 0: tab.setText("Tất cả đơn hàng "); break;
                 case 1: tab.setText("Đang xử lý"); break;
                 case 2: tab.setText("Đang giao"); break;
                 case 3: tab.setText("Hoàn thành"); break;
