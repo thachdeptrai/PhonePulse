@@ -3,31 +3,75 @@ package com.phoneapp.phonepulse.models;
 public class Voucher {
     private String _id;
     private String code;
-    private double discountPercent;
-    private double maxDiscount;
-    private String startDate;
-    private String endDate;
-    private int usageLimit;
+    private String discount_type;   // "percent" hoặc "amount"
+    private double discount_value;  // giá trị giảm
+    private double min_order_value; // giá trị tối thiểu để áp dụng
+    private double max_discount;    // số tiền giảm tối đa
+    private String start_date;
+    private String end_date;
 
-    public String getId() { return _id; }
-    public void setId(String _id) { this._id = _id; }
+    // Getter & Setter
+    public String getId() {
+        return _id;
+    }
 
-    public String getCode() { return code; }
-    public void setCode(String code) { this.code = code; }
+    public void setId(String _id) {
+        this._id = _id;
+    }
 
-    public double getDiscountPercent() { return discountPercent; }
-    public void setDiscountPercent(double discountPercent) { this.discountPercent = discountPercent; }
+    public String getCode() {
+        return code;
+    }
 
-    public double getMaxDiscount() { return maxDiscount; }
-    public void setMaxDiscount(double maxDiscount) { this.maxDiscount = maxDiscount; }
+    public void setCode(String code) {
+        this.code = code;
+    }
 
-    public String getStartDate() { return startDate; }
-    public void setStartDate(String startDate) { this.startDate = startDate; }
+    public String getDiscountType() {
+        return discount_type;
+    }
 
-    public String getEndDate() { return endDate; }
-    public void setEndDate(String endDate) { this.endDate = endDate; }
+    public void setDiscountType(String discount_type) {
+        this.discount_type = discount_type;
+    }
 
-    public int getUsageLimit() { return usageLimit; }
-    public void setUsageLimit(int usageLimit) { this.usageLimit = usageLimit; }
+    public double getDiscountValue() {
+        return discount_value;
+    }
+
+    public void setDiscountValue(double discount_value) {
+        this.discount_value = discount_value;
+    }
+
+    public double getMinOrderValue() {
+        return min_order_value;
+    }
+
+    public void setMinOrderValue(double min_order_value) {
+        this.min_order_value = min_order_value;
+    }
+
+    public double getMaxDiscount() {
+        return max_discount;
+    }
+
+    public void setMaxDiscount(double max_discount) {
+        this.max_discount = max_discount;
+    }
+
+    public String getStartDate() {
+        return start_date;
+    }
+
+    public void setStartDate(String start_date) {
+        this.start_date = start_date;
+    }
+
+    public String getEndDate() {
+        return end_date;
+    }
+
+    public void setEndDate(String end_date) {
+        this.end_date = end_date;
+    }
 }
-

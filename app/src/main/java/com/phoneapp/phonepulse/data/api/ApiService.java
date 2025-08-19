@@ -1,6 +1,7 @@
 package com.phoneapp.phonepulse.data.api;
 
 import com.phoneapp.phonepulse.Response.ApiResponse;
+import com.phoneapp.phonepulse.Response.ApplyVoucherResponse;
 import com.phoneapp.phonepulse.models.*;
 import com.phoneapp.phonepulse.Response.LoginResponse;
 import com.phoneapp.phonepulse.request.*;
@@ -121,6 +122,8 @@ public interface ApiService {
     @POST("/api/vouchers/apply")
     Call<ApiResponse<Voucher>> applyVoucher(@Header("Authorization") String token, @Body VoucherRequest body);
 
+    @GET("/api/vouchers")
+    Call<ApiResponse<List<Voucher>>> getVouchers(@Header("Authorization") String token);
 
     // ========== REVIEWS ==========
     @GET("/api/reviews/{productId}")
