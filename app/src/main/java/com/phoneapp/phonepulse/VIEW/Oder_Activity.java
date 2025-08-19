@@ -25,11 +25,15 @@ import com.phoneapp.phonepulse.data.api.RetrofitClient;
 import com.phoneapp.phonepulse.models.Cart;
 import com.phoneapp.phonepulse.models.Order;
 import com.phoneapp.phonepulse.models.Variant;
+import com.phoneapp.phonepulse.models.Voucher;
 import com.phoneapp.phonepulse.request.CartRequest;
 import com.phoneapp.phonepulse.request.OrderItem;
 import com.phoneapp.phonepulse.request.OrderRequest;
+import com.phoneapp.phonepulse.ui.voucher.VoucherBottomSheet;
 import com.phoneapp.phonepulse.utils.Constants;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -43,7 +47,6 @@ public class Oder_Activity extends AppCompatActivity {
 
     private static final String TAG = "Oder_Activity";
 
-    // Thành phần UI
     private MaterialToolbar toolbar;
     private TextView tvFullName, tvPhoneNumber, tvShippingAddress;
     private Button btnChangeAddress, btnPlaceOrder;
@@ -52,12 +55,14 @@ public class Oder_Activity extends AppCompatActivity {
     private RadioGroup paymentMethodGroup;
     private RadioButton radioCod, radioMomo;
     private TextView tvSubtotal, tvDiscount, tvFinalPrice, tvTotalAmount;
-    private TextView tvAddCoupon;
+    private TextView tvAddCoupon, tvSelectedCoupon; // ✅ THÊM tvSelectedCoupon
 
     // Dữ liệu
     private ArrayList<OrderItem> orderItemList;
     private ApiService apiService;
-    private List<Variant> variantsInCart = new ArrayList<>(); // Lưu trữ các biến thể đã được tải để kiểm tra tồn kho
+    private List<Variant> variantsInCart = new ArrayList<>();
+    private Voucher selectedVoucher; // ✅ THÊM biến voucher đã chọn
+    private int subtotal = 0; // ✅ THÊM biến subtotal để sử dụng trong các hàm khác
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,13 +70,15 @@ public class Oder_Activity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_oder);
 
+        // Khởi tạo ApiService sớm
+        apiService = RetrofitClient.getApiService(Constants.getToken(this));
+
         initViews();
         setupToolbar();
         bindUserToUI();
-        getIntentData(); // Lấy dữ liệu và kiểm tra ngay lập tức
+        getIntentData();
         setupListeners();
 
-        // Tải chi tiết biến thể từ API nếu có sản phẩm trong đơn hàng
         if (orderItemList != null && !orderItemList.isEmpty()) {
             loadVariantsInCart();
         } else {
@@ -80,6 +87,7 @@ public class Oder_Activity extends AppCompatActivity {
             finish();
         }
     }
+
 
     /**
      * Khởi tạo tất cả các thành phần UI bằng cách tìm ID tương ứng của chúng.
@@ -101,11 +109,13 @@ public class Oder_Activity extends AppCompatActivity {
         tvFinalPrice = findViewById(R.id.tv_final_price);
         tvTotalAmount = findViewById(R.id.tv_total_amount);
         tvAddCoupon = findViewById(R.id.tv_add_coupon);
+        tvSelectedCoupon = findViewById(R.id.tv_selected_coupon);
     }
 
     /**
      * Thiết lập Toolbar với tiêu đề và nút quay lại.
      */
+
     private void setupToolbar() {
         toolbar.setTitle("Thanh toán đơn hàng");
         setSupportActionBar(toolbar);
@@ -115,6 +125,7 @@ public class Oder_Activity extends AppCompatActivity {
     /**
      * Lấy danh sách các sản phẩm trong đơn hàng từ Intent và kiểm tra giá.
      */
+
     private void getIntentData() {
         orderItemList = getIntent().getParcelableArrayListExtra("order_items");
         if (orderItemList != null && !orderItemList.isEmpty()) {
@@ -136,9 +147,15 @@ public class Oder_Activity extends AppCompatActivity {
     /**
      * Thiết lập các lắng nghe sự kiện cho các nút và các thành phần UI khác.
      */
+
     private void setupListeners() {
         btnPlaceOrder.setOnClickListener(v -> placeOrder());
-        // btnChangeAddress.setOnClickListener(v -> handleChangeAddress()); // Uncomment nếu có chức năng này
+        // btnChangeAddress.setOnClickListener(v -> handleChangeAddress());
+
+        // ✅ THÊM: Listener cho nút "Thêm mã giảm giá"
+        if (tvAddCoupon != null) {
+            tvAddCoupon.setOnClickListener(v -> fetchVouchers());
+        }
     }
 
     /**
@@ -206,16 +223,17 @@ public class Oder_Activity extends AppCompatActivity {
         rvCheckoutProducts.setLayoutManager(new LinearLayoutManager(this));
         rvCheckoutProducts.setAdapter(adapter);
 
-        int subtotal = 0;
+        // ✅ ĐÃ SỬA: Tính và lưu subtotal
+        subtotal = 0;
         for (OrderItem item : orderItemList) {
             subtotal += item.getPrice() * item.getQuantity();
         }
 
-        String formattedTotal = String.format(Locale.getDefault(), "%,d đ", subtotal).replace(",", ".");
+        String formattedTotal = formatCurrency(subtotal);
         tvTotalAmount.setText(formattedTotal);
         tvSubtotal.setText(formattedTotal);
         tvFinalPrice.setText(formattedTotal);
-        tvDiscount.setText("0 đ");
+        tvDiscount.setText(formatCurrency(0));
         Log.d(TAG, "UI đã được cập nhật. Tổng tiền hiển thị: " + formattedTotal);
     }
 
@@ -321,8 +339,91 @@ public class Oder_Activity extends AppCompatActivity {
         });
     }
 
+
+    // ✅ THÊM: Phương thức cập nhật giá cuối cùng sau khi áp dụng voucher
+    private void updateFinalPrice() {
+        int discount = calculateDiscount(subtotal, selectedVoucher);
+        int finalPrice = subtotal - discount;
+        if (finalPrice < 0) finalPrice = 0;
+
+        tvDiscount.setText("- " + formatCurrency(discount));
+        tvFinalPrice.setText(formatCurrency(finalPrice));
+        tvTotalAmount.setText(formatCurrency(finalPrice));
+    }
+
+    // ✅ THÊM: Phương thức tính toán giảm giá
+    private int calculateDiscount(int subtotal, Voucher voucher) {
+        if (voucher == null || subtotal < voucher.getMinOrderValue()) {
+            return 0;
+        }
+
+        int discount = 0;
+        if (voucher.getDiscountType().equals("percent")) {
+            discount = (int) (subtotal * voucher.getDiscountValue() / 100);
+            if (voucher.getMaxDiscount() > 0 && discount > voucher.getMaxDiscount()) {
+                discount = (int) voucher.getMaxDiscount();
+            }
+        } else if (voucher.getDiscountType().equals("amount")) {
+            discount = (int) voucher.getDiscountValue();
+        }
+
+        return discount;
+    }
+
+    // ✅ THÊM: Phương thức định dạng tiền tệ
+    private String formatCurrency(int amount) {
+        NumberFormat formatter = new DecimalFormat("#,### đ");
+        return formatter.format(amount);
+    }
+
+    // ✅ THÊM: Phương thức gọi API để lấy danh sách voucher
+    private void fetchVouchers() {
+        String token = Constants.getToken(this);
+        if (token == null || token.isEmpty()) {
+            Toast.makeText(this, "Vui lòng đăng nhập để xem mã giảm giá.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        apiService.getVouchers("Bearer " + token).enqueue(new Callback<ApiResponse<List<Voucher>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<List<Voucher>>> call, Response<ApiResponse<List<Voucher>>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    List<Voucher> vouchers = response.body().getData();
+                    showVoucherBottomSheet(vouchers); // ✅ CHUYỂN DANH SÁCH VOUCHER VÀO BOTTOM SHEET
+                } else {
+                    String errorMsg = response.body() != null ? response.body().getMessage() : "Không thể tải mã giảm giá. Vui lòng thử lại.";
+                    Toast.makeText(Oder_Activity.this, errorMsg, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<List<Voucher>>> call, Throwable t) {
+                Toast.makeText(Oder_Activity.this, "Lỗi kết nối khi tải mã giảm giá.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // ✅ THÊM: Phương thức hiển thị BottomSheet
+    private void showVoucherBottomSheet(List<Voucher> vouchers) {
+        if (vouchers == null || vouchers.isEmpty()) {
+            Toast.makeText(this, "Không có mã giảm giá nào hiện có.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        VoucherBottomSheet bottomSheet = new VoucherBottomSheet(vouchers, selected -> {
+            this.selectedVoucher = selected;
+            if (tvSelectedCoupon != null) {
+                tvSelectedCoupon.setText(selected.getCode());
+            }
+
+            updateFinalPrice();
+        });
+        bottomSheet.show(getSupportFragmentManager(), "VoucherBottomSheet");
+    }
+
     /**
      * Kiểm tra xem có đủ tồn kho cho tất cả các sản phẩm trong đơn hàng hay không.
+     *
      * @return true nếu đủ tồn kho, false nếu không.
      */
     private boolean checkStockBeforeOrder() {
@@ -349,6 +450,7 @@ public class Oder_Activity extends AppCompatActivity {
     /**
      * Cập nhật số lượng tồn kho của các biến thể trên máy chủ sau khi đặt hàng thành công.
      * Phương thức này đảm bảo rằng giá sản phẩm không bị thay đổi.
+     *
      * @param orderedItems Danh sách các sản phẩm đã được đặt.
      */
     private void updateVariantStockOnServer(ArrayList<OrderItem> orderedItems) {
@@ -497,8 +599,9 @@ public class Oder_Activity extends AppCompatActivity {
 
     /**
      * Tìm một biến thể (Variant) trong danh sách dựa trên ID của nó.
+     *
      * @param variantId ID của biến thể cần tìm.
-     * @param variants Danh sách các biến thể để tìm kiếm.
+     * @param variants  Danh sách các biến thể để tìm kiếm.
      * @return Đối tượng Variant nếu tìm thấy, ngược lại trả về null.
      */
     private Variant findVariantById(String variantId, List<Variant> variants) {
@@ -552,6 +655,7 @@ public class Oder_Activity extends AppCompatActivity {
 
     /**
      * Trích xuất giá trị số nguyên từ một chuỗi giá tiền đã định dạng (ví dụ: "100.000 đ").
+     *
      * @param formattedPrice Chuỗi giá tiền đã định dạng.
      * @return Giá trị số nguyên của giá tiền, hoặc 0 nếu có lỗi trong quá trình chuyển đổi.
      */

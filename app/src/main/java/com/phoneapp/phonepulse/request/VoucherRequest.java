@@ -2,29 +2,19 @@ package com.phoneapp.phonepulse.request;
 
 public class VoucherRequest {
     private String code;
-    private double total;
+    private double orderTotal; // tổng tiền đơn hàng
 
-    public VoucherRequest() {}
-
-    public VoucherRequest(String code, double total) {
+    public VoucherRequest(String code, double orderTotal) {
         this.code = code;
-        this.total = total;
+        this.orderTotal = orderTotal;
     }
 
     public String getCode() {
         return code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public double getTotal() {
-        return total;
-    }
-
-    public void setTotal(double total) {
-        this.total = total;
+    public double getOrderTotal() {
+        return orderTotal;
     }
 }
 
