@@ -371,9 +371,40 @@ public class Oder_Activity extends AppCompatActivity {
     }
 
     // ✅ THÊM: Phương thức định dạng tiền tệ
+    /**
+     * Định dạng một số nguyên thành chuỗi tiền tệ tiếng Việt (ví dụ: "11.700.000 đ").
+     * Đảm bảo sử dụng Locale Việt Nam để có định dạng dấu chấm phân cách hàng nghìn.
+     *
+     * @param amount Giá trị tiền tệ cần định dạng.
+     * @return Chuỗi tiền tệ đã định dạng.
+     */
     private String formatCurrency(int amount) {
-        NumberFormat formatter = new DecimalFormat("#,### đ");
-        return formatter.format(amount);
+        // Sử dụng Locale Việt Nam để đảm bảo định dạng số nhất quán (dấu chấm cho hàng nghìn)
+        // và thêm ký hiệu tiền tệ 'đ' vào cuối.
+        NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+
+        // Mặc định, NumberFormat.getCurrencyInstance cho Locale "vi", "VN" sẽ thêm ký hiệu "₫"
+        // và có thể có dấu thập phân ".00".
+        // Chúng ta cần điều chỉnh để nó chỉ hiển thị số nguyên và thêm " đ" thủ công.
+        DecimalFormat decimalFormatter = (DecimalFormat) formatter;
+        // Loại bỏ phần thập phân
+        decimalFormatter.applyPattern("#,###"); // Sử dụng dấu phẩy tạm thời để trình bày ở đây,
+        // nhưng thực tế với Locale "vi", "VN" nó sẽ dùng dấu chấm.
+        // Hoặc bạn có thể dùng "#.###" nếu muốn tường minh.
+
+        // Bạn có thể thiết lập Symbol nếu muốn kiểm soát ký hiệu tiền tệ
+        // decimalFormatter.setCurrencySymbol(" đ"); // Điều này có thể không hoạt động như mong đợi với mọi Locale
+
+        // Cách tốt nhất là định dạng số, sau đó nối thêm ký hiệu " đ"
+        String formattedNumber = decimalFormatter.format(amount);
+
+        // Sau khi định dạng, thay thế dấu phẩy (nếu có do pattern) bằng dấu chấm theo chuẩn VN
+        // và đảm bảo định dạng cuối cùng là "số.số.số đ"
+        formattedNumber = formattedNumber.replace(",", "."); // Thay dấu phẩy bằng dấu chấm cho định dạng VN
+        // (nếu DecimalFormat mặc định dùng dấu phẩy cho grouping)
+
+
+        return formattedNumber + " đ";
     }
 
     // ✅ THÊM: Phương thức gọi API để lấy danh sách voucher
@@ -415,7 +446,6 @@ public class Oder_Activity extends AppCompatActivity {
             if (tvSelectedCoupon != null) {
                 tvSelectedCoupon.setText(selected.getCode());
             }
-
             updateFinalPrice();
         });
         bottomSheet.show(getSupportFragmentManager(), "VoucherBottomSheet");
