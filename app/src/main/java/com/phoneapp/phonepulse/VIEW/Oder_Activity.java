@@ -270,8 +270,8 @@ public class Oder_Activity extends AppCompatActivity {
 
         String paymentMethod = radioCod.isChecked() ? "COD" : "MOMO";
         String note = etOrderNote.getText().toString().trim();
-        int discount = 0;
-        int finalPrice = extractPrice(tvFinalPrice.getText().toString());
+        int discount = calculateDiscount(subtotal, selectedVoucher);
+        int finalPrice = subtotal - discount;
 
         // Kiểm tra finalPrice có bị về 0 không trước khi gửi yêu cầu
         if (finalPrice <= 0) {
@@ -346,29 +346,50 @@ public class Oder_Activity extends AppCompatActivity {
         int finalPrice = subtotal - discount;
         if (finalPrice < 0) finalPrice = 0;
 
-        tvDiscount.setText("- " + formatCurrency(discount));
+        // Nếu có giảm giá thì hiển thị "- xxx đ", còn không thì "0 đ"
+        if (discount > 0) {
+            tvDiscount.setText("- " + formatCurrency(discount));
+        } else {
+            tvDiscount.setText(formatCurrency(0));
+        }
+
         tvFinalPrice.setText(formatCurrency(finalPrice));
         tvTotalAmount.setText(formatCurrency(finalPrice));
     }
 
+
     // ✅ THÊM: Phương thức tính toán giảm giá
     private int calculateDiscount(int subtotal, Voucher voucher) {
-        if (voucher == null || subtotal < voucher.getMinOrderValue()) {
+        if (voucher == null) {
+            return 0; // Không có voucher thì không giảm
+        }
+
+        // Kiểm tra điều kiện đơn hàng tối thiểu
+        if (subtotal < voucher.getMinOrderValue()) {
+            Toast.makeText(this,
+                    "Đơn hàng cần tối thiểu " + formatCurrency((int) voucher.getMinOrderValue())
+                            + " để áp dụng voucher này",
+                    Toast.LENGTH_SHORT).show();
             return 0;
         }
 
         int discount = 0;
-        if (voucher.getDiscountType().equals("percent")) {
-            discount = (int) (subtotal * voucher.getDiscountValue() / 100);
-            if (voucher.getMaxDiscount() > 0 && discount > voucher.getMaxDiscount()) {
-                discount = (int) voucher.getMaxDiscount();
-            }
-        } else if (voucher.getDiscountType().equals("amount")) {
-            discount = (int) voucher.getDiscountValue();
+        switch (voucher.getDiscountType()) {
+            case "percent":
+                discount = (int) (subtotal * voucher.getDiscountValue() / 100);
+                if (voucher.getMaxDiscount() > 0 && discount > voucher.getMaxDiscount()) {
+                    discount = (int) voucher.getMaxDiscount();
+                }
+                break;
+
+            case "amount":
+                discount = (int) voucher.getDiscountValue();
+                break;
         }
 
-        return discount;
+        return Math.max(discount, 0);
     }
+
 
     // ✅ THÊM: Phương thức định dạng tiền tệ
     /**
@@ -442,9 +463,16 @@ public class Oder_Activity extends AppCompatActivity {
         }
 
         VoucherBottomSheet bottomSheet = new VoucherBottomSheet(vouchers, selected -> {
+            if (selected != null && subtotal < selected.getMinOrderValue()) {
+                Toast.makeText(this, "Đơn hàng cần tối thiểu "
+                        + formatCurrency((int) selected.getMinOrderValue())
+                        + " để dùng voucher này", Toast.LENGTH_SHORT).show();
+                return; // 🚫 Giữ bottomsheet mở, không set voucher
+            }
+
             this.selectedVoucher = selected;
             if (tvSelectedCoupon != null) {
-                tvSelectedCoupon.setText(selected.getCode());
+                tvSelectedCoupon.setText(selected != null ? selected.getCode() : "Không dùng mã");
             }
             updateFinalPrice();
         });

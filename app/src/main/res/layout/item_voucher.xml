@@ -10,50 +10,68 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:padding="12dp">
 
-        <!-- Mã code -->
-        <TextView
-            android:id="@+id/tvVoucherCode"
+        <!-- Radio button để chọn -->
+        <RadioButton
+            android:id="@+id/rbSelectVoucher"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="VOUCHER2025"
-            android:textColor="@android:color/black"
-            android:textStyle="bold"
-            android:textSize="18sp" />
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:clickable="false" />
 
-        <!-- Thông tin giảm giá -->
-        <TextView
-            android:id="@+id/tvVoucherDiscount"
-            android:layout_width="wrap_content"
+        <!-- Nội dung voucher -->
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Giảm 15% (tối đa 1.000.000₫)"
-            android:textColor="@android:color/holo_red_dark"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
 
-        <!-- Điều kiện áp dụng -->
-        <TextView
-            android:id="@+id/tvVoucherCondition"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Áp dụng cho đơn từ 5.000.000₫"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="14sp" />
+            <!-- Mã code -->
+            <TextView
+                android:id="@+id/tvVoucherCode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="VOUCHER2025"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"
+                android:textSize="18sp" />
 
-        <!-- Ngày hiệu lực -->
-        <TextView
-            android:id="@+id/tvVoucherDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="01/06/2025 - 31/08/2025"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="13sp" />
+            <!-- Thông tin giảm giá -->
+            <TextView
+                android:id="@+id/tvVoucherDiscount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Giảm 15% (tối đa 1.000.000₫)"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="15sp"
+                android:textStyle="bold" />
 
+            <!-- Điều kiện áp dụng -->
+            <TextView
+                android:id="@+id/tvVoucherCondition"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Áp dụng cho đơn từ 5.000.000₫"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="14sp" />
+
+            <!-- Ngày hiệu lực -->
+            <TextView
+                android:id="@+id/tvVoucherDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="01/06/2025 - 31/08/2025"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="13sp" />
+        </LinearLayout>
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

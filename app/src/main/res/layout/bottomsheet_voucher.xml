@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp"
     android:background="@android:color/white">
 
-    <!-- Tiêu đề -->
     <TextView
         android:id="@+id/tv_voucher_title"
         android:layout_width="match_parent"
@@ -19,7 +17,6 @@
         android:textColor="@android:color/black"
         android:paddingBottom="12dp"/>
 
-    <!-- RecyclerView hiển thị danh sách voucher -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_vouchers"
         android:layout_width="match_parent"
@@ -27,14 +24,33 @@
         android:overScrollMode="never"
         android:scrollbars="vertical"/>
 
-    <!-- Nút áp dụng -->
-    <Button
-        android:id="@+id/btn_apply_voucher"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="Áp dụng"
-        android:textColor="@android:color/white"
-        android:backgroundTint="#FF5722"
-        android:textStyle="bold"/>
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:layout_marginTop="12dp">
+
+        <Button
+            android:id="@+id/btn_cancel_voucher"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Không dùng mã"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@android:color/darker_gray"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btn_apply_voucher"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Áp dụng"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#FF5722"
+            android:textStyle="bold" />
+    </LinearLayout>
+
 </LinearLayout>

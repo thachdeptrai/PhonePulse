@@ -24,15 +24,10 @@ import java.util.TimeZone;
 public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.VoucherViewHolder> {
 
     private final List<Voucher> voucherList;
-    private final OnVoucherClickListener listener;
+    private int selectedPosition = -1; // lưu vị trí voucher được chọn
 
-    public interface OnVoucherClickListener {
-        void onVoucherClick(Voucher voucher);
-    }
-
-    public VoucherAdapter(List<Voucher> voucherList, OnVoucherClickListener listener) {
+    public VoucherAdapter(List<Voucher> voucherList) {
         this.voucherList = voucherList;
-        this.listener = listener;
     }
 
     @NonNull
@@ -74,8 +69,17 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.VoucherV
         String dateText = formatDate(voucher.getStartDate()) + " - " + formatDate(voucher.getEndDate());
         holder.tvDate.setText(dateText);
 
-        // Click
-        holder.itemView.setOnClickListener(v -> listener.onVoucherClick(voucher));
+        // 5. RadioButton trạng thái
+        holder.rbSelect.setChecked(position == selectedPosition);
+
+        // Click chọn
+        View.OnClickListener selectListener = v -> {
+            selectedPosition = position;
+            notifyDataSetChanged(); // refresh toàn bộ để radio đúng
+        };
+
+        holder.itemView.setOnClickListener(selectListener);
+        holder.rbSelect.setOnClickListener(selectListener);
     }
 
     @Override
@@ -83,11 +87,21 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.VoucherV
         return voucherList != null ? voucherList.size() : 0;
     }
 
+    // 🔹 Lấy voucher đang chọn
+    public Voucher getSelectedVoucher() {
+        if (selectedPosition >= 0 && selectedPosition < voucherList.size()) {
+            return voucherList.get(selectedPosition);
+        }
+        return null;
+    }
+
     public static class VoucherViewHolder extends RecyclerView.ViewHolder {
         TextView tvCode, tvDiscount, tvCondition, tvDate;
+        RadioButton rbSelect;
 
         public VoucherViewHolder(@NonNull View itemView) {
             super(itemView);
+            rbSelect = itemView.findViewById(R.id.rbSelectVoucher);
             tvCode = itemView.findViewById(R.id.tvVoucherCode);
             tvDiscount = itemView.findViewById(R.id.tvVoucherDiscount);
             tvCondition = itemView.findViewById(R.id.tvVoucherCondition);
@@ -97,12 +111,11 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.VoucherV
 
     private String formatDate(String rawDate) {
         try {
-            // giả định server trả ISO-8601 (yyyy-MM-dd...)
             SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+            input.setTimeZone(TimeZone.getTimeZone("UTC")); // server ISO chuẩn UTC
             SimpleDateFormat output = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            Date date = input.parse(rawDate);
-            return output.format(date);
-        } catch (ParseException e) {
+            return output.format(input.parse(rawDate));
+        } catch (Exception e) {
             e.printStackTrace();
             return rawDate;
         }
