@@ -31,6 +31,8 @@ import com.phoneapp.phonepulse.request.OrderItem; // Đây là OrderItem cho mà
 import com.phoneapp.phonepulse.utils.Constants;
 import com.phoneapp.phonepulse.utils.CartManager; // Import CartManager
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -583,6 +585,7 @@ public class Cart_Activity extends AppCompatActivity implements CartAdapter.OnCa
             }
         });
     }
+    // Hàm format tiền chuẩn VNPay
 
     @Override
     public void onItemSelected(CartItem item, boolean isSelected) {

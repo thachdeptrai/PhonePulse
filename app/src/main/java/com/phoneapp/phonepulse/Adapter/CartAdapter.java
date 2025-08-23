@@ -3,30 +3,30 @@ package com.phoneapp.phonepulse.Adapter;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Base64; // Thêm import Base64
-import android.util.Log; // Thêm import Log
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.request.CartItem;
 
-import java.text.NumberFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
 import java.util.Locale;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
 
-
-    private static final String TAG = "CartAdapter"; // Thêm TAG cho Logcat
+    private static final String TAG = "CartAdapter";
 
     private List<CartItem> cartItemList;
     private Context context;
@@ -51,7 +51,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         notifyDataSetChanged();
     }
 
-
     @NonNull
     @Override
     public CartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -64,15 +63,10 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     public void onBindViewHolder(@NonNull CartViewHolder holder, int position) {
         CartItem currentItem = cartItemList.get(position);
 
-        // --- 1. Tải ảnh sản phẩm ---
-        // Lấy URL ảnh trực tiếp từ trường productImage trong CartItem
-        String imageUrl = currentItem.getProductImage(); // <-- THAY ĐỔI Ở ĐÂY
-
-
-
+        // --- 1. Ảnh sản phẩm ---
+        String imageUrl = currentItem.getProductImage();
         if (!TextUtils.isEmpty(imageUrl)) {
             if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
-                // Đây là URL web thông thường
                 Glide.with(context)
                         .load(imageUrl)
                         .placeholder(R.drawable.placeholder_product)
@@ -80,7 +74,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                         .into(holder.ivProductImage);
 
             } else if (imageUrl.startsWith("data:image/")) {
-                // Đây là chuỗi Base64
                 try {
                     String base64Image = imageUrl.substring(imageUrl.indexOf(",") + 1);
                     byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
@@ -89,28 +82,30 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                             .placeholder(R.drawable.placeholder_product)
                             .error(R.drawable.placeholder_product)
                             .into(holder.ivProductImage);
-
                 } catch (IllegalArgumentException e) {
-
                     holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
                 }
             } else {
-                // Các định dạng khác hoặc đường dẫn cục bộ không được hỗ trợ trực tiếp
                 holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
-                Log.w(TAG, "onBindViewHolder: Unrecognized image URL format for " + (currentItem.getProduct() != null ? currentItem.getProduct().getProductName() : "N/A") + ". Using placeholder. URL: " + imageUrl);
+                Log.w(TAG, "Unrecognized image URL: " + imageUrl);
             }
         } else {
             holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
-            Log.w(TAG, "onBindViewHolder: Image URL is null or empty for " + (currentItem.getProduct() != null ? currentItem.getProduct().getProductName() : "N/A") + ". Using placeholder.");
+            Log.w(TAG, "Image URL empty for item.");
         }
 
         // 2. Tên sản phẩm
-        holder.tvProductName.setText(currentItem.getProduct() != null ? currentItem.getProduct().getProductName() : "Sản phẩm không xác định");
+        holder.tvProductName.setText(
+                currentItem.getProduct() != null
+                        ? currentItem.getProduct().getProductName()
+                        : "Sản phẩm không xác định"
+        );
 
-        // 3. Chi tiết biến thể (Màu, Kích thước, Bộ nhớ, RAM)
+        // 3. Biến thể (Màu, Kích thước, Bộ nhớ, RAM)
         StringBuilder variantDetails = new StringBuilder();
         if (currentItem.getVariant() != null) {
-            if (currentItem.getVariant().getColor() != null && !TextUtils.isEmpty(currentItem.getVariant().getColor().getColorName())) {
+            if (currentItem.getVariant().getColor() != null &&
+                    !TextUtils.isEmpty(currentItem.getVariant().getColor().getColorName())) {
                 variantDetails.append("Màu: ").append(currentItem.getVariant().getColor().getColorName());
             }
             if (currentItem.getVariant().getSize() != null) {
@@ -136,15 +131,14 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             holder.tvVariantDetails.setVisibility(View.GONE);
         }
 
-        // 4. Giá sản phẩm (giá của biến thể)
-        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        currencyFormat.setMaximumFractionDigits(0);
-        holder.tvProductPrice.setText(currencyFormat.format(currentItem.getVariant() != null ? currentItem.getVariant().getPrice() : 0));
+        // 4. Giá sản phẩm (dùng formatCurrency chuẩn VNPay)
+        int price = currentItem.getVariant() != null ? (int) currentItem.getVariant().getPrice() : 0;
+        holder.tvProductPrice.setText(formatCurrency(price));
 
         // 5. Số lượng
         holder.tvQuantity.setText(String.valueOf(currentItem.getQuantity()));
 
-        // 6. Xử lý sự kiện tăng/giảm số lượng
+        // 6. Sự kiện tăng/giảm số lượng
         holder.btnDecrease.setOnClickListener(v -> {
             if (listener != null) {
                 int currentQuantity = currentItem.getQuantity();
@@ -158,22 +152,28 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
         holder.btnIncrease.setOnClickListener(v -> {
             if (listener != null) {
-                int currentQuantity = currentItem.getQuantity(); // số lượng hiện tại trong giỏ
-                int stock = currentItem.getVariant().getStockQuantity(); // số lượng tồn kho từ variant
+                int currentQuantity = currentItem.getQuantity();
+                int stock = currentItem.getVariant().getStockQuantity();
 
                 if (currentQuantity < stock) {
                     listener.onQuantityChange(currentItem, currentQuantity + 1);
                 } else {
-                    Toast.makeText(context, "Không thể tăng thêm. Đã đạt số lượng tồn kho tối đa.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context,
+                            "Không thể tăng thêm. Đã đạt số lượng tồn kho tối đa.",
+                            Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-
-
         holder.btnDelete.setOnClickListener(v -> showRemoveConfirmationDialog(currentItem));
+    }
 
-
+    // ✅ Hàm format tiền chuẩn VNPay
+    private String formatCurrency(int amount) {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("vi", "VN"));
+        symbols.setGroupingSeparator(','); // dùng dấu phẩy ngăn cách nghìn
+        DecimalFormat decimalFormat = new DecimalFormat("#,###", symbols);
+        return decimalFormat.format(amount) + " ₫";
     }
 
     @Override
@@ -184,7 +184,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     private void showRemoveConfirmationDialog(CartItem item) {
         new AlertDialog.Builder(context)
                 .setTitle("Xác nhận xóa")
-                .setMessage("Bạn có chắc chắn muốn xóa sản phẩm " + (item.getProduct() != null ? item.getProduct().getProductName() : "này") + " khỏi giỏ hàng không?")
+                .setMessage("Bạn có chắc chắn muốn xóa sản phẩm " +
+                        (item.getProduct() != null ? item.getProduct().getProductName() : "này") +
+                        " khỏi giỏ hàng không?")
                 .setPositiveButton("Xóa", (dialog, which) -> {
                     if (listener != null) {
                         listener.onRemoveItem(item);

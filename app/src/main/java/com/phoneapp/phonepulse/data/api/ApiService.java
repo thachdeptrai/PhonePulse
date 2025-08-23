@@ -7,6 +7,7 @@ import com.phoneapp.phonepulse.Response.LoginResponse;
 import com.phoneapp.phonepulse.request.*;
 
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.MultipartBody;
 import retrofit2.Call;
@@ -107,18 +108,27 @@ public interface ApiService {
     Call<ApiResponse<Cart>> removeFromCart(@Body CartRequest.RemoveCartItem request);
 
 
-    // ========== ORDER ==========
-    @POST("/api/orders")
+    // ========== ORDER API CALLS ==========
+
+
+    @POST("api/orders")
     Call<ApiResponse<Order>> createOrder(@Body OrderRequest body);
 
-    // Đã sửa lỗi kiểu trả về để khớp với backend
-    @GET("/api/orders")
+
+    @GET("api/orders")
     Call<ApiResponse<List<Order>>> getUserOrders();
 
 
     @PUT("/api/orders/{id}/cancel")
     Call<ApiResponse> cancelOrder(@Header("Authorization") String token, @Path("id") String id);
 
+    // ===================================
+    //        VNPAY API CALLS
+    // ===================================
+
+
+    @GET("api/orders/vnpay_return")
+    Call<ApiResponse<ApiResponse>> checkVnPayReturn(@Query("orderId") String orderId);
 
     // ========== VOUCHERS ==========
     @POST("/api/vouchers/apply")

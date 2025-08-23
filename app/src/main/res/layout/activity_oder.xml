@@ -214,14 +214,25 @@
                             android:layout_height="wrap_content"
                             android:checked="true"
                             android:text="Thanh toán khi nhận hàng (COD)"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/black"
+                            >
+
+                        </RadioButton>
 
                         <RadioButton
                             android:id="@+id/radio_momo"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Thanh toán qua Momo"
-                            android:textColor="@color/black" />
+                            android:textColor="@color/black"
+                            />
+                        <RadioButton
+                            android:id="@+id/radio_vnpay"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Thanh toán qua  VnPay"
+                            android:textColor="@color/black"
+                            />
                     </RadioGroup>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
