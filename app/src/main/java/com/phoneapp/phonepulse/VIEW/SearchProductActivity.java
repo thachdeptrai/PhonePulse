@@ -41,7 +41,7 @@ public class SearchProductActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_product);
 
-        // Ánh xạ view
+        // 1. Ánh xạ tất cả các View trước
         til_search = findViewById(R.id.til_search);
         et_search = findViewById(R.id.et_search);
         btn_sort_asc = findViewById(R.id.btn_sort_asc);
@@ -50,26 +50,23 @@ public class SearchProductActivity extends AppCompatActivity {
         tv_suggestions_title = findViewById(R.id.tv_suggestions_title);
         rv_products = findViewById(R.id.rv_products);
         rv_suggestions = findViewById(R.id.rv_suggestions);
-
         ImageButton backButton = findViewById(R.id.back_button);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed(); // Quay lại màn hình trước đó
-            }
-        });
 
-
+        // 2. Khởi tạo danh sách dữ liệu chính
         productList = (ArrayList<ProductGirdItem>) getIntent().getSerializableExtra("product_list");
         if (productList == null) {
             productList = new ArrayList<>();
         }
-        filteredProductList = new ArrayList<>(productList);
-        suggestionList = new ArrayList<>(productList);
 
-        // Thiết lập RecyclerView cho sản phẩm
+        // 3. Khởi tạo các danh sách phụ (quan trọng: phải là 'new ArrayList<>()' hoặc 'new ArrayList<>(someOtherList)')
+        // Để trống ban đầu hoặc sao chép từ productList tùy theo logic bạn muốn trước khi loadProducts()
+        filteredProductList = new ArrayList<>(); // Khởi tạo để không bị null
+        suggestionList = new ArrayList<>();    // Khởi tạo để không bị null
+
+        // 4. Thiết lập RecyclerView và Adapters
+        // Adapter cho sản phẩm tìm kiếm
         rv_products.setLayoutManager(new LinearLayoutManager(this));
-        productAdapter = new SearchProductAdapter(this, filteredProductList);
+        productAdapter = new SearchProductAdapter(this, filteredProductList); // filteredProductList đã được khởi tạo
         productAdapter.setOnItemClickListener(new SearchProductAdapter.OnItemClickListener() {
             @Override
             public void onAddToCartClick(ProductGirdItem item) {
@@ -87,15 +84,12 @@ public class SearchProductActivity extends AppCompatActivity {
                 intent.putExtra(Constants.VARIANT_ID, item.getVariant_id());
                 startActivity(intent);
             }
-
-
-
         });
         rv_products.setAdapter(productAdapter);
 
-        // Thiết lập RecyclerView cho gợi ý
+        // Adapter cho gợi ý
         rv_suggestions.setLayoutManager(new LinearLayoutManager(this));
-        suggestionAdapter = new SearchProductAdapter(this, suggestionList);
+        suggestionAdapter = new SearchProductAdapter(this, suggestionList); // suggestionList đã được khởi tạo
         suggestionAdapter.setOnItemClickListener(new SearchProductAdapter.OnItemClickListener() {
             @Override
             public void onAddToCartClick(ProductGirdItem item) {
@@ -107,57 +101,110 @@ public class SearchProductActivity extends AppCompatActivity {
 
             @Override
             public void onItemClick(ProductGirdItem item) {
-                Toast.makeText(SearchProductActivity.this, "Đã nhấn vào " + item.getProduct_name(), Toast.LENGTH_SHORT).show();
+                // Ví dụ: khi nhấn vào gợi ý, điền vào ô tìm kiếm và thực hiện tìm kiếm
+                et_search.setText(item.getProduct_name());
+                filterProducts(item.getProduct_name());
+                // Ẩn danh sách gợi ý sau khi chọn
+                hideSuggestions();
+                // Ẩn bàn phím
+                InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                if (imm != null && et_search != null) {
+                    imm.hideSoftInputFromWindow(et_search.getWindowToken(), 0);
+                }
             }
         });
         rv_suggestions.setAdapter(suggestionAdapter);
 
-        loadProducts();
+        // 5. Nạp dữ liệu vào các danh sách và cập nhật adapter
+        // Bây giờ tất cả các list và adapter đã được khởi tạo và không còn null
+        loadProducts(); // Chỉ gọi MỘT LẦN ở đây
 
-        // Xử lý sự kiện nhấn vào biểu tượng quay lại
+        // 6. Thiết lập các listeners còn lại
+        backButton.setOnClickListener(v -> onBackPressed());
         til_search.setStartIconOnClickListener(v -> finish());
 
-        // Xử lý tìm kiếm
         et_search.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 String query = et_search.getText().toString().trim();
                 filterProducts(query);
-                // Ẩn bàn phím
                 InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                if (imm != null && v != null) {
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
                 return true;
             }
             return false;
         });
 
-        // Xử lý lọc giá tăng dần
         btn_sort_asc.setOnClickListener(v -> {
             Collections.sort(filteredProductList, (p1, p2) -> Double.compare(p1.getPrice(), p2.getPrice()));
-            productAdapter.setData(filteredProductList);
+            productAdapter.setData(filteredProductList); // productAdapter đã được khởi tạo
         });
 
-        // Xử lý lọc giá giảm dần
         btn_sort_desc.setOnClickListener(v -> {
             Collections.sort(filteredProductList, (p1, p2) -> Double.compare(p2.getPrice(), p1.getPrice()));
-            productAdapter.setData(filteredProductList);
+            productAdapter.setData(filteredProductList); // productAdapter đã được khởi tạo
         });
 
         // Tự động hiển thị bàn phím
         et_search.requestFocus();
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        imm.showSoftInput(et_search, InputMethodManager.SHOW_IMPLICIT);
+        if (imm != null) {
+            imm.showSoftInput(et_search, InputMethodManager.SHOW_IMPLICIT);
+        }
     }
+
 
     private void loadProducts() {
-        filteredProductList.clear();
-        suggestionList.clear();
+        // Kiểm tra an toàn, mặc dù với logic onCreate đúng, chúng không nên null
+        if (filteredProductList == null || suggestionList == null || productList == null ||
+                productAdapter == null || suggestionAdapter == null) {
+            Log.e("SearchProductActivity", "Lỗi khởi tạo trong loadProducts. Một thành phần là null.");
+            // Có thể thêm Toast hoặc xử lý khác ở đây nếu cần thiết
+            // Nếu productList là null, không có gì để tải
+            if (productList == null) {
+                productList = new ArrayList<>(); // Khởi tạo để tránh lỗi sau đó
+            }
+            // Nếu các list phụ là null, khởi tạo chúng
+            if (filteredProductList == null) {
+                filteredProductList = new ArrayList<>();
+            }
+            if (suggestionList == null) {
+                suggestionList = new ArrayList<>();
+            }
+            // Nếu adapter là null, không thể setData
+            if (productAdapter == null || suggestionAdapter == null) {
+                Log.e("SearchProductActivity", "Adapter chưa được khởi tạo trước khi gọi loadProducts.");
+                return; // Không thể tiếp tục nếu adapter là null
+            }
+        }
 
-        filteredProductList.addAll(productList);
-        suggestionList.addAll(productList);
+        filteredProductList.clear();
+        suggestionList.clear(); // Bạn có thể muốn logic khác cho suggestionList ban đầu
+
+        // Chỉ thêm nếu productList không rỗng để tránh thao tác không cần thiết
+        if (!productList.isEmpty()) {
+            filteredProductList.addAll(productList);
+            // Có thể bạn muốn suggestionList ban đầu hiển thị các sản phẩm bán chạy nhất thay vì toàn bộ productList
+            // Ví dụ, gọi showSuggestions() ở đây nếu muốn hiển thị gợi ý mặc định,
+            // hoặc để trống suggestionList và chỉ điền khi tìm kiếm không có kết quả.
+            // Để đơn giản, ban đầu có thể làm giống filteredProductList hoặc để trống:
+            // suggestionList.addAll(productList); // Hoặc để trống và xử lý trong showSuggestions()
+        }
 
         productAdapter.setData(filteredProductList);
-        suggestionAdapter.setData(suggestionList);
+        suggestionAdapter.setData(suggestionList); // Cập nhật adapter gợi ý (có thể là danh sách rỗng ban đầu)
+
+        // Quyết định xem có nên ẩn/hiện gợi ý ban đầu hay không
+        if (filteredProductList.isEmpty() && !et_search.getText().toString().trim().isEmpty()) {
+            // Nếu không có kết quả tìm kiếm VÀ đã có query -> hiển thị gợi ý
+            showSuggestions();
+        } else {
+            // Mặc định ẩn gợi ý khi mới vào hoặc khi có kết quả
+            hideSuggestions();
+        }
     }
+
 
 
     private void filterProducts(String query) {
