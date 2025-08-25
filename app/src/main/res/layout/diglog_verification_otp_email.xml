@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="24dp"
+    android:background="@drawable/bg_dialog_rounded"
+    android:gravity="center_horizontal">
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nhập mã OTP"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/accent_pink"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/tvEmailSent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mã OTP đã được gửi tới email:"
+        android:textColor="@color/shopee_orange"
+        android:textSize="14sp"
+        android:layout_marginBottom="16dp"/>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layoutOtp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Mã OTP"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxStrokeColor="@color/shopee_orange"
+        app:boxStrokeErrorColor="@color/red"
+        app:hintTextColor="@color/gray">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtOtp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:maxLength="6"
+            android:textSize="16sp"
+            android:textColor="@color/shopee_orange" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnVerifyOtp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Xác minh"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/shopee_orange"
+        android:textColor="@color/white"
+        app:cornerRadius="24dp" />
+
+    <TextView
+        android:id="@+id/txtResendOtp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chưa nhận được mã? Gửi lại"
+        android:textColor="@color/shopee_orange"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:layout_marginTop="12dp"
+        android:layout_gravity="center_horizontal" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="24dp"
+        android:gravity="end">
+
+        <TextView
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HUỶ"
+            android:textColor="@color/red"
+            android:textStyle="bold"
+            android:paddingEnd="24dp"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:id="@+id/btnConfirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="XÁC NHẬN"
+            android:textColor="@color/gray"
+            android:textStyle="bold"
+            android:textSize="14sp"/>
+    </LinearLayout>
+</LinearLayout>
