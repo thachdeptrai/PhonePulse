@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
-    app:cardCornerRadius="4dp"
-    app:cardElevation="1dp"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
     android:backgroundTint="@android:color/white"
     android:clickable="true"
     android:focusable="true"
@@ -18,13 +19,24 @@
         android:padding="8dp">
 
         <!-- Product Image -->
-        <ImageView
-            android:id="@+id/iv_search_product_image"
+        <FrameLayout
             android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@drawable/placeholder_product"
-            android:scaleType="centerCrop"
-            android:contentDescription="Product Image" />
+            android:layout_height="wrap_content"
+            android:minHeight="80dp"
+            android:maxHeight="120dp"
+            android:adjustViewBounds="true">
+
+            <ImageView
+                android:id="@+id/iv_search_product_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
+                android:background="@color/black"
+                android:src="@drawable/placeholder_product"
+                android:contentDescription="Product Image" />
+
+        </FrameLayout>
 
         <!-- Product Info -->
         <LinearLayout
@@ -32,67 +44,102 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="8dp">
+            android:layout_marginStart="8dp"
+            android:paddingEnd="8dp">
 
             <!-- Product Name -->
             <TextView
                 android:id="@+id/tv_search_product_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="iPhone 15 Pro Max 256GB"
                 android:textSize="14sp"
                 android:textColor="#333333"
                 android:maxLines="2"
-                android:ellipsize="end" />
+                android:ellipsize="end"
+                android:text="iPhone 15 Pro Max 256GB" />
 
-            <!-- Price -->
-            <TextView
-                android:id="@+id/tv_search_discount_price"
-                android:layout_width="wrap_content"
+            <!-- Price and Discount -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
                 android:layout_marginTop="4dp"
-                android:text="₫25.990.000"
-                android:textSize="16sp"
-                android:textColor="#E74C3C" />
+                android:gravity="center_vertical">
 
-            <!-- Original Price -->
-            <TextView
-                android:id="@+id/tv_search_original_price"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="₫30.990.000"
-                android:textSize="12sp"
-                android:textColor="#999999"
-                android:visibility="gone" />
+                <TextView
+                    android:id="@+id/tv_search_discount_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/shopee_orange"
+                    android:text="₫25.990.000" />
+
+                <TextView
+                    android:id="@+id/tv_search_original_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textSize="12sp"
+                    android:textColor="#999999"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:visibility="gone"
+                    android:text="₫30.990.000" />
+
+
+            </LinearLayout>
 
             <!-- Discount Percent -->
             <TextView
                 android:id="@+id/tv_search_discount_percent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:background="#FF6B00"
+                android:layout_marginTop="4dp"
                 android:paddingStart="6dp"
                 android:paddingEnd="6dp"
                 android:paddingTop="2dp"
                 android:paddingBottom="2dp"
-                android:text="-15%"
-                android:textColor="@android:color/white"
                 android:textSize="10sp"
                 android:textStyle="bold"
-                android:visibility="gone" />
+                android:textColor="@android:color/white"
+                android:background="@drawable/danhsach"
+                android:visibility="gone"
+                android:text="-15%" />
 
-            <!-- Sold Count -->
-            <TextView
-                android:id="@+id/tv_search_sold"
+            <!-- Sold Count and Rating -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Đã bán 1,2k"
-                android:textSize="10sp"
-                android:textColor="#999999" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:src="@drawable/ic_star"
+                    android:tint="#673AB7" />
+
+                <TextView
+                    android:id="@+id/tv_search_rating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:textSize="10sp"
+                    android:textColor="#999999"
+                    android:text="4.8" />
+
+                <TextView
+                    android:id="@+id/tv_search_sold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textSize="10sp"
+                    android:textColor="#999999"
+                    android:text="Đã bán 1,2k" />
+
+            </LinearLayout>
         </LinearLayout>
 
         <!-- Add to Cart Button -->
@@ -102,11 +149,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="8dp"
+            android:backgroundTint="#673AB7"
             android:text="Thêm"
+            android:textAllCaps="false"
             android:textColor="@android:color/white"
-            android:textSize="12sp"
-            android:backgroundTint="#FF6B00"
-            android:textAllCaps="false" />
+            android:textSize="12sp" />
 
     </LinearLayout>
 

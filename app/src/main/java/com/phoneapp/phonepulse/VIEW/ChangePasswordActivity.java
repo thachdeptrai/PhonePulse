@@ -13,6 +13,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.data.api.ApiService;
@@ -25,6 +26,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ChangePasswordActivity extends AppCompatActivity {
+    private MaterialToolbar toolbar;
     private EditText edtCurrentPassword, edtNewPassword, edtConfirmPassword;
     private Button btnChangePassword;
 
@@ -33,18 +35,18 @@ public class ChangePasswordActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_password);
 
-        edtCurrentPassword = findViewById(R.id.edt_current_password);
-        edtNewPassword = findViewById(R.id.edt_new_password);
-        edtConfirmPassword = findViewById(R.id.edt_confirm_password);
-        btnChangePassword = findViewById(R.id.btn_change_password);
-
+        edtCurrentPassword = findViewById(R.id.edtCurrentPassword);
+        edtNewPassword = findViewById(R.id.edtNewPassword);
+        edtConfirmPassword = findViewById(R.id.edtConfirmPassword);
+        btnChangePassword = findViewById(R.id.btnChangePassword);
+        toolbar = findViewById(R.id.toolbarChangePassword);
+        setSupportActionBar(toolbar);
         btnChangePassword.setOnClickListener(v -> handleChangePassword());
 
-        ImageButton backButton = findViewById(R.id.btn_back);
-        backButton.setOnClickListener(new View.OnClickListener() {
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed(); // Quay lại màn hình trước đó
+                onBackPressed(); // Hoặc finish();
             }
         });
     }

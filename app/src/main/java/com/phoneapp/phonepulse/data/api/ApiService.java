@@ -76,10 +76,6 @@ public interface ApiService {
 
 
     // ========== FAVOURITES ==========
-//    @GET("/api/favourite")
-//    Call<List<Product>> getFavourites(@Header("Authorization") String token);
-
-
     @GET("api/favourite") // Hoặc đường dẫn API đúng của bạn
     Call<ApiResponse<List<Favourite>>> getFavourites();
 
@@ -111,10 +107,8 @@ public interface ApiService {
     @POST("/api/orders")
     Call<ApiResponse<Order>> createOrder(@Body OrderRequest body);
 
-    // Đã sửa lỗi kiểu trả về để khớp với backend
     @GET("/api/orders")
     Call<ApiResponse<List<Order>>> getUserOrders();
-
 
     @PUT("/api/orders/{id}/cancel")
     Call<ApiResponse> cancelOrder(@Header("Authorization") String token, @Path("id") String id);
