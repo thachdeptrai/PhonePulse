@@ -2,12 +2,14 @@ package com.phoneapp.phonepulse.VIEW;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable; // THÊM MỚI
+import android.text.TextWatcher; // THÊM MỚI
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
-import android.widget.ProgressBar; // THÊM MỚI (Tùy chọn, nếu bạn có ProgressBar)
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,15 +18,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.gson.Gson; // THÊM MỚI - Để log request body
+import com.google.gson.Gson;
 import com.phoneapp.phonepulse.Adapter.SearchProductAdapter;
 import com.phoneapp.phonepulse.R;
-import com.phoneapp.phonepulse.Response.ApiResponse; // THÊM MỚI
-import com.phoneapp.phonepulse.data.api.ApiService; // THÊM MỚI
-import com.phoneapp.phonepulse.data.api.RetrofitClient; // THÊM MỚI
-import com.phoneapp.phonepulse.models.Cart; // THÊM MỚI
-import com.phoneapp.phonepulse.models.Variant; // THÊM MỚI - Dùng cho checkStock
-import com.phoneapp.phonepulse.request.CartRequest; // THÊM MỚI
+import com.phoneapp.phonepulse.Response.ApiResponse;
+import com.phoneapp.phonepulse.data.api.ApiService;
+import com.phoneapp.phonepulse.data.api.RetrofitClient;
+import com.phoneapp.phonepulse.models.Cart;
+import com.phoneapp.phonepulse.models.Variant;
+import com.phoneapp.phonepulse.request.CartRequest;
 import com.phoneapp.phonepulse.request.ProductGirdItem;
 import com.phoneapp.phonepulse.utils.Constants;
 
@@ -32,13 +34,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import retrofit2.Call; // THÊM MỚI
-import retrofit2.Callback; // THÊM MỚI
-import retrofit2.Response; // THÊM MỚI
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SearchProductActivity extends AppCompatActivity {
 
-    private static final String TAG = "SearchActivity"; // THÊM MỚI - Tag cho log
+    private static final String TAG = "SearchActivity";
 
     private TextInputEditText et_search;
     private TextInputLayout til_search;
@@ -48,16 +50,15 @@ public class SearchProductActivity extends AppCompatActivity {
     private SearchProductAdapter productAdapter, suggestionAdapter;
     private List<ProductGirdItem> productList, filteredProductList, suggestionList;
 
-    private ApiService apiService; // THÊM MỚI
-    private ProgressBar progressBarSearch; // THÊM MỚI (Tùy chọn - ID của ProgressBar trong layout của bạn)
-    private String authToken; // THÊM MỚI
+    private ApiService apiService;
+    private ProgressBar progressBarSearch;
+    private String authToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_product);
 
-        // 1. Ánh xạ tất cả các View trước
         til_search = findViewById(R.id.til_search);
         et_search = findViewById(R.id.et_search);
         btn_sort_asc = findViewById(R.id.btn_sort_asc);
@@ -67,36 +68,28 @@ public class SearchProductActivity extends AppCompatActivity {
         rv_products = findViewById(R.id.rv_products);
         rv_suggestions = findViewById(R.id.rv_suggestions);
         ImageButton backButton = findViewById(R.id.back_button);
-        // progressBarSearch = findViewById(R.id.progressBar_search_activity); // THÊM MỚI - Thay R.id.progressBar_search_activity bằng ID thực tế
+        // progressBarSearch = findViewById(R.id.progressBar_search_activity);
 
-        // THÊM MỚI - Khởi tạo ApiService và authToken
         authToken = Constants.getToken(this);
         if (authToken != null && !authToken.isEmpty()) {
             apiService = RetrofitClient.getApiService(authToken);
         } else {
             Log.w(TAG, "AuthToken is null or empty. API calls might fail.");
-            // Có thể hiển thị thông báo hoặc chuyển hướng đăng nhập nếu cần
         }
 
-
-        // 2. Khởi tạo danh sách dữ liệu chính
         productList = (ArrayList<ProductGirdItem>) getIntent().getSerializableExtra("product_list");
         if (productList == null) {
             productList = new ArrayList<>();
         }
 
-        // 3. Khởi tạo các danh sách phụ
         filteredProductList = new ArrayList<>();
         suggestionList = new ArrayList<>();
 
-        // 4. Thiết lập RecyclerView và Adapters
-        // Adapter cho sản phẩm tìm kiếm
         rv_products.setLayoutManager(new LinearLayoutManager(this));
         productAdapter = new SearchProductAdapter(this, filteredProductList);
         productAdapter.setOnItemClickListener(new SearchProductAdapter.OnItemClickListener() {
             @Override
             public void onAddToCartClick(ProductGirdItem item) {
-                // SỬA ĐỔI - Gọi hàm xử lý chung
                 checkStockAndAddToCart(item.get_id(), item.getVariant_id(), 1, item.getProduct_name());
             }
 
@@ -111,20 +104,18 @@ public class SearchProductActivity extends AppCompatActivity {
         });
         rv_products.setAdapter(productAdapter);
 
-        // Adapter cho gợi ý
         rv_suggestions.setLayoutManager(new LinearLayoutManager(this));
         suggestionAdapter = new SearchProductAdapter(this, suggestionList);
         suggestionAdapter.setOnItemClickListener(new SearchProductAdapter.OnItemClickListener() {
             @Override
             public void onAddToCartClick(ProductGirdItem item) {
-                // SỬA ĐỔI - Gọi hàm xử lý chung
                 checkStockAndAddToCart(item.get_id(), item.getVariant_id(), 1, item.getProduct_name());
             }
 
             @Override
             public void onItemClick(ProductGirdItem item) {
                 et_search.setText(item.getProduct_name());
-                filterProducts(item.getProduct_name());
+                filterProducts(item.getProduct_name()); // Lọc ngay khi click gợi ý
                 hideSuggestions();
                 InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                 if (imm != null && et_search != null) {
@@ -134,18 +125,32 @@ public class SearchProductActivity extends AppCompatActivity {
         });
         rv_suggestions.setAdapter(suggestionAdapter);
 
-        // 5. Nạp dữ liệu
-        loadProducts();
+        loadProducts(); // Load sản phẩm và cập nhật UI ban đầu
 
-        // 6. Thiết lập listeners còn lại
-        // ... (các listener khác của bạn giữ nguyên) ...
         backButton.setOnClickListener(v -> onBackPressed());
         til_search.setStartIconOnClickListener(v -> finish());
 
+        // THÊM TextWatcher CHO TÌM KIẾM REAL-TIME
+        et_search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Không cần làm gì
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterProducts(s.toString().trim());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Không cần làm gì
+            }
+        });
+
         et_search.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                String query = et_search.getText().toString().trim();
-                filterProducts(query);
+                // filterProducts đã được gọi bởi TextWatcher, ở đây chỉ cần ẩn bàn phím
                 InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
                 if (imm != null && v != null) {
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -172,8 +177,6 @@ public class SearchProductActivity extends AppCompatActivity {
         }
     }
 
-
-    // THÊM MỚI - Hàm kiểm tra tồn kho và thêm vào giỏ hàng (tương tự ProductDetailActivity)
     private void checkStockAndAddToCart(final String productId, final String variantId, final int addedQuantity, final String productNameForToast) {
         if (apiService == null) {
             Toast.makeText(this, "Lỗi dịch vụ, không thể thêm vào giỏ hàng.", Toast.LENGTH_SHORT).show();
@@ -188,7 +191,6 @@ public class SearchProductActivity extends AppCompatActivity {
 
         if (progressBarSearch != null) progressBarSearch.setVisibility(View.VISIBLE);
 
-        // Bước 1: Lấy giỏ hàng hiện tại (để biết số lượng đã có của variant này)
         apiService.getCart().enqueue(new Callback<ApiResponse<Cart>>() {
             @Override
             public void onResponse(Call<ApiResponse<Cart>> call, Response<ApiResponse<Cart>> response) {
@@ -196,7 +198,7 @@ public class SearchProductActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     Cart cart = response.body().getData();
                     if (cart != null && cart.getItems() != null) {
-                        for (com.phoneapp.phonepulse.request.CartItem itemInCart : cart.getItems()) { // Sử dụng đúng CartItem từ package request
+                        for (com.phoneapp.phonepulse.request.CartItem itemInCart : cart.getItems()) {
                             if (itemInCart.getVariant() != null && variantId.equals(itemInCart.getVariant().getId())) {
                                 existingQuantity = itemInCart.getQuantity();
                                 break;
@@ -205,10 +207,8 @@ public class SearchProductActivity extends AppCompatActivity {
                     }
                 } else {
                     Log.w(TAG, "Không thể lấy giỏ hàng hiện tại, hoặc giỏ hàng trống. Code: " + response.code());
-                    // Tiếp tục với existingQuantity = 0
                 }
 
-                // Bước 2: Lấy thông tin tồn kho của variant
                 final int finalExistingQuantity = existingQuantity;
                 apiService.getVariantForProductById(productId, variantId).enqueue(new Callback<Variant>() {
                     @Override
@@ -249,7 +249,6 @@ public class SearchProductActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ApiResponse<Cart>> call, Throwable t) {
-                // Nếu không lấy được giỏ hàng, vẫn thử kiểm tra tồn kho và thêm (với giả định existingQuantity = 0)
                 Log.w(TAG, "Lỗi mạng khi lấy giỏ hàng. Tiếp tục kiểm tra tồn kho và thêm.", t);
                 apiService.getVariantForProductById(productId, variantId).enqueue(new Callback<Variant>() {
                     @Override
@@ -279,7 +278,6 @@ public class SearchProductActivity extends AppCompatActivity {
         });
     }
 
-    // THÊM MỚI - Hàm gọi API thêm vào giỏ hàng
     private void callAddToCartApi(String productId, String variantId, int quantity, final String productNameForToast) {
         if (apiService == null) {
             Toast.makeText(this, "Lỗi dịch vụ, không thể thêm vào giỏ hàng.", Toast.LENGTH_SHORT).show();
@@ -288,7 +286,6 @@ public class SearchProductActivity extends AppCompatActivity {
         }
 
         CartRequest.AddToCart request = new CartRequest.AddToCart(productId, variantId, quantity);
-        // Toast.makeText(SearchProductActivity.this, "Đang thêm " + productNameForToast + "...", Toast.LENGTH_SHORT).show();
         if (progressBarSearch != null) progressBarSearch.setVisibility(View.VISIBLE);
         Log.d(TAG, "Gửi yêu cầu AddToCart: " + new Gson().toJson(request));
 
@@ -299,17 +296,8 @@ public class SearchProductActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     Toast.makeText(SearchProductActivity.this, "Đã thêm " + productNameForToast + " vào giỏ hàng!", Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "Thêm vào giỏ hàng thành công. Cart: " + new Gson().toJson(response.body().getData()));
-
-                    // (Tùy chọn) Cập nhật CartManager nếu bạn có
-                    // Cart updatedCart = response.body().getData();
-                    // if (updatedCart != null && updatedCart.getItems() != null) {
-                    //    CartManager.getInstance().setCartItems(updatedCart.getItems());
-                    // }
-
-                    // Chuyển sang Cart_Activity sau khi thêm thành công
                     Intent intent = new Intent(SearchProductActivity.this, Cart_Activity.class);
                     startActivity(intent);
-
                 } else {
                     String errorMsg = "Lỗi khi thêm vào giỏ hàng.";
                     if (response.body() != null && response.body().getMessage() != null) {
@@ -337,85 +325,89 @@ public class SearchProductActivity extends AppCompatActivity {
         });
     }
 
-
-    // ... (Các phương thức loadProducts, filterProducts, showSuggestions, hideSuggestions giữ nguyên) ...
     private void loadProducts() {
-        // Kiểm tra an toàn, mặc dù với logic onCreate đúng, chúng không nên null
         if (filteredProductList == null || suggestionList == null || productList == null ||
                 productAdapter == null || suggestionAdapter == null) {
             Log.e(TAG, "Lỗi khởi tạo trong loadProducts. Một thành phần là null.");
             if (productList == null) productList = new ArrayList<>();
             if (filteredProductList == null) filteredProductList = new ArrayList<>();
             if (suggestionList == null) suggestionList = new ArrayList<>();
+            // Không cần khởi tạo lại adapter ở đây nếu đã làm trong onCreate
             if (productAdapter == null || suggestionAdapter == null) {
-                Log.e(TAG, "Adapter chưa được khởi tạo trước khi gọi loadProducts.");
-                return;
+                 Log.e(TAG, "Adapter chưa được khởi tạo trước khi gọi loadProducts.");
+                 // Có thể cần khởi tạo lại adapter nếu logic cho phép,
+                 // nhưng tốt hơn là đảm bảo nó được khởi tạo trong onCreate.
+                 return;
             }
         }
 
-        filteredProductList.clear();
-        suggestionList.clear();
-
-        if (!productList.isEmpty()) {
-            filteredProductList.addAll(productList);
+        filteredProductList.clear(); // Xóa danh sách lọc cũ
+        // Ban đầu, hiển thị tất cả sản phẩm nếu có, hoặc danh sách rỗng nếu không có query
+        if (productList != null && !productList.isEmpty()) {
+             // Nếu muốn hiển thị tất cả sản phẩm ban đầu khi et_search rỗng:
+            if(et_search.getText().toString().trim().isEmpty()){
+                filteredProductList.addAll(productList);
+            }
         }
-
         productAdapter.setData(filteredProductList);
-        suggestionAdapter.setData(suggestionList);
 
+
+        // Xử lý gợi ý ban đầu (có thể không cần nếu chưa có query)
+        suggestionList.clear(); // Xóa gợi ý cũ
         if (filteredProductList.isEmpty() && !et_search.getText().toString().trim().isEmpty()) {
-            showSuggestions();
+            showSuggestions(); // Chỉ hiển thị gợi ý nếu có query và không có kết quả
         } else {
             hideSuggestions();
         }
+        suggestionAdapter.setData(suggestionList); // Cập nhật adapter gợi ý
     }
-
-
 
     private void filterProducts(String query) {
         filteredProductList.clear();
         if (query.isEmpty()) {
-            filteredProductList.addAll(productList);
-            hideSuggestions();
+            // Khi query rỗng, không hiển thị gì trong rv_products (hoặc tất cả productList tùy theo UX)
+            // filteredProductList.addAll(productList); // Bỏ comment nếu muốn hiển thị tất cả
+            hideSuggestions(); // Ẩn gợi ý khi query rỗng
         } else {
             String lowerQuery = query.toLowerCase();
-            for (ProductGirdItem product : productList) {
-                // Giả sử ProductGirdItem có getProduct_name() và getCategory_id() (hoặc tương đương)
-                boolean nameMatches = product.getProduct_name() != null && product.getProduct_name().toLowerCase().contains(lowerQuery);
-                boolean categoryMatches = product.getCategory_id() != null && product.getCategory_id().toLowerCase().contains(lowerQuery); // Sửa: Giả sử category là String ID
-
-                if (nameMatches || categoryMatches) {
-                    filteredProductList.add(product);
+            if (productList != null) { // Đảm bảo productList không null
+                for (ProductGirdItem product : productList) {
+                    boolean nameMatches = product.getProduct_name() != null && product.getProduct_name().toLowerCase().contains(lowerQuery);
+                    // Bỏ qua categoryMatches nếu không cần thiết hoặc getCategory_id() trả về đối tượng Category
+                    // boolean categoryMatches = product.getCategory_id() != null && product.getCategory_id().toLowerCase().contains(lowerQuery);
+                    // if (nameMatches || categoryMatches) {
+                    if (nameMatches) { // Chỉ tìm theo tên sản phẩm cho đơn giản
+                        filteredProductList.add(product);
+                    }
                 }
             }
 
             if (filteredProductList.isEmpty()) {
-                showSuggestions();
+                showSuggestions(); // Hiển thị gợi ý nếu không có kết quả tìm kiếm
             } else {
-                hideSuggestions();
+                hideSuggestions(); // Ẩn gợi ý nếu có kết quả
             }
         }
-        productAdapter.setData(filteredProductList);
+        productAdapter.setData(filteredProductList); // Cập nhật RecyclerView chính
     }
+
     private void showSuggestions() {
         tv_no_results.setVisibility(View.VISIBLE);
         tv_suggestions_title.setVisibility(View.VISIBLE);
         rv_suggestions.setVisibility(View.VISIBLE);
 
         if (productList == null || productList.isEmpty()) {
-            suggestionList.clear(); // Xóa gợi ý cũ nếu productList rỗng
+            suggestionList.clear();
             suggestionAdapter.setData(suggestionList);
             return;
         }
 
         List<ProductGirdItem> top = new ArrayList<>(productList);
-        // Sắp xếp theo sold_count nếu có, nếu không thì không cần sắp xếp hoặc theo logic khác
+        // Sắp xếp gợi ý nếu cần, ví dụ theo số lượng bán (nếu có)
         // Collections.sort(top, (p1, p2) -> Integer.compare(p2.getSold_count(), p1.getSold_count()));
 
-
         suggestionList.clear();
-        // Hiển thị tối đa 5 gợi ý hoặc ít hơn nếu danh sách sản phẩm gốc nhỏ hơn
-        suggestionList.addAll(top.subList(0, Math.min(5, top.size())));
+        suggestionList.addAll(top.subList(0, Math.min(5, top.size()))); // Hiển thị 5 gợi ý
         suggestionAdapter.setData(suggestionList);
     }
 

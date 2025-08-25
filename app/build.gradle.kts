@@ -34,6 +34,8 @@ android {
 
 dependencies {
 
+
+
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -53,6 +55,8 @@ dependencies {
     implementation("com.squareup.retrofit2:adapter-rxjava2:2.11.0")
 
 // Room
+    implementation("io.socket:socket.io-client:2.1.0")
+
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-rxjava2:2.6.1")
 
