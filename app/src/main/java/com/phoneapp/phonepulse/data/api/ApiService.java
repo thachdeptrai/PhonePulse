@@ -2,6 +2,7 @@ package com.phoneapp.phonepulse.data.api;
 
 import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.Response.ApplyVoucherResponse;
+import com.phoneapp.phonepulse.Response.OtpResponse;
 import com.phoneapp.phonepulse.models.*;
 import com.phoneapp.phonepulse.Response.LoginResponse;
 import com.phoneapp.phonepulse.request.*;
@@ -20,7 +21,10 @@ public interface ApiService {
 
     @POST("/api/users/login")
     Call<ApiResponse<LoginResponse>> login(@Body LoginRequest body);
-
+    @POST("/api/users/send-otp")
+    Call<OtpResponse> sendOtp(@Body OtpRequest request);
+    @POST("/api/users/verify-otp")
+    Call<OtpResponse> verifyOtp(@Body VerifyOtpRequest request);
     @POST("/api/users/logout")
     Call<ApiResponse> logout(@Header("Authorization") String token);
 
