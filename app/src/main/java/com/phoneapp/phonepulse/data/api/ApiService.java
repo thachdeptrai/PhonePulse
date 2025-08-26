@@ -8,6 +8,7 @@ import com.phoneapp.phonepulse.Response.LoginResponse;
 import com.phoneapp.phonepulse.request.*;
 
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.MultipartBody;
 import retrofit2.Call;
@@ -33,8 +34,8 @@ public interface ApiService {
     @GET("api/users/profile")
     Call<ApiResponse<User>> getProfile();
 
-    @PUT("/api/users/profile")
-    Call<ApiResponse<User>> updateProfile(@Header("Authorization") String token, @Body User user);
+    @PUT("api/users/profile")
+    Call<ApiResponse<User>> updateProfile(@Body User user);
 
     @PUT("/api/users/change-password")
     Call<ApiResponse<Void>> changePassword(@Body ChangePasswordRequest body);
