@@ -28,7 +28,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -167,57 +169,57 @@ public class EditProfileActivity extends AppCompatActivity {
         String address = edtAddress.getText().toString().trim();
         String birthDateStr = edtBirthDate.getText().toString().trim(); // dd/MM/yyyy
 
+        // Giới tính
         String gender;
         int checkedId = rgGender.getCheckedRadioButtonId();
         if (checkedId == R.id.rbMale) gender = "Nam";
         else if (checkedId == R.id.rbFemale) gender = "Nữ";
         else gender = "Khác";
 
-        // ✅ Chuyển đổi ngày từ "dd/MM/yyyy" ➝ "yyyy-MM-dd"
+        // Convert dd/MM/yyyy -> yyyy-MM-dd
         String formattedBirthday = null;
-        try {
-            SimpleDateFormat sdfInput = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            SimpleDateFormat sdfOutput = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-            Date date = sdfInput.parse(birthDateStr);
-            formattedBirthday = sdfOutput.format(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
+        if (!birthDateStr.isEmpty()) {
+            try {
+                SimpleDateFormat sdfInput = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                SimpleDateFormat sdfOutput = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                Date date = sdfInput.parse(birthDateStr);
+                formattedBirthday = sdfOutput.format(date);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
 
-        // Gửi dữ liệu qua API
-        User updatedUser = new User();
-        updatedUser.setId(currentUser.getId());
-        updatedUser.setName(name);
-        updatedUser.setPhone(phone);
-        updatedUser.setAddress(address);
-        updatedUser.setGender(gender);
-        updatedUser.setBirthday(formattedBirthday); // ✅ Đã chuẩn định dạng
+        // ✅ Tạo object User
+        User user = new User();
+        user.setName(name);
+        user.setPhone(phone);
+        user.setAddress(address);
+        user.setGender(gender);
+        user.setBirthday(formattedBirthday);
 
         String token = Constants.getToken(this);
         ApiService apiService = RetrofitClient.getApiService(token);
 
-        apiService.updateProfile("Bearer " + token, updatedUser)
-                .enqueue(new Callback<ApiResponse<User>>() {
-                    @Override
-                    public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
-                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                            Toast.makeText(EditProfileActivity.this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
+        apiService.updateProfile(user).enqueue(new Callback<ApiResponse<User>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    Toast.makeText(EditProfileActivity.this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
 
-                            Intent resultIntent = new Intent();
-                            resultIntent.putExtra("updatedUser", response.body().getData());
-                            setResult(RESULT_OK, resultIntent);
-                            finish();
-                        } else {
-                            Toast.makeText(EditProfileActivity.this, "Lỗi cập nhật", Toast.LENGTH_SHORT).show();
-                        }
-                    }
+                    // Trả data mới về cho ProfileActivity
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("updatedUser", response.body().getData());
+                    setResult(RESULT_OK, resultIntent);
+                    finish();
+                } else {
+                    Toast.makeText(EditProfileActivity.this, "Lỗi cập nhật", Toast.LENGTH_SHORT).show();
+                }
+            }
 
-                    @Override
-                    public void onFailure(Call<ApiResponse<User>> call, Throwable t) {
-                        Toast.makeText(EditProfileActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+            @Override
+            public void onFailure(Call<ApiResponse<User>> call, Throwable t) {
+                Toast.makeText(EditProfileActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
-
-
 }

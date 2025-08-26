@@ -35,13 +35,14 @@ public class User implements Serializable {
     private String birthday;
 
     @SerializedName("role")
-    private boolean isAdmin;
+    private Boolean isAdmin;
 
     @SerializedName("status")
-    private boolean status;
+    private Boolean status;
 
     @SerializedName("is_verified")
-    private boolean isVerified;
+    private Boolean isVerified;
+
 
     @SerializedName("created_date")
     private Date createdDate;
