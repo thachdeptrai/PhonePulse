@@ -1,57 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/card_product"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:clipToOutline="true"
     app:cardCornerRadius="12dp"
-    app:cardElevation="4dp"
-    app:strokeWidth="0dp">
+    app:cardElevation="4dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Product Image -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/iv_product_image"
             android:layout_width="0dp"
-            android:layout_height="200dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="2:2"
             android:scaleType="centerCrop"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:contentDescription="Hình ảnh sản phẩm"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.MediumComponent"
+            app:layout_constraintWidth_percent="0.9"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
-        <LinearLayout
+        <!-- Product Details Container -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/product_details_container"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:padding="12dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/iv_product_image"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/iv_product_image">
+            app:layout_constraintEnd_toEndOf="parent">
 
+            <!-- Product Name -->
             <TextView
                 android:id="@+id/tv_product_name"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="2"
                 android:minLines="2"
                 android:text="iPhone 15 Pro Max 256GB - Blue Titanium"
-                android:textColor="#333333"
+                android:textColor="#222222"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:contentDescription="Tên sản phẩm"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
+            <!-- Size and Color Container -->
             <LinearLayout
                 android:id="@+id/ll_size_color_container"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/tv_product_name"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <TextView
                     android:id="@+id/tv_product_size"
@@ -77,12 +92,17 @@
                     android:textSize="12sp" />
             </LinearLayout>
 
+            <!-- Price and Discount Container -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:id="@+id/ll_price_container"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                app:layout_constraintTop_toBottomOf="@id/ll_size_color_container"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <TextView
                     android:id="@+id/tv_discount_price"
@@ -98,11 +118,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:ellipsize="end"
-                    android:maxLines="1"
                     android:text="₫29.990.000"
                     android:textColor="#999999"
                     android:textSize="14sp" />
+
 
                 <TextView
                     android:id="@+id/tv_discount_percent"
@@ -117,31 +136,33 @@
                     android:textSize="12sp" />
             </LinearLayout>
 
+            <!-- Sold Count -->
             <TextView
                 android:id="@+id/tv_sold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="12dp"
                 android:text="Đã bán 245"
                 android:textColor="#666666"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                app:layout_constraintTop_toBottomOf="@id/ll_price_container"
+                app:layout_constraintStart_toStartOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </LinearLayout>
-
+        <!-- Add to Cart Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_add_to_cart"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
-            android:layout_marginBottom="12dp"
+            android:layout_margin="12dp"
             android:text="Thêm vào giỏ"
             android:textSize="14sp"
             app:backgroundTint="#FF6B00"
             app:cornerRadius="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.9"
+            app:layout_constraintTop_toBottomOf="@id/product_details_container"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/product_details_container" />
-
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

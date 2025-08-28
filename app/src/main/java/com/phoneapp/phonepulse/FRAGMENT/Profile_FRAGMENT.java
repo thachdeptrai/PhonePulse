@@ -1,8 +1,8 @@
 package com.phoneapp.phonepulse.FRAGMENT;
 
-import android.app.AlertDialog; // THÊM MỚI
+import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface; // THÊM MỚI
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -11,16 +11,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-// import android.widget.Button; // btnEdit không được sử dụng, có thể xóa import
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView; // THÊM MỚI
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -29,7 +28,7 @@ import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.VIEW.ChangePasswordActivity;
 import com.phoneapp.phonepulse.VIEW.EditProfileActivity;
-import com.phoneapp.phonepulse.VIEW.LoginActivity; // THÊM MỚI
+import com.phoneapp.phonepulse.VIEW.LoginActivity;
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
 import com.phoneapp.phonepulse.models.User;
@@ -49,8 +48,8 @@ public class Profile_FRAGMENT extends Fragment {
     private CircleImageView imgAvatar;
     private TextView tvFullName, tvEmail, tvPhone, tvAddress, tvGender, tvBirthday;
     private Button btnEdit; // Không thấy sử dụng
-    private ImageView btn_settings; // SẼ LÀ NÚT ĐĂNG XUẤT
-    private LinearLayout history_order_layout;
+    private ImageView btn_settings; // Nút đăng xuất
+    private CardView history_order_layout; // SỬA: Từ LinearLayout thành CardView
     private static final String TAG = "ProfileFragment";
 
     @Nullable
@@ -69,7 +68,6 @@ public class Profile_FRAGMENT extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        // SỬA ĐỔI: Thêm kiểm tra getActivity() != null
         if (requestCode == 1001 && getActivity() != null && resultCode == getActivity().RESULT_OK && data != null) {
             loadUserProfile();
         }
@@ -83,8 +81,8 @@ public class Profile_FRAGMENT extends Fragment {
         tvAddress = view.findViewById(R.id.tv_address);
         tvGender = view.findViewById(R.id.tv_gender);
         tvBirthday = view.findViewById(R.id.tv_birthday);
-        btn_settings = view.findViewById(R.id.btn_settings); // Đây là ImageView
-        history_order_layout = view.findViewById(R.id.history_order_layout);
+        btn_settings = view.findViewById(R.id.btn_settings);
+        history_order_layout = view.findViewById(R.id.history_order_layout); // SỬA: Ép kiểu thành CardView
 
         tvFullName.setOnClickListener(v -> goToEditProfile());
         tvPhone.setOnClickListener(v -> goToEditProfile());
@@ -92,14 +90,13 @@ public class Profile_FRAGMENT extends Fragment {
         tvGender.setOnClickListener(v -> goToEditProfile());
         tvBirthday.setOnClickListener(v -> goToEditProfile());
 
-        LinearLayout changePasswordLayout = view.findViewById(R.id.change_password_layout);
+        CardView changePasswordLayout = view.findViewById(R.id.change_password_layout); // SỬA: Từ LinearLayout thành CardView
         changePasswordLayout.setOnClickListener(v -> {
             if (getContext() == null) return;
             Intent intent = new Intent(requireContext(), ChangePasswordActivity.class);
             startActivity(intent);
         });
 
-        // THÊM MỚI: Gắn sự kiện click cho btn_settings để đăng xuất
         btn_settings.setOnClickListener(v -> {
             Log.d(TAG, "Nút cài đặt (đăng xuất) được nhấn.");
             showLogoutConfirmationDialog();
@@ -127,13 +124,10 @@ public class Profile_FRAGMENT extends Fragment {
 
         if (token == null || token.isEmpty()) {
             Toast.makeText(requireContext(), "Bạn cần đăng nhập để xem thông tin cá nhân.", Toast.LENGTH_LONG).show();
-            // Cân nhắc gọi navigateToLogin() nếu bạn muốn chuyển người dùng đi ngay
-            // navigateToLogin();
             return;
         }
         Log.d(TAG, "🧪 Token lấy từ SharedPreferences cho getProfile: " + token);
 
-        // Tạo instance ApiService CỤC BỘ với token hiện tại
         ApiService localApiService = RetrofitClient.getApiService(token);
 
         localApiService.getProfile().enqueue(new Callback<ApiResponse<User>>() {
@@ -186,7 +180,7 @@ public class Profile_FRAGMENT extends Fragment {
         SharedPreferences preferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString("fullname", user.getName());
-        editor.putString("phone", String.valueOf(user.getPhone())); // Chuyển sang String nếu getPhone() trả về số
+        editor.putString("phone", String.valueOf(user.getPhone()));
         editor.putString("address", user.getAddress());
         editor.apply();
 
@@ -196,7 +190,6 @@ public class Profile_FRAGMENT extends Fragment {
 
         tvFullName.setText(nonNull(user.getName(), "Chưa có tên"));
         tvEmail.setText(nonNull(user.getEmail(), "Không có email"));
-        // SỬA ĐỔI: Đảm bảo user.getPhone() được chuyển thành String trước khi gọi nonNull
         tvPhone.setText(nonNull(user.getPhone() != null ? String.valueOf(user.getPhone()) : null, "Không có số điện thoại"));
         tvAddress.setText(nonNull(user.getAddress(), "Chưa có địa chỉ"));
         tvGender.setText(nonNull(user.getGender(), "Không chia sẻ"));
@@ -220,7 +213,6 @@ public class Profile_FRAGMENT extends Fragment {
         }
 
         if (!TextUtils.isEmpty(user.getAvatar_url())) {
-            // SỬA ĐỔI: Kiểm tra this.isAdded() trước khi dùng Glide
             if (this.isAdded()) {
                 Glide.with(this)
                         .load(user.getAvatar_url())
@@ -243,10 +235,9 @@ public class Profile_FRAGMENT extends Fragment {
             public void onClick(View v) {
                 if (getActivity() == null) return;
                 OrderHistory_FRAGMENT fragment = new OrderHistory_FRAGMENT();
-                // SỬA ĐỔI: Nên dùng getParentFragmentManager() trong Fragment
                 FragmentManager fm = getParentFragmentManager();
                 fm.beginTransaction()
-                        .replace(R.id.fragment_container, fragment) // Đảm bảo R.id.fragment_container là đúng
+                        .replace(R.id.fragment_container, fragment)
                         .addToBackStack(null)
                         .commit();
 
@@ -256,13 +247,12 @@ public class Profile_FRAGMENT extends Fragment {
                 }
                 EditText etSearch = getActivity().findViewById(R.id.et_search_product);
                 if (etSearch != null) {
-                    etSearch.setVisibility(View.GONE); // Sửa: Ẩn thanh tìm kiếm khi xem lịch sử
+                    etSearch.setVisibility(View.GONE);
                 }
             }
         });
     }
 
-    // --- CÁC PHƯƠNG THỨC ĐĂNG XUẤT ---
     private void showLogoutConfirmationDialog() {
         if (getContext() == null) {
             Log.w(TAG, "showLogoutConfirmationDialog: Context is null.");
@@ -295,22 +285,14 @@ public class Profile_FRAGMENT extends Fragment {
         }
         Log.d(TAG, "🧪 Token sẽ được dùng cho performLogout: " + token);
 
-        // Tạo instance ApiService CỤC BỘ với token hiện tại
         ApiService logoutApiService = RetrofitClient.getApiService(token);
 
         Log.d(TAG, "Đang thực hiện gọi API đăng xuất...");
-        // Gọi API logout, truyền "Bearer " + token vào làm giá trị cho header Authorization
-        // vì phương thức logout trong ApiService của bạn được định nghĩa với @Header
         Call<ApiResponse> call = logoutApiService.logout("Bearer " + token);
-
-        // (Tùy chọn) Hiển thị ProgressBar
-        // ProgressBar progressBarLogout = (getView() != null) ? getView().findViewById(R.id.your_progressbar_id_logout) : null;
-        // if(progressBarLogout!=null) progressBarLogout.setVisibility(View.VISIBLE);
 
         call.enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                // if(progressBarLogout!=null) progressBarLogout.setVisibility(View.GONE);
                 if (!isAdded() || getContext() == null) {
                     Log.w(TAG, "performLogout onResponse: Fragment not added or context is null.");
                     return;
@@ -318,7 +300,6 @@ public class Profile_FRAGMENT extends Fragment {
 
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse apiResponse = response.body();
-                    // Giả sử ApiResponse có trường isSuccess() hoặc một cách để kiểm tra thành công logic
                     if (apiResponse.isSuccess()) {
                         Log.i(TAG, "Đăng xuất thành công từ server.");
                         Toast.makeText(requireContext(), "Đăng xuất thành công!", Toast.LENGTH_SHORT).show();
@@ -327,7 +308,6 @@ public class Profile_FRAGMENT extends Fragment {
                         String message = apiResponse.getMessage() != null ? apiResponse.getMessage() : "Đăng xuất không thành công.";
                         Log.w(TAG, "Đăng xuất không thành công từ server (logic error): " + message);
                         Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
-                        // Cân nhắc có nên clearLocalDataAndNavigate() ở đây không
                     }
                 } else {
                     String errorMsg = "Lỗi khi đăng xuất. Mã lỗi: " + response.code();
@@ -340,20 +320,17 @@ public class Profile_FRAGMENT extends Fragment {
                     }
                     Log.e(TAG, "API đăng xuất thất bại (HTTP error): " + errorMsg);
                     Toast.makeText(requireContext(), "Lỗi khi đăng xuất, vui lòng thử lại.", Toast.LENGTH_LONG).show();
-                    // Cân nhắc có nên clearLocalDataAndNavigate() ở đây không
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse> call, Throwable t) {
-                // if(progressBarLogout!=null) progressBarLogout.setVisibility(View.GONE);
                 if (!isAdded() || getContext() == null) {
                     Log.w(TAG, "performLogout onFailure: Fragment not added or context is null.");
                     return;
                 }
                 Log.e(TAG, "Lỗi mạng khi đăng xuất: ", t);
                 Toast.makeText(requireContext(), "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                // Cân nhắc có nên clearLocalDataAndNavigate() ở đây không
             }
         });
     }
@@ -365,21 +342,17 @@ public class Profile_FRAGMENT extends Fragment {
         }
         SharedPreferences tokenPrefs = requireContext().getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor tokenEditor = tokenPrefs.edit();
-        tokenEditor.remove(Constants.TOKEN_KEY); // SỬ DỤNG ĐÚNG HẰNG SỐ CỦA BẠN
+        tokenEditor.remove(Constants.TOKEN_KEY);
         tokenEditor.apply();
         Log.i(TAG, "Token đã được xóa khỏi SharedPreferences: " + Constants.SHARED_PREFS);
 
         SharedPreferences userPrefs = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor userEditor = userPrefs.edit();
-        userEditor.clear(); // Xóa tất cả dữ liệu trong "user_prefs"
+        userEditor.clear();
         userEditor.apply();
 
         Log.i(TAG, "Dữ liệu người dùng cục bộ (token và user_prefs) đã được xóa.");
 
-        // 2. (Tùy chọn) Xóa dữ liệu trong CartManager hoặc các Singleton khác
-        // ví dụ: CartManager.getInstance().clearCartData();
-
-        // 3. Điều hướng về màn hình Đăng nhập
         navigateToLogin();
     }
 
@@ -391,21 +364,7 @@ public class Profile_FRAGMENT extends Fragment {
         Intent intent = new Intent(requireActivity(), LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-        requireActivity().finish(); // Kết thúc Activity chứa Fragment này
+        requireActivity().finish();
         Log.i(TAG, "Đã điều hướng đến LoginActivity.");
     }
-
-
-    // Bỏ phương thức getSupportFragmentManager() nếu không dùng nữa
-
-//    private FragmentManager getSupportFragmentManager() {
-//        if (getActivity() != null) {
-//            return getActivity().getSupportFragmentManager();
-//        } else {
-//            Log.e(TAG, "❌ getActivity() is null, cannot get FragmentManager");
-//            return null;
-//        }
-//    }
-
 }
-

@@ -1,35 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:background="@android:color/white">
 
-    <RelativeLayout
-        android:id="@+id/main"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/gradient_background"
-        android:padding="24dp">
+        android:padding="16dp"
+        android:maxWidth="600dp"
+        android:layout_gravity="center_horizontal">
 
-        <LinearLayout
+        <!-- Logo Container -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/logoContainer"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="40dp"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="16dp"
+            app:layout_constraintWidth_percent="0.9"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <FrameLayout
-                android:layout_width="160dp"
-                android:layout_height="160dp"
-                android:layout_gravity="center">
+                android:id="@+id/logoFrame"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintWidth_percent="0.4"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <View
-                    android:layout_width="160dp"
-                    android:layout_height="160dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_marginStart="4dp"
                     android:layout_marginTop="4dp"
                     android:background="@drawable/logo_shadow"
@@ -37,8 +46,8 @@
 
                 <ImageView
                     android:id="@+id/logoImageView"
-                    android:layout_width="160dp"
-                    android:layout_height="160dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:src="@drawable/icon"
                     android:scaleType="centerInside"
                     android:elevation="4dp"
@@ -51,7 +60,11 @@
                 android:layout_height="wrap_content"
                 android:text="PhonePulse"
                 style="@style/TitleText"
-                android:layout_marginTop="16dp" />
+                android:textColor="@android:color/black"
+                android:layout_marginTop="12dp"
+                app:layout_constraintTop_toBottomOf="@id/logoFrame"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <TextView
                 android:id="@+id/logo"
@@ -59,7 +72,11 @@
                 android:layout_height="wrap_content"
                 android:text="Come Find What's Yours"
                 style="@style/SubtitleText"
-                android:layout_marginTop="8dp" />
+                android:textColor="@android:color/black"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@id/rewards"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <TextView
                 android:id="@+id/slogan"
@@ -67,143 +84,229 @@
                 android:layout_height="wrap_content"
                 android:text="Your Choice, Your Style, Your Shop"
                 style="@style/SloganText"
-                android:layout_marginTop="4dp" />
-        </LinearLayout>
+                android:textColor="@android:color/darker_gray"
+                android:layout_marginTop="4dp"
+                app:layout_constraintTop_toBottomOf="@id/logo"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <LinearLayout
+        <!-- Login Container -->
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/loginContainer"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_below="@id/logoContainer"
-            android:layout_marginTop="32dp"
-            android:orientation="vertical"
-            android:background="@drawable/card_background"
-            android:padding="28dp"
-            android:elevation="8dp">
+            android:layout_marginTop="24dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="@android:color/white"
+            app:layout_constraintWidth_percent="0.9"
+            app:layout_constraintTop_toBottomOf="@id/logoContainer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-            <com.google.android.material.textfield.TextInputLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                style="@style/CustomTextInputLayout"
-                android:hint="Email Address">
+                android:padding="16dp">
 
-                <EditText
-                    android:id="@+id/edEmail"
-                    style="@style/InputField"
-                    android:drawableStart="@drawable/ic_person"
-                    android:inputType="textEmailAddress" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                style="@style/CustomTextInputLayout"
-                android:hint="Password">
-
-                <EditText
-                    android:id="@+id/edPassWord"
-                    style="@style/InputField"
-                    android:drawableStart="@drawable/ic_pass"
-                    android:inputType="textPassword" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp">
-
-                <CheckBox
-                    android:id="@+id/cbRememberMe"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Remember Me"
-                    android:textColor="#FFFFFF"
-                    android:buttonTint="@color/white"
-                    android:layout_alignParentStart="true"/>
-
-                <TextView
-                    android:id="@+id/tvForgotPassword"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Forgot Password?"
-                    android:textColor="@color/white"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:padding="8dp" />
-            </RelativeLayout>
-
-
-            <Button
-                android:id="@+id/btnLogin"
-                style="@style/PrimaryButton"
-                android:text="SIGN IN"
-                android:background="@drawable/button_gradient"
-                android:layout_marginBottom="24dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginVertical="20dp">
-
-                <View
+                <!-- Email Input -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutEmail"
+                    style="@style/CustomTextInputLayout"
                     android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1"
-                    android:background="#444444" />
-
-                <TextView
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="OR"
-                    android:textColor="#888888"
-                    android:textSize="12sp"
-                    android:paddingHorizontal="16dp" />
+                    android:layout_marginBottom="12dp"
+                    android:hint="Email Address"
+                    app:boxCornerRadiusTopStart="12dp"
+                    app:boxCornerRadiusTopEnd="12dp"
+                    app:boxCornerRadiusBottomStart="12dp"
+                    app:boxCornerRadiusBottomEnd="12dp"
+                    app:boxStrokeColor="@android:color/black"
+                    app:hintTextColor="@android:color/black"
+                    app:startIconDrawable="@drawable/ic_person"
+                    app:startIconTint="@android:color/black"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
 
-                <View
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textEmailAddress"
+                        android:textColor="@android:color/black"
+                        android:contentDescription="Nhập địa chỉ email" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Password Input -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layoutPassword"
+                    style="@style/CustomTextInputLayout"
                     android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1"
-                    android:background="#444444" />
-            </LinearLayout>
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:hint="Password"
+                    app:boxCornerRadiusTopStart="12dp"
+                    app:boxCornerRadiusTopEnd="12dp"
+                    app:boxCornerRadiusBottomStart="12dp"
+                    app:boxCornerRadiusBottomEnd="12dp"
+                    app:boxStrokeColor="@android:color/black"
+                    app:hintTextColor="@android:color/black"
+                    app:startIconDrawable="@drawable/ic_pass"
+                    app:startIconTint="@android:color/black"
+                    app:endIconMode="password_toggle"
+                    app:endIconTint="@android:color/black"
+                    app:layout_constraintTop_toBottomOf="@id/layoutEmail"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
 
-            <LinearLayout
-                android:id="@+id/socialLoginLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:layout_marginBottom="24dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edPassWord"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"
+                        android:textColor="@android:color/black"
+                        android:contentDescription="Nhập mật khẩu" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <ImageButton
-                    android:id="@+id/btnGoogle"
-                    style="@style/SocialButton"
-                    android:src="@drawable/ic_gg"
-                    android:layout_marginEnd="16dp"
-                    android:contentDescription="Google Login" />
+                <!-- Remember Me and Forgot Password -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/optionsContainer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/layoutPassword"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
 
-                <ImageButton
-                    android:id="@+id/btnFacebook"
-                    style="@style/SocialButton"
-                    android:src="@drawable/ic_fb"
-                    android:layout_marginStart="16dp"
-                    android:contentDescription="Facebook Login" />
-            </LinearLayout>
+                    <CheckBox
+                        android:id="@+id/cbRememberMe"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Remember Me"
+                        android:textColor="#3F51B5"
+                        android:buttonTint="#00BCD4"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-            <Button
-                android:id="@+id/btnRegister"
-                style="@style/SecondaryButton"
-                android:text="Create a New Account" />
-        </LinearLayout>
+                    <TextView
+                        android:id="@+id/tvForgotPassword"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Forgot Password?"
+                        android:textColor="@android:color/black"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="8dp"
+                        android:contentDescription="Quên mật khẩu"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/cbRememberMe"
+                        app:layout_constraintBottom_toBottomOf="@id/cbRememberMe" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- Sign In Button -->
+                <Button
+                    android:id="@+id/btnLogin"
+                    style="@style/PrimaryButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="SIGN IN"
+                    android:backgroundTint="@android:color/black"
+                    android:textColor="@android:color/white"
+                    android:layout_marginBottom="16dp"
+                    app:layout_constraintWidth_percent="0.9"
+                    app:layout_constraintTop_toBottomOf="@id/optionsContainer"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- Social Login Separator -->
+                <LinearLayout
+                    android:id="@+id/socialSeparator"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginVertical="12dp"
+                    app:layout_constraintWidth_percent="0.9"
+                    app:layout_constraintTop_toBottomOf="@id/btnLogin"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:background="@android:color/black" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="OR"
+                        android:textColor="@android:color/black"
+                        android:textSize="12sp"
+                        android:paddingHorizontal="16dp" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:background="@android:color/black" />
+                </LinearLayout>
+
+                <!-- Social Login Buttons -->
+                <LinearLayout
+                    android:id="@+id/socialLoginLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp"
+                    app:layout_constraintWidth_percent="0.9"
+                    app:layout_constraintTop_toBottomOf="@id/socialSeparator"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <ImageButton
+                        android:id="@+id/btnGoogle"
+                        style="@style/SocialButton"
+                        android:src="@drawable/ic_gg"
+                        android:layout_marginEnd="16dp"
+                        android:backgroundTint="@android:color/white"
+                        android:contentDescription="Đăng nhập bằng Google" />
+
+                    <ImageButton
+                        android:id="@+id/btnFacebook"
+                        style="@style/SocialButton"
+                        android:src="@drawable/ic_fb"
+                        android:layout_marginStart="16dp"
+                        android:backgroundTint="@android:color/white"
+                        android:contentDescription="Đăng nhập bằng Facebook" />
+                </LinearLayout>
+
+                <!-- Register Button -->
+                <Button
+                    android:id="@+id/btnRegister"
+                    style="@style/SecondaryButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Create a New Account"
+                    android:backgroundTint="@android:color/transparent"
+                    android:textColor="@android:color/black"
+                    app:layout_constraintWidth_percent="0.9"
+                    app:layout_constraintTop_toBottomOf="@id/socialLoginLayout"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="32dp"
-            android:layout_below="@id/loginContainer" />
-    </RelativeLayout>
+            app:layout_constraintTop_toBottomOf="@id/loginContainer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

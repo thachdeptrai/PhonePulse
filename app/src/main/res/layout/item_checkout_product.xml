@@ -4,47 +4,75 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="8dp">
+    android:padding="8dp"
+    android:maxWidth="600dp"
+    android:layout_gravity="center_horizontal">
 
+    <!-- Product Image -->
     <ImageView
         android:id="@+id/iv_product_image"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:src="@drawable/ic_launcher_background"
+        android:scaleType="centerCrop"
+        android:contentDescription="Hình ảnh sản phẩm"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintWidth_percent="0.25"
+        app:layout_constraintHeight_percent="0.15"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Product Name -->
     <TextView
         android:id="@+id/tv_product_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:text="Điện thoại GGGGG"
-        android:textColor="@color/black"
+        android:textColor="@android:color/black"
         android:textSize="16sp"
         android:textStyle="bold"
+        android:contentDescription="Tên sản phẩm"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/iv_product_image"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@id/iv_product_image" />
 
+    <!-- Product Variant -->
     <TextView
         android:id="@+id/tv_product_variant"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:text="Màu: blue, Kích thước: 6 inch, Bộ nhớ: 64GB"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:text="Màu: Blue, Kích thước: 6 inch, Bộ nhớ: 64GB"
         android:textColor="@android:color/darker_gray"
+        android:textSize="14sp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:contentDescription="Thông tin biến thể sản phẩm"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/iv_product_image"
         app:layout_constraintTop_toBottomOf="@id/tv_product_name" />
 
+    <!-- Product Quantity -->
     <TextView
         android:id="@+id/tv_product_quantity"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         android:text="Số lượng: 2"
-        android:textColor="@color/black"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:contentDescription="Số lượng sản phẩm"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/iv_product_image"
         app:layout_constraintTop_toBottomOf="@id/tv_product_variant" />

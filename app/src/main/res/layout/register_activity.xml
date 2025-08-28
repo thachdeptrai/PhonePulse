@@ -6,31 +6,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@drawable/gradient_background">
+    android:background="@android:color/white">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="16dp"
+        android:maxWidth="600dp"
+        android:layout_gravity="center_horizontal">
 
-        <LinearLayout
+        <!-- Logo Container -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/logoContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical"
             android:padding="16dp"
-            android:layout_marginTop="32dp">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <FrameLayout
-                android:layout_width="140dp"
-                android:layout_height="140dp"
-                android:layout_gravity="center">
+                android:id="@+id/logoFrame"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintWidth_percent="0.35"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <View
-                    android:layout_width="140dp"
-                    android:layout_height="140dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_marginStart="4dp"
                     android:layout_marginTop="4dp"
                     android:background="@drawable/logo_shadow"
@@ -38,8 +45,8 @@
 
                 <ImageView
                     android:id="@+id/logoImageView"
-                    android:layout_width="140dp"
-                    android:layout_height="140dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:src="@drawable/icon"
                     android:scaleType="centerInside"
                     android:elevation="4dp"
@@ -52,7 +59,11 @@
                 android:layout_height="wrap_content"
                 android:text="PhonePulse"
                 style="@style/TitleText"
-                android:layout_marginTop="12dp" />
+                android:textColor="@android:color/black"
+                android:layout_marginTop="12dp"
+                app:layout_constraintTop_toBottomOf="@id/logoFrame"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <TextView
                 android:id="@+id/registerTitle"
@@ -60,7 +71,11 @@
                 android:layout_height="wrap_content"
                 android:text="Join the Future of Shopping"
                 style="@style/SubtitleText"
-                android:layout_marginTop="8dp" />
+                android:textColor="@android:color/black"
+                android:layout_marginTop="8dp"
+                app:layout_constraintTop_toBottomOf="@id/appTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <TextView
                 android:id="@+id/slogan"
@@ -68,188 +83,244 @@
                 android:layout_height="wrap_content"
                 android:text="Your Choice, Your Style, Your Shop"
                 style="@style/SloganText"
-                android:layout_marginTop="4dp" />
-        </LinearLayout>
+                android:textColor="@android:color/darker_gray"
+                android:layout_marginTop="4dp"
+                app:layout_constraintTop_toBottomOf="@id/registerTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <!-- Full Name Input -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layoutFullName"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="Full name"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="24dp"
             app:boxCornerRadiusTopStart="12dp"
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusBottomEnd="12dp"
-            app:boxStrokeColor="@color/shopee_orange"
-            app:hintTextColor="@color/shopee_orange"
+            app:boxStrokeColor="@android:color/black"
+            app:hintTextColor="@android:color/black"
             app:startIconDrawable="@drawable/ic_person"
-            app:startIconTint="@color/shopee_orange">
+            app:startIconTint="@android:color/black"
+            app:layout_constraintWidth_percent="0.9"
+            app:layout_constraintTop_toBottomOf="@id/logoContainer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edFullName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
-                android:textColor="@color/shopee_orange" />
+                android:textColor="@android:color/black"
+                android:contentDescription="Nhập họ và tên" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Email Input -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layoutEmail"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="Email"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             app:endIconDrawable="@drawable/gui"
             app:endIconMode="custom"
-            app:endIconTint="@color/shopee_orange"
+            app:endIconTint="@android:color/black"
             app:boxCornerRadiusTopStart="12dp"
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusBottomEnd="12dp"
-            app:boxStrokeColor="@color/shopee_orange"
-            app:hintTextColor="@color/shopee_orange"
+            app:boxStrokeColor="@android:color/black"
+            app:hintTextColor="@android:color/black"
             app:startIconDrawable="@drawable/ic_email"
-            app:startIconTint="@color/shopee_orange">
+            app:startIconTint="@android:color/black"
+            app:layout_constraintWidth_percent="0.9"
+            app:layout_constraintTop_toBottomOf="@id/layoutFullName"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
-                android:textColor="@color/shopee_orange" />
+                android:textColor="@android:color/black"
+                android:contentDescription="Nhập email" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Phone Input -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layoutPhone"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="Phone Number (Optional)"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             app:endIconDrawable="@drawable/gui"
             app:endIconMode="custom"
+            app:endIconTint="@android:color/black"
             app:boxCornerRadiusTopStart="12dp"
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusBottomEnd="12dp"
-            app:boxStrokeColor="@color/shopee_orange"
-            app:hintTextColor="@color/shopee_orange"
+            app:boxStrokeColor="@android:color/black"
+            app:hintTextColor="@android:color/black"
             app:startIconDrawable="@drawable/ic_phone"
-            app:startIconTint="@color/shopee_orange">
+            app:startIconTint="@android:color/black"
+            app:layout_constraintWidth_percent="0.9"
+            app:layout_constraintTop_toBottomOf="@id/layoutEmail"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edPhone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="phone"
-                android:textColor="@color/shopee_orange" />
+                android:textColor="@android:color/black"
+                android:contentDescription="Nhập số điện thoại" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Password Input -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layoutPassword"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="Password"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             app:endIconMode="password_toggle"
-            app:endIconTint="@color/shopee_orange"
+            app:endIconTint="@android:color/black"
             app:boxCornerRadiusTopStart="12dp"
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusBottomEnd="12dp"
-            app:boxStrokeColor="@color/shopee_orange"
-            app:hintTextColor="@color/shopee_orange"
+            app:boxStrokeColor="@android:color/black"
+            app:hintTextColor="@android:color/black"
             app:startIconDrawable="@drawable/ic_pass"
-            app:startIconTint="@color/shopee_orange">
+            app:startIconTint="@android:color/black"
+            app:layout_constraintWidth_percent="0.9"
+            app:layout_constraintTop_toBottomOf="@id/layoutPhone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:textColor="@color/shopee_orange" />
+                android:textColor="@android:color/black"
+                android:contentDescription="Nhập mật khẩu" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Confirm Password Input -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/layoutConfirmPassword"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="Confirm Password"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             app:endIconMode="password_toggle"
-            app:endIconTint="@color/shopee_orange"
+            app:endIconTint="@android:color/black"
             app:boxCornerRadiusTopStart="12dp"
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusBottomEnd="12dp"
-            app:boxStrokeColor="@color/shopee_orange"
-            app:hintTextColor="@color/shopee_orange"
+            app:boxStrokeColor="@android:color/black"
+            app:hintTextColor="@android:color/black"
             app:startIconDrawable="@drawable/ic_pass"
-            app:startIconTint="@color/shopee_orange">
+            app:startIconTint="@android:color/black"
+            app:layout_constraintWidth_percent="0.9"
+            app:layout_constraintTop_toBottomOf="@id/layoutPassword"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edConfirmPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:textColor="@color/shopee_orange" />
+                android:textColor="@android:color/black"
+                android:contentDescription="Nhập lại mật khẩu" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Terms and Conditions -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/termsContainer"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="24dp">
+            app:layout_constraintWidth_percent="0.9"
+            app:layout_constraintTop_toBottomOf="@id/layoutConfirmPassword"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <CheckBox
                 android:id="@+id/cbTerms"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:buttonTint="@color/shopee_orange" />
+                android:buttonTint="@android:color/black" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="I agree to the Terms &amp; Conditions and Privacy Policy"
-                android:textColor="@color/shopee_orange"
+                android:textColor="@android:color/black"
                 android:textSize="14sp"
                 android:layout_marginStart="8dp"
-                android:lineSpacingExtra="2dp" />
+                android:lineSpacingExtra="2dp"
+                android:contentDescription="Đồng ý với Điều khoản và Chính sách bảo mật" />
         </LinearLayout>
 
+        <!-- Register Button -->
         <Button
             android:id="@+id/btnRegister"
             style="@style/PrimaryButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:text="CREATE ACCOUNT"
-            android:background="@drawable/button_gradient"
-            android:layout_marginBottom="24dp" />
+            android:backgroundTint="#673AB7"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintWidth_percent="0.9"
+            app:layout_constraintTop_toBottomOf="@id/termsContainer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
+        <!-- Social Sign-Up Separator -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/socialSeparator"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginVertical="20dp">
+            android:layout_marginVertical="16dp"
+            app:layout_constraintWidth_percent="0.9"
+            app:layout_constraintTop_toBottomOf="@id/btnRegister"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <View
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_weight="1"
-                android:background="@color/shopee_orange" />
+                android:background="@android:color/black" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="OR SIGN UP WITH"
-                android:textColor="@color/shopee_orange"
+                android:textColor="@android:color/black"
                 android:textSize="12sp"
                 android:paddingHorizontal="16dp" />
 
@@ -257,35 +328,52 @@
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_weight="1"
-                android:background="@color/shopee_orange" />
+                android:background="@android:color/black" />
         </LinearLayout>
 
+        <!-- Social Register Buttons -->
         <LinearLayout
             android:id="@+id/socialRegisterLayout"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="16dp"
+            app:layout_constraintWidth_percent="0.9"
+            app:layout_constraintTop_toBottomOf="@id/socialSeparator"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <ImageButton
                 android:id="@+id/btnGoogleRegister"
                 style="@style/SocialButton"
                 android:src="@drawable/ic_gg"
                 android:layout_marginEnd="16dp"
-                android:contentDescription="Google Registration" />
+                android:backgroundTint="@android:color/white"
+                android:contentDescription="Đăng ký bằng Google" />
 
             <ImageButton
                 android:id="@+id/btnFacebookRegister"
                 style="@style/SocialButton"
                 android:src="@drawable/ic_fb"
                 android:layout_marginStart="16dp"
-                android:contentDescription="Facebook Registration" />
+                android:backgroundTint="@android:color/white"
+                android:contentDescription="Đăng ký bằng Facebook" />
         </LinearLayout>
 
+        <!-- Login Button -->
         <Button
             android:id="@+id/btnLogin"
             style="@style/SecondaryButton"
-            android:text="Already have an account? Sign In" />
-    </LinearLayout>
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Already have an account? Sign In"
+            android:backgroundTint="@android:color/transparent"
+            android:textColor="@android:color/black"
+            app:layout_constraintWidth_percent="0.9"
+            app:layout_constraintTop_toBottomOf="@id/socialRegisterLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
