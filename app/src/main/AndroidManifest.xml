@@ -21,6 +21,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".VIEW.MomoPaymentWebViewActivity"
+            android:exported="false" />
+        <activity
             android:name=".VIEW.Register_Activity"
             android:exported="false" />
         <activity
@@ -34,7 +37,19 @@
             android:exported="false" />
         <activity
             android:name=".VIEW.Oder_Activity"
-            android:exported="false" />
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="momo_return"
+                    android:scheme="momo_return" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".VIEW.DashBoar_Activity"
             android:exported="false" />
@@ -43,12 +58,6 @@
             android:exported="false" />
         <activity
             android:name=".ui.admin.AdminActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.profile.ProfileActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.checkout.CheckoutActivity"
             android:exported="false" />
         <activity
             android:name=".VIEW.ProductDetailActivity"

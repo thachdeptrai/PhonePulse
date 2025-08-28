@@ -106,32 +106,46 @@ public class DashBoar_Activity extends AppCompatActivity {
     }
 
     private void handleIntent(Intent intent) {
-        if (intent != null) {
-            // Nhận danh sách OrderItem từ Oder_Activity
-            ArrayList<OrderItem> orderItems = intent.getParcelableArrayListExtra("order_items");
-            if (orderItems != null && !orderItems.isEmpty()) {
-                Log.d("DashBoar_Activity", "Nhận được " + orderItems.size() + " item từ Oder_Activity");
-                // Bạn có thể truyền orderItems này cho fragment OrderHistory_FRAGMENT
-                OrderHistory_FRAGMENT fragment = new OrderHistory_FRAGMENT();
-                Bundle bundle = new Bundle();
-                bundle.putParcelableArrayList("order_items", orderItems);
-                fragment.setArguments(bundle);
-
-                // Chuyển sang fragment lịch sử đơn hàng
-                bottomNavigationView.setSelectedItemId(R.id.nav_profile);
-                replaceFragment(fragment, "Lịch sử đơn hàng", false);
-                return;
+        if (intent == null) {
+            // Load Home mặc định nếu không có Intent nào
+            if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) == null) {
+                replaceFragment(new Home_FRAGMENT(), "Trang Chủ", true);
             }
-
-            // Nếu intent yêu cầu chỉ chuyển sang lịch sử đơn hàng
-            if (intent.getBooleanExtra("navigate_to_history", false)) {
-                bottomNavigationView.setSelectedItemId(R.id.nav_profile);
-                replaceFragment(new OrderHistory_FRAGMENT(), "Lịch sử đơn hàng", false);
-                return;
-            }
+            return;
         }
 
-        // Load Home mặc định nếu chưa có fragment nào
+        // ✅ Tách riêng việc xử lý deep link/redirect từ MoMo hoặc các nguồn khác
+        String fragmentToOpen = intent.getStringExtra("openFragment");
+        if ("TatCaDonHang".equals(fragmentToOpen)) {
+            Log.d("DashBoar_Activity", "Nhận yêu cầu mở fragment TatCaDonHang từ MoMo redirect.");
+            bottomNavigationView.setSelectedItemId(R.id.nav_profile);
+            replaceFragment(new OrderHistory_FRAGMENT(), "Lịch sử đơn hàng", false);
+            return; // Rất quan trọng để kết thúc xử lý tại đây
+        }
+
+        // ✅ Xử lý các Intent truyền dữ liệu khác (ví dụ: từ Cart_Activity)
+        ArrayList<OrderItem> orderItems = intent.getParcelableArrayListExtra("order_items");
+        if (orderItems != null && !orderItems.isEmpty()) {
+            Log.d("DashBoar_Activity", "Nhận được " + orderItems.size() + " item từ Intent.");
+            OrderHistory_FRAGMENT fragment = new OrderHistory_FRAGMENT();
+            Bundle bundle = new Bundle();
+            bundle.putParcelableArrayList("order_items", orderItems);
+            fragment.setArguments(bundle);
+
+            bottomNavigationView.setSelectedItemId(R.id.nav_profile);
+            replaceFragment(fragment, "Lịch sử đơn hàng", false);
+            return;
+        }
+
+        // ✅ Xử lý các cờ Intent đơn giản (ví dụ: chỉ điều hướng)
+        if (intent.getBooleanExtra("navigate_to_history", false)) {
+            Log.d("DashBoar_Activity", "Nhận yêu cầu navigate_to_history.");
+            bottomNavigationView.setSelectedItemId(R.id.nav_profile);
+            replaceFragment(new OrderHistory_FRAGMENT(), "Lịch sử đơn hàng", false);
+            return;
+        }
+
+        // Load Home mặc định nếu không có điều kiện nào ở trên được thỏa mãn
         if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) == null) {
             replaceFragment(new Home_FRAGMENT(), "Trang Chủ", true);
         }
