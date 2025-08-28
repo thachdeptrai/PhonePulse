@@ -1,8 +1,10 @@
 package com.phoneapp.phonepulse.data.api;
 
 import com.phoneapp.phonepulse.Response.ApiResponse;
-import com.phoneapp.phonepulse.Response.ApplyVoucherResponse;
+import com.phoneapp.phonepulse.Response.MessagesApiResponse;
+import com.phoneapp.phonepulse.Response.MessagesListApiResponse;
 import com.phoneapp.phonepulse.Response.OtpResponse;
+import com.phoneapp.phonepulse.Response.RoomApiResponse;
 import com.phoneapp.phonepulse.models.*;
 import com.phoneapp.phonepulse.Response.LoginResponse;
 import com.phoneapp.phonepulse.request.*;
@@ -225,4 +227,16 @@ public interface ApiService {
 
     @PUT("/api/notifications/{id}/read")
     Call<ApiResponse> markNotificationAsRead(@Header("Authorization") String token, @Path("id") String id);
+
+    // ========== Chat ==========
+
+    @POST("api/chat/room")
+    Call<RoomApiResponse> createOrGetRoom(@Body UserIdRequest userIdRequest);
+
+    // API để lấy tất cả tin nhắn của một phòng chat cụ thể
+// API để lấy tất cả tin nhắn của một phòng chat cụ thể
+    @GET("api/chat/messages/{roomId}")
+    Call<MessagesListApiResponse> getMessagesByRoomId(@Path("roomId") String roomId);
+
+
 }

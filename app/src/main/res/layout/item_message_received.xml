@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:paddingStart="8dp"
+    android:paddingEnd="16dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:background="@drawable/bg_message_received"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <!-- Optional: Tên người gửi nếu là group chat hoặc bạn muốn hiển thị -->
+        <!-- <TextView
+            android:id="@+id/tv_sender_name_received"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:textSize="12sp"
+            android:text="Hỗ trợ viên"/> -->
+
+        <TextView
+            android:id="@+id/tv_message_text_received"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="260dp"
+            android:textColor="@android:color/black"
+            android:text="Đây là tin nhắn nhận được"/>
+
+        <TextView
+            android:id="@+id/tv_message_timestamp_received"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:textSize="10sp"
+            android:textColor="#757575"
+            android:text="10:01 AM"
+            android:layout_marginTop="4dp"/>
+    </LinearLayout>
+</RelativeLayout>

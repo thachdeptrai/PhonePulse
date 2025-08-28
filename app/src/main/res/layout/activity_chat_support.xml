@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".VIEW.ChatSupportActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_chat_support"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="?attr/actionBarTheme"
+        app:title="Hỗ trợ trực tuyến"
+        app:titleTextColor="@android:color/white"
+        android:layout_alignParentTop="true"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_chat_messages"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/layout_chat_input"
+        android:layout_below="@id/toolbar_chat_support"
+        android:padding="8dp"
+        android:clipToPadding="false"/>
+
+    <LinearLayout
+        android:id="@+id/layout_chat_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:background="@android:color/white"
+        android:elevation="4dp">
+
+        <EditText
+            android:id="@+id/et_chat_message_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Nhập tin nhắn..."
+            android:inputType="textMultiLine"
+            android:maxLines="5"
+            android:background="@android:drawable/editbox_background_normal"
+            android:padding="12dp"
+            android:layout_marginEnd="8dp"/>
+
+        <ImageButton
+            android:id="@+id/btn_chat_send_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_send"
+            android:contentDescription="Gửi tin nhắn"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+
+</RelativeLayout>

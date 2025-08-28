@@ -17,6 +17,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.phoneapp.phonepulse.FRAGMENT.CategoryFragment;
+import com.phoneapp.phonepulse.FRAGMENT.ChatListFragment;
 import com.phoneapp.phonepulse.FRAGMENT.FavouriteFragment;
 import com.phoneapp.phonepulse.FRAGMENT.Home_FRAGMENT;
 import com.phoneapp.phonepulse.FRAGMENT.Profile_FRAGMENT;
@@ -81,10 +82,21 @@ public class DashBoar_Activity extends AppCompatActivity {
             } else if (id == R.id.nav_favorites) {
                 replaceFragment(new FavouriteFragment(), "Yêu thích", true);
                 return true;
+            } else if (id == R.id.nav_message) { // THÊM BLOCK NÀY
+                // Xử lý khi chọn mục "Tin nhắn"
+                // Tùy chọn 1: Nếu bạn muốn hiển thị danh sách chat bằng một Fragment
+                // Giả sử bạn sẽ tạo một Fragment tên là ChatListFragment
+                // Tham số thứ 3 (showSearchBar) có thể cần điều chỉnh tùy theo thiết kế của bạn
+                replaceFragment(new ChatListFragment(), "Tin Nhắn", false); // Hoặc true nếu muốn thanh tìm kiếm
+
+                // Tùy chọn 2: Nếu bạn muốn mở một Activity mới cho danh sách chat
+                // Intent intent = new Intent(DashBoar_Activity.this, ChatListActivity.class); // Tạo Activity này
+                // startActivity(intent);
+
+                return true;
             }
             return false;
         });
-
 
         // Theo dõi để ẩn BottomNavigation nếu đang ở Fragment toàn màn hình
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
