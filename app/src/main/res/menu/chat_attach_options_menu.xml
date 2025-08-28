@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/option_take_photo"
+        android:title="Gửi ảnh trực tiếp" />
+    <item
+        android:id="@+id/option_from_gallery"
+        android:title="Gửi từ thư viện" />
+    <item
+        android:id="@+id/option_send_order"
+        android:title="Gửi đơn hàng" />
+</menu>

@@ -11,6 +11,6 @@
         <domain includeSubdomains="true">10.24.49.108</domain>
         <domain includeSubdomains="true">https://c5b87c444556.ngrok-free.app</domain>
 
-
+        <domain includeSubdomains="true"> 10.24.49.138</domain>
     </domain-config>
 </network-security-config>
