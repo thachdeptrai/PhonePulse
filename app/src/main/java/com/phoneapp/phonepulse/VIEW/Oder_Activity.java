@@ -2,6 +2,8 @@ package com.phoneapp.phonepulse.VIEW;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -27,6 +29,7 @@ import com.phoneapp.phonepulse.models.Order;
 import com.phoneapp.phonepulse.models.Variant;
 import com.phoneapp.phonepulse.models.Voucher;
 import com.phoneapp.phonepulse.request.CartRequest;
+import com.phoneapp.phonepulse.request.MomoData;
 import com.phoneapp.phonepulse.request.OrderItem;
 import com.phoneapp.phonepulse.request.OrderRequest;
 import com.phoneapp.phonepulse.ui.voucher.VoucherBottomSheet;
@@ -70,6 +73,48 @@ public class Oder_Activity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_oder);
 
+
+
+        // ✅ Tách biệt luồng logic xử lý Intent
+        Intent intent = getIntent();
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            // Luồng 2: Xử lý deep link từ MoMo
+            handleMomoReturnIntent(intent);
+        } else {
+            // Luồng 1: Xử lý khi đến từ giỏ hàng
+            handleInitialOrderIntent(intent);
+        }
+    }
+
+    // ✅ Phương thức mới để xử lý Intent từ MoMo
+    private void handleMomoReturnIntent(Intent intent) {
+        Uri data = intent.getData();
+        if (data != null && "momo_return".equals(data.getScheme())) {
+            String resultCodeStr = data.getQueryParameter("resultCode");
+            String orderId = data.getQueryParameter("orderId");
+            String message = data.getQueryParameter("message");
+            String extraData = data.getQueryParameter("extraData");
+
+            int resultCode = resultCodeStr != null ? Integer.parseInt(resultCodeStr) : -1;
+            Log.i(TAG, "MoMo Return Params: resultCode=" + resultCode +
+                    ", orderId=" + orderId + ", message=" + message);
+
+            confirmMomoPayment(resultCode, orderId, message, extraData);
+        }
+    }
+
+
+    // ✅ Phương thức mới để xử lý Intent ban đầu (khi đến từ giỏ hàng)
+    private void handleInitialOrderIntent(Intent intent) {
+        getIntentData(); // Lấy dữ liệu từ Intent
+        if (orderItemList != null && !orderItemList.isEmpty()) {
+            loadVariantsInCart();
+        } else {
+            Log.w(TAG, "Không tìm thấy sản phẩm trong Intent để đặt hàng.");
+            Toast.makeText(this, "Không có sản phẩm nào để đặt hàng. Vui lòng thêm sản phẩm vào giỏ hàng.", Toast.LENGTH_LONG).show();
+            finish();
+        }
+
         // Khởi tạo ApiService sớm
         apiService = RetrofitClient.getApiService(Constants.getToken(this));
 
@@ -86,7 +131,64 @@ public class Oder_Activity extends AppCompatActivity {
             Toast.makeText(this, "Không có sản phẩm nào để đặt hàng. Vui lòng thêm sản phẩm vào giỏ hàng.", Toast.LENGTH_LONG).show();
             finish();
         }
+
     }
+    private void confirmMomoPayment(int resultCode, String orderId, String message, String extraData) {
+        Log.d(TAG, "confirmMomoPayment: Calling API to confirm payment.");
+
+        String token = Constants.getToken(Oder_Activity.this);
+        if (token == null || token.isEmpty()) {
+            Log.e(TAG, "confirmMomoPayment: Token is null or empty. Cannot confirm payment.");
+            Toast.makeText(this, "Vui lòng đăng nhập để xác nhận thanh toán.", Toast.LENGTH_SHORT).show();
+        }
+
+        ApiService apiService = RetrofitClient.getApiService(token);
+        Call<ApiResponse<Order>> call = apiService.handleMomoReturn(resultCode, orderId, message, extraData);
+
+        call.enqueue(new Callback<ApiResponse<Order>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<Order>> call, Response<ApiResponse<Order>> response) {
+                Log.d(TAG, "onResponse: API call successful? " + response.isSuccessful() + ", HTTP Code: " + response.code());
+
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<Order> apiResponse = response.body();
+                    Log.d(TAG, "API Response: isSuccess=" + apiResponse.isSuccess() + ", message=" + apiResponse.getMessage());
+
+                    if (apiResponse.isSuccess()) {
+                        Order order = apiResponse.getData();
+                        Log.i(TAG, "Thanh toán thành công! Order ID: " + (order != null ? order.getId() : "null"));
+
+                        Toast.makeText(Oder_Activity.this, "Thanh toán thành công!", Toast.LENGTH_SHORT).show();
+
+                        // ✅ BỔ SUNG: Gọi phương thức để cập nhật tồn kho và xóa giỏ hàng.
+                        // Luồng chuyển hướng sẽ được gọi từ phương thức này sau khi hoàn tất.
+                        updateVariantStockOnServer(orderItemList);
+
+                    } else {
+                        Log.e(TAG, "Thanh toán thất bại: " + apiResponse.getMessage());
+                        Toast.makeText(Oder_Activity.this,
+                                "Thanh toán thất bại: " + apiResponse.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Log.e(TAG, "Lỗi khi xác nhận thanh toán. HTTP " + response.code() + " - " + response.message());
+                    Toast.makeText(Oder_Activity.this,
+                            "Lỗi khi xác nhận thanh toán! (HTTP " + response.code() + ")",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<Order>> call, Throwable t) {
+                Log.e(TAG, "API lỗi: " + t.getMessage(), t);
+                Toast.makeText(Oder_Activity.this,
+                        "API lỗi: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
 
 
     /**
@@ -241,30 +343,29 @@ public class Oder_Activity extends AppCompatActivity {
      * Xử lý quá trình đặt hàng.
      * Kiểm tra token, tồn kho, sau đó gửi yêu cầu tạo đơn hàng đến API.
      */
+
+
+
     private void placeOrder() {
         String token = Constants.getToken(Oder_Activity.this);
         if (token == null || token.isEmpty()) {
             Toast.makeText(this, "Vui lòng đăng nhập để đặt hàng.", Toast.LENGTH_SHORT).show();
-            Log.w(TAG, "Không có token, yêu cầu đăng nhập.");
             return;
         }
 
         if (orderItemList == null || orderItemList.isEmpty()) {
             Toast.makeText(this, "Không có sản phẩm nào để đặt hàng.", Toast.LENGTH_SHORT).show();
-            Log.w(TAG, "orderItemList rỗng khi cố gắng đặt hàng.");
             return;
         }
 
         if (!checkStockBeforeOrder()) {
-            Toast.makeText(this, "Một số sản phẩm không đủ tồn kho. Vui lòng kiểm tra lại giỏ hàng.", Toast.LENGTH_LONG).show();
-            Log.w(TAG, "Kiểm tra tồn kho thất bại.");
+            Toast.makeText(this, "Một số sản phẩm không đủ tồn kho.", Toast.LENGTH_LONG).show();
             return;
         }
 
         String shippingAddress = tvShippingAddress.getText().toString().trim();
         if (shippingAddress.isEmpty() || shippingAddress.equals("Chưa có địa chỉ")) {
             Toast.makeText(this, "Vui lòng cập nhật địa chỉ giao hàng.", Toast.LENGTH_SHORT).show();
-            Log.w(TAG, "Địa chỉ giao hàng trống hoặc chưa cập nhật.");
             return;
         }
 
@@ -273,73 +374,59 @@ public class Oder_Activity extends AppCompatActivity {
         int discount = calculateDiscount(subtotal, selectedVoucher);
         int finalPrice = subtotal - discount;
 
-        // Kiểm tra finalPrice có bị về 0 không trước khi gửi yêu cầu
         if (finalPrice <= 0) {
-            Toast.makeText(this, "Tổng giá đơn hàng không hợp lệ. Vui lòng kiểm tra lại.", Toast.LENGTH_LONG).show();
-            Log.e(TAG, "LỖI: Tổng giá finalPrice là " + finalPrice + ". Không thể đặt hàng.");
+            Toast.makeText(this, "Tổng giá đơn hàng không hợp lệ.", Toast.LENGTH_LONG).show();
             return;
         }
 
         OrderRequest request = new OrderRequest(orderItemList, discount, finalPrice, shippingAddress, paymentMethod, note);
-        Log.d(TAG, "Gửi yêu cầu đặt hàng: " + request.toString());
-
         apiService = RetrofitClient.getApiService(token);
-        apiService.createOrder(request).enqueue(new Callback<ApiResponse<Order>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<Order>> call, Response<ApiResponse<Order>> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Toast.makeText(Oder_Activity.this, "Đặt hàng thành công! Đơn hàng của bạn đang được xử lý.", Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "Đặt hàng thành công. Mã đơn hàng: " + (response.body().getData() != null ? response.body().getData().getId() : "N/A"));
 
-                    ArrayList<OrderItem> orderedItems = new ArrayList<>();
-                    if (response.body().getData() != null && response.body().getData().getItems() != null) {
-                        orderedItems.addAll(response.body().getData().getItems());
-                        Log.d(TAG, "Kiểm tra OrderItems từ phản hồi API tạo đơn hàng:");
-                        for (int i = 0; i < orderedItems.size(); i++) {
-                            OrderItem item = orderedItems.get(i);
-                            Log.d(TAG, String.format(Locale.getDefault(),
-                                    "  API Response Item %d: Name=%s, Price=%d, Quantity=%d",
-                                    i, item.getName(), item.getPrice(), item.getQuantity()));
-                            if (item.getPrice() <= 0) {
-                                Log.e(TAG, "❌ CẢNH BÁO: OrderItem '" + item.getName() + "' có giá <= 0 từ phản hồi API tạo đơn hàng! Vấn đề từ Server?");
-                            }
-                        }
+        if (paymentMethod.equals("COD")) {
+            // ================= COD =================
+            apiService.createOrder(request).enqueue(new Callback<ApiResponse<Order>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<Order>> call, Response<ApiResponse<Order>> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        Toast.makeText(Oder_Activity.this, "Đặt hàng COD thành công!", Toast.LENGTH_SHORT).show();
+                        // ✅ Step 1: Update stock and clear cart
+                        updateVariantStockOnServer(orderItemList);
+                        // The navigation logic will be handled at the end of the stock update and cart clearing chain.
                     } else {
-                        Log.w(TAG, "Phản hồi API đặt hàng không chứa danh sách sản phẩm đã đặt.");
+                        Toast.makeText(Oder_Activity.this, "Đặt hàng COD thất bại.", Toast.LENGTH_SHORT).show();
                     }
-                    updateVariantStockOnServer(orderedItems);
-                } else {
-                    String errorMsg = "Đặt hàng thất bại.";
-                    int errorCode = response.code();
-                    String responseBodyError = null;
-                    try {
-                        if (response.errorBody() != null) {
-                            responseBodyError = response.errorBody().string();
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Lỗi khi đọc errorBody: " + e.getMessage());
-                    }
-
-                    if (response.body() != null && response.body().getMessage() != null) {
-                        errorMsg = response.body().getMessage();
-                    } else if (responseBodyError != null && !responseBodyError.isEmpty()) {
-                        errorMsg = "Lỗi từ server: " + responseBodyError;
-                    }
-
-                    Log.e(TAG, "Đặt hàng thất bại: " + errorMsg + ". Mã lỗi HTTP: " + errorCode);
-                    Toast.makeText(Oder_Activity.this, "Đặt hàng thất bại: " + errorMsg, Toast.LENGTH_LONG).show();
                 }
-            }
 
-            @Override
-            public void onFailure(Call<ApiResponse<Order>> call, Throwable t) {
-                Log.e(TAG, "Lỗi mạng/API khi gọi createOrder: " + t.getMessage(), t);
-                Toast.makeText(Oder_Activity.this, "Lỗi kết nối hoặc server không phản hồi. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
-            }
-        });
+                @Override
+                public void onFailure(Call<ApiResponse<Order>> call, Throwable t) {
+                    Toast.makeText(Oder_Activity.this, "Lỗi mạng COD: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            // ================= MOMO =================
+            apiService.createMomoOrder("Bearer " + token, request).enqueue(new Callback<ApiResponse<MomoData>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<MomoData>> call, Response<ApiResponse<MomoData>> response) {
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        String payUrl = response.body().getData().getMomoPayUrl();
+                        // 👉 Open MoMo app/web for payment
+                        String qrUrl = response.body().getData().getQrCodeUrl();
+                        Intent intent = new Intent(Oder_Activity.this, MomoPaymentWebViewActivity.class);
+                        intent.putExtra(MomoPaymentWebViewActivity.EXTRA_URL, payUrl);
+                        intent.putExtra(MomoPaymentWebViewActivity.EXTRA_QR, qrUrl);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(Oder_Activity.this, "Không tạo được link MoMo.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse<MomoData>> call, Throwable t) {
+                    Toast.makeText(Oder_Activity.this, "Lỗi mạng khi gọi MoMo: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
     }
-
-
     // ✅ THÊM: Phương thức cập nhật giá cuối cùng sau khi áp dụng voucher
     private void updateFinalPrice() {
         int discount = calculateDiscount(subtotal, selectedVoucher);

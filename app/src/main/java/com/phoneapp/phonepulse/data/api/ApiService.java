@@ -120,6 +120,21 @@ public interface ApiService {
     @PUT("/api/orders/{id}/cancel")
     Call<ApiResponse> cancelOrder(@Header("Authorization") String token, @Path("id") String id);
 
+    // ========== MOMO ==========
+    @POST("/api/orders/momo")
+    Call<ApiResponse<MomoData>> createMomoOrder(
+            @Header("Authorization") String token,
+            @Body OrderRequest body
+    );
+
+    @GET("/api/orders/momo/return")
+    Call<ApiResponse<Order>> handleMomoReturn(
+            @Query("resultCode") int resultCode,
+            @Query("orderId") String orderId,
+            @Query("message") String message,
+            @Query("extraData") String extraData
+    );
+
 
     // ========== VOUCHERS ==========
     @POST("/api/vouchers/apply")
