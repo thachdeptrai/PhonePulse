@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -22,6 +23,7 @@ import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
 import com.phoneapp.phonepulse.models.Order;
 import com.phoneapp.phonepulse.utils.Constants;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -34,6 +36,8 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
     private WebView webView;
     private ImageView qrImage;
 
+    private static final int REDIRECT_DELAY_MS = 3000; // 3 giây
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,10 +49,12 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
         String url = getIntent().getStringExtra(EXTRA_URL);
         String qrUrl = getIntent().getStringExtra(EXTRA_QR);
 
+        apiService = RetrofitClient.getApiService(Constants.getToken(this));
+
         if (url != null) {
             setupWebView(url);
         }
-        apiService = RetrofitClient.getApiService(Constants.getToken(this));
+
         if (qrUrl != null && !qrUrl.isEmpty()) {
             qrImage.setVisibility(View.VISIBLE);
             Bitmap qrBitmap = generateQRCode(qrUrl);
@@ -87,6 +93,7 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
                     String message = uri.getQueryParameter("message");
                     String extraData = uri.getQueryParameter("extraData");
                     int resultCode = resultCodeStr != null ? Integer.parseInt(resultCodeStr) : -1;
+
                     // ✅ POST về backend để tạo đơn hàng thực sự
                     apiService.handleMomoReturn(resultCode, orderId, message, extraData)
                             .enqueue(new Callback<ApiResponse<Order>>() {
@@ -96,10 +103,17 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
                                         // Lấy dữ liệu order từ ApiResponse
                                         Order order = response.body().getData();
 
-                                        Intent intent = new Intent(MomoPaymentWebViewActivity.this, Oder_Activity.class);
-                                        intent.putExtra("orderData", order);
-                                        startActivity(intent);
-                                        finish();
+                                        Toast.makeText(MomoPaymentWebViewActivity.this,
+                                                "Thanh toán thành công!", Toast.LENGTH_SHORT).show();
+
+                                        // ⏱ Delay 3 giây trước khi chuyển sang Tatcadonhang_FRAGMENT
+                                        new Handler().postDelayed(() -> {
+                                            Intent intent = new Intent(MomoPaymentWebViewActivity.this, Oder_Activity.class);
+                                            intent.putExtra("orderData", order);
+                                            startActivity(intent);
+                                            finish();
+                                        }, REDIRECT_DELAY_MS);
+
                                     } else {
                                         Toast.makeText(MomoPaymentWebViewActivity.this,
                                                 "Thanh toán thành công nhưng tạo đơn thất bại!", Toast.LENGTH_LONG).show();
@@ -114,6 +128,7 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
                                     finish();
                                 }
                             });
+
                     return true;
                 }
                 return false;

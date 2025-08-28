@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardBackgroundColor="@android:color/white"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <!-- Avatar Image -->
+        <ImageView
+            android:id="@+id/iv_chat_avatar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="12dp"
+            android:src="@drawable/bg_message_received"
+            android:scaleType="centerCrop"
+            android:contentDescription="Avatar" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Display Name -->
+            <TextView
+                android:id="@+id/tv_chat_display_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceListItem"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                tools:text="Hỗ trợ Khách hàng" />
+
+            <!-- Last Message Preview -->
+            <TextView
+                android:id="@+id/tv_chat_last_message_preview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textAppearance="?attr/textAppearanceListItemSecondary"
+                android:textSize="14sp"
+                android:textColor="@android:color/darker_gray"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="Nhấn để xem tin nhắn" />
+
+        </LinearLayout>
+
+        <!-- Last Activity Time -->
+        <TextView
+            android:id="@+id/tv_chat_last_activity_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:textAppearance="?attr/textAppearanceCaption"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            tools:text="10:30 AM" />
+
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="@android:color/darker_gray"
+        android:alpha="0.2" />
+
+</androidx.cardview.widget.CardView>

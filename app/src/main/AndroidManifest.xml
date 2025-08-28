@@ -45,14 +45,15 @@
             android:name=".ui.admin.AdminActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.profile.ProfileActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.checkout.CheckoutActivity"
-            android:exported="false" />
+            android:name=".VIEW.MomoPaymentWebViewActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity
             android:name=".VIEW.ProductDetailActivity"
             android:exported="false" />
+        <activity android:name=".VIEW.ChatSupportActivity"
+            android:exported="true"/>
+
         <activity
             android:name=".VIEW.RegisterActivity"
             android:exported="false" />

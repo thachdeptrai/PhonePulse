@@ -160,6 +160,9 @@ public class Oder_Activity extends AppCompatActivity {
 
                         Toast.makeText(Oder_Activity.this, "Thanh toán thành công!", Toast.LENGTH_SHORT).show();
 
+
+                        // ✅ Xóa giỏ hàng
+                        clearCartOnServer();
                         // ✅ BỔ SUNG: Gọi phương thức để cập nhật tồn kho và xóa giỏ hàng.
                         // Luồng chuyển hướng sẽ được gọi từ phương thức này sau khi hoàn tất.
                         updateVariantStockOnServer(orderItemList);
