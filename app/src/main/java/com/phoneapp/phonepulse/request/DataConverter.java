@@ -21,7 +21,6 @@ public class DataConverter {
 
         for (Product product : products) {
             String imageUrl = product.getImageUrlSafe();
-            List<Variant> variants = product.getVariants();
 
             // Lấy category_id từ object Category
             String categoryId = null;
@@ -29,41 +28,42 @@ public class DataConverter {
                 categoryId = product.getCategory().getId();
             }
 
-            if (variants != null && !variants.isEmpty()) {
-                for (Variant variant : variants) {
-                    String colorName = (variant.getColor() != null) ? variant.getColor().getColorName() : null;
-                    String sizeName = (variant.getSize() != null) ? variant.getSize().getSizeName() : null;
+            // ✅ chỉ lấy 1 variant đại diện
+            Variant variant = product.getVariant();
+            if (variant != null) {
+                String colorName = (variant.getColor() != null) ? variant.getColor().getColorName() : null;
+                String sizeName = (variant.getSize() != null) ? variant.getSize().getSizeName() : null;
 
-                    double discountedPrice = variant.getPrice();
-                    int discountPercent = product.getDiscount();
-                    double originalPrice = discountedPrice;
-                    if (discountPercent > 0 && discountPercent <= 100) {
-                        originalPrice = discountedPrice / (1 - (double) discountPercent / 100);
-                    }
-
-                    int soldCount = (int) (Math.random() * 500) + 1;
-
-                    ProductGirdItem item = new ProductGirdItem(
-                            product.getId(),
-                            variant.getId(),
-                            product.getName(),
-                            imageUrl,
-                            discountedPrice,
-                            originalPrice,
-                            discountPercent,
-                            soldCount,
-                            sizeName,
-                            colorName,
-                            images
-                    );
-
-                    item.setCategory_id(categoryId); // Gán đúng category_id
-
-                    gridItems.add(item);
+                double discountedPrice = variant.getPrice();
+                int discountPercent = product.getDiscount();
+                double originalPrice = discountedPrice;
+                if (discountPercent > 0 && discountPercent <= 100) {
+                    originalPrice = discountedPrice / (1 - (double) discountPercent / 100);
                 }
+
+                int soldCount = (int) (Math.random() * 500) + 1;
+
+                ProductGirdItem item = new ProductGirdItem(
+                        product.getId(),
+                        variant.getId(),
+                        product.getName(),
+                        imageUrl,
+                        discountedPrice,
+                        originalPrice,
+                        discountPercent,
+                        soldCount,
+                        sizeName,
+                        colorName,
+                        images
+                );
+
+                item.setCategory_id(categoryId);
+
+                gridItems.add(item);
             }
         }
         return gridItems;
     }
+
 
 }
