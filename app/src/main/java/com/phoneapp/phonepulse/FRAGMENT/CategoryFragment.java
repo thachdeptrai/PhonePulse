@@ -26,6 +26,7 @@ import com.phoneapp.phonepulse.data.api.RetrofitClient;
 import com.phoneapp.phonepulse.models.Cart;
 import com.phoneapp.phonepulse.models.Category;
 import com.phoneapp.phonepulse.models.Product;
+import com.phoneapp.phonepulse.models.Variant;
 import com.phoneapp.phonepulse.request.CartItem;
 import com.phoneapp.phonepulse.request.CartRequest;
 import com.phoneapp.phonepulse.request.DataConverter;
@@ -40,7 +41,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class CategoryFragment extends Fragment implements ItemProduct_ADAPTER.OnItemClickListener {
+public class CategoryFragment extends Fragment implements ItemProduct_ADAPTER.OnProductActionListener { // ✅ Sửa đổi interface
 
     private static final String TAG = "CategoryFragment";
 
@@ -69,7 +70,7 @@ public class CategoryFragment extends Fragment implements ItemProduct_ADAPTER.On
         rv_products_by_category.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
         productAdapter = new ItemProduct_ADAPTER(getContext(), filteredProductList);
-        productAdapter.setOnItemClickListener(this); // Set the listener here
+        productAdapter.setOnProductActionListener(this); // ✅ Đặt listener mới
         rv_products_by_category.setAdapter(productAdapter);
 
         authToken = getSavedToken();
@@ -117,7 +118,7 @@ public class CategoryFragment extends Fragment implements ItemProduct_ADAPTER.On
         });
     }
 
-    private void loadAllProducts() {
+        private void loadAllProducts() {
         progressBar.setVisibility(View.VISIBLE);
         if (apiService == null) {
             progressBar.setVisibility(View.GONE);
@@ -166,14 +167,16 @@ public class CategoryFragment extends Fragment implements ItemProduct_ADAPTER.On
 
     @Override
     public void onAddToCartClick(ProductGirdItem item) {
-        if (isAdded() && getContext() != null) {
-            if (item.get_id() == null || item.getVariant_id() == null) {
-                Toast.makeText(requireContext(), "Không thể thêm sản phẩm này vào giỏ hàng (thiếu ID).", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        // ✅ Cần sửa đổi logic này để lấy variantId từ một biến thể cụ thể
+        Toast.makeText(requireContext(), "Bạn cần chọn một biến thể để thêm vào giỏ hàng.", Toast.LENGTH_SHORT).show();
+    }
 
-            fetchVariantAndAddToCart(item.get_id(), item.getVariant_id(), 1);
-        }
+    // ✅ Thêm phương thức mới để xử lý khi một biến thể được chọn
+    @Override
+    public void onVariantSelected(ProductGirdItem productItem, Variant selectedVariant) {
+        // Bây giờ bạn có thể gọi hàm thêm vào giỏ hàng với thông tin biến thể chính xác
+        Toast.makeText(requireContext(), "Đã chọn biến thể: " + selectedVariant.getSize().getSizeName() + " - " + selectedVariant.getColor().getColorName(), Toast.LENGTH_SHORT).show();
+        fetchVariantAndAddToCart(productItem.get_id(), selectedVariant.getId(), 1);
     }
 
     private void fetchVariantAndAddToCart(String productId, String variantId, int addedQuantity) {
@@ -274,8 +277,9 @@ public class CategoryFragment extends Fragment implements ItemProduct_ADAPTER.On
             if (item.get_id() != null) {
                 intent.putExtra(Constants.PRODUCT_ID, item.get_id());
             }
-            if (item.getVariant_id() != null) {
-                intent.putExtra(Constants.VARIANT_ID, item.getVariant_id());
+            if (item.getVariants() != null && !item.getVariants().isEmpty()) {
+                // Truyền ID của biến thể đầu tiên làm mặc định
+                intent.putExtra(Constants.VARIANT_ID, item.getVariants().get(0).getId());
             }
             startActivity(intent);
         }

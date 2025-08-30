@@ -45,7 +45,7 @@ public interface ApiService {
     @DELETE("/api/users/delete-self")
     Call<ApiResponse> deleteAccount(@Header("Authorization") String token);
 
-    // ========== PRODUCTS ==========
+             // ========== PRODUCTS ==========
     @GET("/api/products")
     Call<List<Product>> getAllProductsRaw();
 
@@ -53,6 +53,9 @@ public interface ApiService {
     // Backend route: GET /api/products/{id}
     @GET("/api/products/{id}")
     Call<Product> getProductById(@Path("id") String id);
+    // ✅ Lấy danh sách sản phẩm cho Home (chỉ có ảnh + thông tin cơ bản)
+    @GET("/api/products/grid")
+    Call<List<ProductGirdItem>> getAllProductsGrid();
 
 
     // ========== CATEGORY ==========

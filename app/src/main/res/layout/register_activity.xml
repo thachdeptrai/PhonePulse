@@ -6,40 +6,41 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@drawable/gradient_background">
+    android:background="#F5F7FA">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="32dp">
 
         <LinearLayout
             android:id="@+id/logoContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="32dp"
             android:gravity="center"
             android:orientation="vertical"
-            android:padding="16dp"
-            android:layout_marginTop="32dp">
+            android:padding="16dp">
 
             <FrameLayout
-                android:layout_width="140dp"
-                android:layout_height="140dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:layout_gravity="center">
 
                 <View
-                    android:layout_width="140dp"
-                    android:layout_height="140dp"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
                     android:layout_marginStart="4dp"
                     android:layout_marginTop="4dp"
                     android:background="@drawable/logo_shadow"
-                    android:alpha="0.3" />
+                    android:alpha="0.15" />
 
                 <ImageView
                     android:id="@+id/logoImageView"
-                    android:layout_width="140dp"
-                    android:layout_height="140dp"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
                     android:src="@drawable/icon"
                     android:scaleType="centerInside"
                     android:elevation="4dp"
@@ -47,28 +48,35 @@
             </FrameLayout>
 
             <TextView
-                android:id="@+id/appTitle"
+                android:id="@+id/rewards"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="PhonePulse"
                 style="@style/TitleText"
-                android:layout_marginTop="12dp" />
+                android:textSize="24sp"
+                android:textColor="#212121"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif-medium" />
 
             <TextView
-                android:id="@+id/registerTitle"
+                android:id="@+id/logo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Join the Future of Shopping"
+                android:text="Discover Your Perfect Find"
                 style="@style/SubtitleText"
+                android:textSize="16sp"
+                android:textColor="#616161"
                 android:layout_marginTop="8dp" />
 
             <TextView
                 android:id="@+id/slogan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Your Choice, Your Style, Your Shop"
+                android:text="Shop Your Way, Every Day"
                 style="@style/SloganText"
-                android:layout_marginTop="4dp" />
+                android:textSize="12sp"
+                android:textColor="#757575"
+                android:layout_marginTop="6dp" />
         </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -76,23 +84,24 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Full name"
-            android:layout_marginTop="32dp"
-            app:boxCornerRadiusTopStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusBottomEnd="12dp"
-            app:boxStrokeColor="@color/shopee_orange"
-            app:hintTextColor="@color/shopee_orange"
+            android:hint="Họ và tên"
+            android:layout_marginTop="40dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxStrokeColor="#A0AEC0"
+            app:hintTextColor="#4A5568"
             app:startIconDrawable="@drawable/ic_person"
-            app:startIconTint="@color/shopee_orange">
+            app:startIconTint="#673AB7">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edFullName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
-                android:textColor="@color/shopee_orange" />
+                android:textColor="#2D3748"
+                android:backgroundTint="#F5F7FA" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -101,25 +110,26 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Email"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             app:endIconDrawable="@drawable/gui"
             app:endIconMode="custom"
-            app:endIconTint="@color/shopee_orange"
-            app:boxCornerRadiusTopStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusBottomEnd="12dp"
-            app:boxStrokeColor="@color/shopee_orange"
-            app:hintTextColor="@color/shopee_orange"
+            app:endIconTint="#673AB7"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxStrokeColor="#A0AEC0"
+            app:hintTextColor="#4A5568"
             app:startIconDrawable="@drawable/ic_email"
-            app:startIconTint="@color/shopee_orange">
+            app:startIconTint="#673AB7">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
-                android:textColor="@color/shopee_orange" />
+                android:textColor="#2D3748"
+                android:backgroundTint="#F5F7FA" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -127,25 +137,25 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Phone Number (Optional)"
-            android:layout_marginTop="16dp"
-            app:endIconDrawable="@drawable/gui"
+            android:hint="Số điện thoại"
+            android:layout_marginTop="20dp"
             app:endIconMode="custom"
-            app:boxCornerRadiusTopStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusBottomEnd="12dp"
-            app:boxStrokeColor="@color/shopee_orange"
-            app:hintTextColor="@color/shopee_orange"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxStrokeColor="#A0AEC0"
+            app:hintTextColor="#4A5568"
             app:startIconDrawable="@drawable/ic_phone"
-            app:startIconTint="@color/shopee_orange">
+            app:startIconTint="#673AB7">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edPhone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="phone"
-                android:textColor="@color/shopee_orange" />
+                android:textColor="#2D3748"
+                android:backgroundTint="#F5F7FA" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -153,25 +163,26 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password"
-            android:layout_marginTop="16dp"
+            android:hint="Nhập mật khẩu"
+            android:layout_marginTop="20dp"
             app:endIconMode="password_toggle"
-            app:endIconTint="@color/shopee_orange"
-            app:boxCornerRadiusTopStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusBottomEnd="12dp"
-            app:boxStrokeColor="@color/shopee_orange"
-            app:hintTextColor="@color/shopee_orange"
+            app:endIconTint="#4A5568"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxStrokeColor="#A0AEC0"
+            app:hintTextColor="#4A5568"
             app:startIconDrawable="@drawable/ic_pass"
-            app:startIconTint="@color/shopee_orange">
+            app:startIconTint="#673AB7">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:textColor="@color/shopee_orange" />
+                android:textColor="#2D3748"
+                android:backgroundTint="#F5F7FA" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -179,25 +190,26 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Confirm Password"
-            android:layout_marginTop="16dp"
+            android:hint="Nhập lại mật khẩu"
+            android:layout_marginTop="20dp"
             app:endIconMode="password_toggle"
-            app:endIconTint="@color/shopee_orange"
-            app:boxCornerRadiusTopStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusBottomEnd="12dp"
-            app:boxStrokeColor="@color/shopee_orange"
-            app:hintTextColor="@color/shopee_orange"
+            app:endIconTint="#4A5568"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:boxStrokeColor="#A0AEC0"
+            app:hintTextColor="#4A5568"
             app:startIconDrawable="@drawable/ic_pass"
-            app:startIconTint="@color/shopee_orange">
+            app:startIconTint="#673AB7">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edConfirmPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:textColor="@color/shopee_orange" />
+                android:textColor="#2D3748"
+                android:backgroundTint="#F5F7FA" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
@@ -205,51 +217,55 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="24dp">
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="32dp">
 
             <CheckBox
                 android:id="@+id/cbTerms"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:buttonTint="@color/shopee_orange" />
+                android:buttonTint="#4A5568" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="I agree to the Terms &amp; Conditions and Privacy Policy"
-                android:textColor="@color/shopee_orange"
+                android:text="Tôi đồng ý với Điều khoản &amp; Điều kiện và Chính sách bảo mật"
+                android:textColor="#4A5568"
                 android:textSize="14sp"
-                android:layout_marginStart="8dp"
-                android:lineSpacingExtra="2dp" />
+                android:layout_marginStart="12dp"
+                android:lineSpacingExtra="4dp" />
         </LinearLayout>
 
         <Button
             android:id="@+id/btnRegister"
-            style="@style/PrimaryButton"
-            android:text="CREATE ACCOUNT"
-            android:background="@drawable/button_gradient"
-            android:layout_marginBottom="24dp" />
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Tạo tài khoản"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#673AB7"
+            android:elevation="2dp"
+            android:layout_marginBottom="32dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginVertical="20dp">
+            android:layout_marginVertical="24dp">
 
             <View
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_weight="1"
-                android:background="@color/shopee_orange" />
+                android:background="#E2E8F0" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="OR SIGN UP WITH"
-                android:textColor="@color/shopee_orange"
+                android:text="Or Sign Up With"
+                android:textColor="#718096"
                 android:textSize="12sp"
                 android:paddingHorizontal="16dp" />
 
@@ -257,7 +273,7 @@
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_weight="1"
-                android:background="@color/shopee_orange" />
+                android:background="#E2E8F0" />
         </LinearLayout>
 
         <LinearLayout
@@ -266,26 +282,30 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="32dp">
 
             <ImageButton
                 android:id="@+id/btnGoogleRegister"
-                style="@style/SocialButton"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
                 android:src="@drawable/ic_gg"
-                android:layout_marginEnd="16dp"
-                android:contentDescription="Google Registration" />
+                android:layout_marginEnd="20dp"
+                android:contentDescription="Google Registration"
+                android:scaleType="centerInside" />
 
             <ImageButton
                 android:id="@+id/btnFacebookRegister"
-                style="@style/SocialButton"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
                 android:src="@drawable/ic_fb"
-                android:layout_marginStart="16dp"
-                android:contentDescription="Facebook Registration" />
+                android:layout_marginStart="20dp"
+                android:contentDescription="Facebook Registration"
+                android:scaleType="centerInside" />
         </LinearLayout>
 
         <Button
             android:id="@+id/btnLogin"
             style="@style/SecondaryButton"
-            android:text="Already have an account? Sign In" />
+            android:text="Đã có tài khoản? Đăng nhập" />
     </LinearLayout>
 </ScrollView>

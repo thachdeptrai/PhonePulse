@@ -46,36 +46,14 @@
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <LinearLayout
-                android:id="@+id/ll_size_color_container"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_product_variants"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/tv_product_size"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/bg_option_selected"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="4dp"
-                    android:text="256GB"
-                    android:textColor="#333333"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/tv_product_color"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_option_selected"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="4dp"
-                    android:text="Xanh"
-                    android:textColor="#333333"
-                    android:textSize="12sp" />
-            </LinearLayout>
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_variant" />
 
             <LinearLayout
                 android:layout_width="match_parent"

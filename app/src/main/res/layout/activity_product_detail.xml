@@ -15,8 +15,6 @@
 
 
         <androidx.appcompat.widget.Toolbar
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/toolbar_product_detail"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -185,7 +183,6 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -218,77 +215,14 @@
                         android:textColor="#666666"
                         android:textSize="14sp" />
 
-                    <LinearLayout
-                        android:id="@+id/ll_color_options"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_color_options"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:background="@drawable/bg_option_selected"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="8dp"
-                            android:text="Xám Titan"
-                            android:textColor="@android:color/black"
-                            android:textSize="14sp"
-                            tools:ignore="HardcodedText" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:background="@drawable/bg_option_selected"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="8dp"
-                            android:text="Xanh Titan"
-                            android:textColor="#666666"
-                            android:textSize="14sp"
-                            tools:ignore="HardcodedText" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="Dung lượng:"
-                        android:textColor="#666666"
-                        android:textSize="14sp" />
-
-                    <LinearLayout
-                        android:id="@+id/ll_storage_options"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:background="@drawable/bg_option_selected"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="8dp"
-                            android:text="256GB"
-                            android:textColor="#666666"
-                            android:textSize="14sp"
-                            tools:ignore="HardcodedText" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:background="@drawable/bg_option_selected"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="8dp"
-                            android:text="512GB"
-                            android:textColor="@android:color/black"
-                            android:textSize="14sp"
-                            tools:ignore="HardcodedText" />
-                    </LinearLayout>
-
+                        android:orientation="horizontal"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        tools:listitem="@layout/item_variant" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
