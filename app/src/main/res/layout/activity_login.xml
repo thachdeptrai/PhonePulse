@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:background="#F5F5F5">
 
     <RelativeLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/gradient_background"
         android:padding="24dp">
 
         <LinearLayout
@@ -17,28 +18,28 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="32dp"
             android:gravity="center"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="16dp">
 
             <FrameLayout
-                android:layout_width="160dp"
-                android:layout_height="160dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:layout_gravity="center">
 
                 <View
-                    android:layout_width="160dp"
-                    android:layout_height="160dp"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
                     android:layout_marginStart="4dp"
                     android:layout_marginTop="4dp"
                     android:background="@drawable/logo_shadow"
-                    android:alpha="0.3" />
+                    android:alpha="0.15" />
 
                 <ImageView
                     android:id="@+id/logoImageView"
-                    android:layout_width="160dp"
-                    android:layout_height="160dp"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
                     android:src="@drawable/icon"
                     android:scaleType="centerInside"
                     android:elevation="4dp"
@@ -51,23 +52,30 @@
                 android:layout_height="wrap_content"
                 android:text="PhonePulse"
                 style="@style/TitleText"
-                android:layout_marginTop="16dp" />
+                android:textSize="24sp"
+                android:textColor="#212121"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif-medium" />
 
             <TextView
                 android:id="@+id/logo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Come Find What's Yours"
+                android:text="Discover Your Perfect Find"
                 style="@style/SubtitleText"
+                android:textSize="16sp"
+                android:textColor="#616161"
                 android:layout_marginTop="8dp" />
 
             <TextView
                 android:id="@+id/slogan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Your Choice, Your Style, Your Shop"
+                android:text="Shop Your Way, Every Day"
                 style="@style/SloganText"
-                android:layout_marginTop="4dp" />
+                android:textSize="12sp"
+                android:textColor="#757575"
+                android:layout_marginTop="6dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -77,71 +85,105 @@
             android:layout_below="@id/logoContainer"
             android:layout_marginTop="32dp"
             android:orientation="vertical"
-            android:background="@drawable/card_background"
-            android:padding="28dp"
-            android:elevation="8dp">
+            android:padding="24dp"
+            android:elevation="2dp">
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutEmail"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:hint="Email"
                 android:layout_marginBottom="16dp"
-                style="@style/CustomTextInputLayout"
-                android:hint="Email Address">
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxStrokeColor="#673AB7"
+                app:hintTextColor="#673AB7"
+                app:startIconDrawable="@drawable/ic_person"
+                app:startIconTint="#673AB7">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edEmail"
-                    style="@style/InputField"
-                    android:drawableStart="@drawable/ic_person"
-                    android:inputType="textEmailAddress" />
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"
+                    android:textColor="#212121"
+                    android:textSize="16sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutPassword"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                style="@style/CustomTextInputLayout"
-                android:hint="Password">
+                android:hint="Mật khẩu"
+                android:layout_marginBottom="16dp"
+                app:endIconMode="password_toggle"
+                app:endIconTint="#673AB7"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxStrokeColor="#673AB7"
+                app:hintTextColor="#673AB7"
+                app:startIconDrawable="@drawable/ic_pass"
+                app:startIconTint="#673AB7">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edPassWord"
-                    style="@style/InputField"
-                    android:drawableStart="@drawable/ic_pass"
-                    android:inputType="textPassword" />
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:textColor="#212121"
+                    android:textSize="16sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp">
+                android:layout_marginBottom="20dp">
 
                 <CheckBox
                     android:id="@+id/cbRememberMe"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Remember Me"
-                    android:textColor="#FFFFFF"
-                    android:buttonTint="@color/white"
-                    android:layout_alignParentStart="true"/>
+                    android:text="Ghi nhớ mật khẩu"
+                    android:textColor="#212121"
+                    android:textSize="14sp"
+                    android:buttonTint="#673AB7"
+                    android:scaleX="1.1"
+                    android:scaleY="1.1"
+                    android:paddingEnd="16dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true" />
 
                 <TextView
                     android:id="@+id/tvForgotPassword"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Forgot Password?"
-                    android:textColor="@color/white"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
+                    android:textColor="#673AB7"
+                    android:textSize="14sp"
+                    android:padding="12dp"
                     android:clickable="true"
                     android:focusable="true"
-                    android:padding="8dp" />
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true" />
             </RelativeLayout>
 
 
             <Button
                 android:id="@+id/btnLogin"
                 style="@style/PrimaryButton"
-                android:text="SIGN IN"
-                android:background="@drawable/button_gradient"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Sign In"
+                android:backgroundTint="#673AB7"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:elevation="2dp"
                 android:layout_marginBottom="24dp" />
 
             <LinearLayout
@@ -149,27 +191,27 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginVertical="20dp">
+                android:layout_marginVertical="16dp">
 
                 <View
                     android:layout_width="0dp"
                     android:layout_height="1dp"
                     android:layout_weight="1"
-                    android:background="#444444" />
+                    android:background="#B0BEC5" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="OR"
-                    android:textColor="#888888"
-                    android:textSize="12sp"
+                    android:text="Or Sign In With"
+                    android:textColor="#616161"
+                    android:textSize="14sp"
                     android:paddingHorizontal="16dp" />
 
                 <View
                     android:layout_width="0dp"
                     android:layout_height="1dp"
                     android:layout_weight="1"
-                    android:background="#444444" />
+                    android:background="#B0BEC5" />
             </LinearLayout>
 
             <LinearLayout
@@ -183,27 +225,38 @@
                 <ImageButton
                     android:id="@+id/btnGoogle"
                     style="@style/SocialButton"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
                     android:src="@drawable/ic_gg"
+                    android:elevation="2dp"
                     android:layout_marginEnd="16dp"
-                    android:contentDescription="Google Login" />
+                    android:contentDescription="Sign in with Google" />
 
                 <ImageButton
                     android:id="@+id/btnFacebook"
                     style="@style/SocialButton"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
                     android:src="@drawable/ic_fb"
+                    android:elevation="2dp"
                     android:layout_marginStart="16dp"
-                    android:contentDescription="Facebook Login" />
+                    android:contentDescription="Sign in with Facebook" />
             </LinearLayout>
 
             <Button
                 android:id="@+id/btnRegister"
                 style="@style/SecondaryButton"
-                android:text="Create a New Account" />
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Tạo tài khoản mới"
+                android:textColor="#9C673AB7"
+                android:backgroundTint="#00000000"
+                android:textSize="16sp" />
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="32dp"
+            android:layout_height="24dp"
             android:layout_below="@id/loginContainer" />
     </RelativeLayout>
 </ScrollView>
