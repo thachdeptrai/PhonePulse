@@ -138,19 +138,28 @@
             });
 
             btnAddToCart.setOnClickListener(v -> {
-                if (currentProduct != null && displayedVariant != null) {
-                    checkStockAndAddToCart(currentProduct.getId(), displayedVariant.getId(), 1);
-                } else {
-                    Toast.makeText(ProductDetailActivity.this, "Thông tin sản phẩm/biến thể chưa tải xong.", Toast.LENGTH_SHORT).show();
+                if (currentProduct == null) {
+                    Toast.makeText(ProductDetailActivity.this, "Thông tin sản phẩm chưa tải xong.", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+                if (displayedVariant == null) {
+                    Toast.makeText(ProductDetailActivity.this, "Vui lòng chọn biến thể trước khi thêm vào giỏ.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                checkStockAndAddToCart(currentProduct.getId(), displayedVariant.getId(), 1);
             });
 
             btnBuyNow.setOnClickListener(v -> {
-                if (currentProduct != null && displayedVariant != null) {
-                    Toast.makeText(ProductDetailActivity.this, "Mua ngay " + currentProduct.getName(), Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(ProductDetailActivity.this, "Thông tin sản phẩm/biến thể chưa tải xong.", Toast.LENGTH_SHORT).show();
+                if (currentProduct == null) {
+                    Toast.makeText(ProductDetailActivity.this, "Thông tin sản phẩm chưa tải xong.", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+                if (displayedVariant == null) {
+                    Toast.makeText(ProductDetailActivity.this, "Vui lòng chọn biến thể trước khi mua.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Toast.makeText(ProductDetailActivity.this, "Mua ngay " + currentProduct.getName(), Toast.LENGTH_SHORT).show();
+                // Ở đây bạn có thể chuyển sang màn hình thanh toán kèm biến thể đã chọn
             });
         }
 
