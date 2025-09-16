@@ -131,7 +131,6 @@ public class ProductListFragment extends Fragment {
                 } else {
                     tvEmptyProducts.setVisibility(View.VISIBLE);
                     tvEmptyProducts.setText("Lỗi khi tải sản phẩm: " + response.code());
-                    Log.e(TAG, "API call failed with code: " + response.code());
                 }
             }
 
@@ -140,7 +139,6 @@ public class ProductListFragment extends Fragment {
                 pbLoadingProducts.setVisibility(View.GONE);
                 tvEmptyProducts.setVisibility(View.VISIBLE);
                 tvEmptyProducts.setText("Lỗi kết nối: " + t.getMessage());
-                Log.e(TAG, "API call failed", t);
             }
         });
     }

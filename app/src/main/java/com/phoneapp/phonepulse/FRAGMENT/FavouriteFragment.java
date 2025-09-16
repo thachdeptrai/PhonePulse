@@ -62,8 +62,6 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
         if (getContext() != null) {
             authToken = Constants.getToken(requireContext());
             apiService = RetrofitClient.getApiService(authToken);
-        } else {
-            Log.e(TAG, "Context is null in onCreate, cannot initialize ApiService or get token.");
         }
         fullyDetailedFavouriteProductList = new ArrayList<>();
         // initialFavouriteProducts = new ArrayList<>(); // Bỏ dòng này
@@ -89,7 +87,6 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
 
     private void setupRecyclerView() {
         if (getContext() == null) {
-            Log.e(TAG, "Context is null in setupRecyclerView. Cannot setup RecyclerView.");
             return;
         }
         favouriteAdapter = new FavouriteProductAdapter(requireContext(), this);
@@ -101,7 +98,6 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
 
     private void loadInitialFavouriteList() {
         if (authToken == null || authToken.isEmpty()) {
-            Log.w(TAG, "Auth token is missing. Cannot load favourites.");
             displayLoginPrompt();
             updateAdapterWithFinalList(); // Cập nhật adapter với danh sách trống
             return;
@@ -115,14 +111,12 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
         updateAdapterWithFinalList();
 
 
-        Log.d(TAG, "Bắt đầu tải danh sách Favourite (Favourite objects).");
         // THAY ĐỔI KIỂU DỮ LIỆU CỦA CALL VÀ CALLBACK
         apiService.getFavourites().enqueue(new Callback<ApiResponse<List<Favourite>>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<List<Favourite>>> call, @NonNull Response<ApiResponse<List<Favourite>>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     List<Favourite> favouriteEntries = response.body().getData(); // Danh sách các đối tượng Favourite
-                    Log.d(TAG, "Tải danh sách Favourite thành công. Số lượng: " + (favouriteEntries != null ? favouriteEntries.size() : 0));
 
                     if (favouriteEntries != null && !favouriteEntries.isEmpty()) {
                         // Không cần initialFavouriteProducts nữa nếu dùng Favourite model trực tiếp
@@ -145,7 +139,6 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
                                 // Giữ originalIndex có thể không cần thiết nữa nếu không sort phức tạp
                                 fetchFullProductDetails(actualProductId, favouriteEntries.indexOf(favouriteEntry));
                             } else {
-                                Log.w(TAG, "Favourite entry hoặc product ID trong đó là null.");
                                 decrementCounterAndCheckCompletion();
                             }
                         }
@@ -154,7 +147,6 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
                         updateUIAfterAllDetailsFetched(); // Danh sách yêu thích trống
                     }
                 } else {
-                    Log.e(TAG, "Lỗi khi tải danh sách Favourite: " + response.code() + " - " + (response.body() != null ? response.body().getMessage() : "Unknown error"));
                     tvEmptyFavourites.setText("Không thể tải danh sách yêu thích. Vui lòng thử lại.");
                     detailFetchCounter.set(0);
                     updateUIAfterAllDetailsFetched();
@@ -163,7 +155,6 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<Favourite>>> call, @NonNull Throwable t) {
-                Log.e(TAG, "Lỗi mạng khi tải danh sách Favourite: " + t.getMessage(), t);
                 tvEmptyFavourites.setText("Lỗi mạng. Vui lòng kiểm tra kết nối và thử lại.");
                 detailFetchCounter.set(0);
                 updateUIAfterAllDetailsFetched();
@@ -172,7 +163,6 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
     }
 
     private void fetchFullProductDetails(String productId, final int originalIndex) {
-        Log.d(TAG, "Đang tải chi tiết đầy đủ cho sản phẩm ID: " + productId);
         apiService.getProductById(productId).enqueue(new Callback<Product>() {
             @Override
             public void onResponse(@NonNull Call<Product> call, @NonNull Response<Product> response) {
@@ -180,22 +170,15 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
                     Product fullProduct = response.body();
                     // Nếu muốn giữ thứ tự ban đầu, bạn cần một cách để map `originalIndex`
                     // vào `fullProduct` và sort sau. Hiện tại, nó sẽ thêm vào cuối danh sách.
-                    Log.d(TAG, "Tải chi tiết đầy đủ thành công cho: " + fullProduct.getName());
                     synchronized (fullyDetailedFavouriteProductList) {
                         fullyDetailedFavouriteProductList.add(fullProduct);
                     }
-                } else {
-                    Log.w(TAG, "Không tải được chi tiết đầy đủ cho sản phẩm ID: " + productId + ". Code: " + response.code());
-                    // Có thể tìm product cơ bản từ initialFavouriteProducts (nếu bạn đã lưu) để hiển thị tên
-                    // Product basicEquivalent = findBasicProductByOriginalIndex(originalIndex); // Cần implement
-                    // if(basicEquivalent != null) fullyDetailedFavouriteProductList.add(basicEquivalent);
                 }
                 decrementCounterAndCheckCompletion();
             }
 
             @Override
             public void onFailure(@NonNull Call<Product> call, @NonNull Throwable t) {
-                Log.e(TAG, "Lỗi mạng khi tải chi tiết đầy đủ cho sản phẩm ID: " + productId, t);
                 decrementCounterAndCheckCompletion();
             }
         });
@@ -203,7 +186,6 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
 
     private void decrementCounterAndCheckCompletion() {
         if (detailFetchCounter.decrementAndGet() <= 0) {
-            Log.d(TAG, "Tất cả các yêu cầu tải chi tiết đã hoàn tất.");
             if (getActivity() != null) {
                 getActivity().runOnUiThread(this::updateUIAfterAllDetailsFetched);
             }
@@ -211,10 +193,6 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
     }
 
     private void updateUIAfterAllDetailsFetched() {
-        Log.d(TAG, "Cập nhật UI. Số lượng sản phẩm chi tiết: " + fullyDetailedFavouriteProductList.size());
-        // Nếu cần sort theo thứ tự ban đầu, bạn cần implement logic sort ở đây
-        // Ví dụ: Collections.sort(fullyDetailedFavouriteProductList, Comparator.comparingInt(Product::getOriginalSortIndex));
-        // (Product model cần có trường getOriginalSortIndex và bạn phải set nó khi fetch)
 
         updateAdapterWithFinalList();
 
@@ -232,8 +210,6 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
         if (favouriteAdapter != null) {
             List<Product> newDisplayList = new ArrayList<>(fullyDetailedFavouriteProductList);
             favouriteAdapter.setData(newDisplayList);
-        } else {
-            Log.w(TAG, "Adapter is null in updateAdapterWithFinalList");
         }
     }
 
@@ -242,7 +218,6 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
     public void onItemClick(Product productFromAdapter, String variantIdFromAdapter) {
         if (productFromAdapter == null || productFromAdapter.getId() == null) {
             Toast.makeText(getContext(), "Không thể mở chi tiết sản phẩm.", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "Product object hoặc Product ID từ adapter là null.");
             return;
         }
 
@@ -252,16 +227,12 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
                 Variant firstVariant = productFromAdapter.getVariants().get(0);
                 if (firstVariant != null && firstVariant.getId() != null) {
                     finalVariantId = firstVariant.getId();
-                    Log.d(TAG, "Lấy variantId từ product trong onItemClick: " + finalVariantId);
-                } else {
-                    Log.w(TAG, "Biến thể đầu tiên hoặc ID của nó là null cho sản phẩm: " + productFromAdapter.getName());
                 }
             }
         }
 
         if (finalVariantId == null) {
             Toast.makeText(getContext(), "Sản phẩm này không có thông tin biến thể hợp lệ.", Toast.LENGTH_SHORT).show();
-            Log.w(TAG, "Không có variantId hợp lệ để mở chi tiết cho sản phẩm: " + productFromAdapter.getName());
             // Cân nhắc mở chỉ với Product ID nếu ProductDetailActivity có thể xử lý
             // Intent intent = new Intent(getActivity(), ProductDetailActivity.class);
             // intent.putExtra(Constants.PRODUCT_ID, productFromAdapter.getId());
@@ -272,17 +243,14 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
         Intent intent = new Intent(getActivity(), ProductDetailActivity.class);
         intent.putExtra(Constants.PRODUCT_ID, productFromAdapter.getId());
         intent.putExtra(Constants.VARIANT_ID, finalVariantId);
-        Log.d(TAG, "Điều hướng đến ProductDetailActivity với ProductID: " + productFromAdapter.getId() + " và VariantID: " + finalVariantId);
         startActivity(intent);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume được gọi.");
         // Đảm bảo các điều kiện để tải dữ liệu được kiểm tra đúng
         if (getContext() == null) {
-            Log.e(TAG, "onResume: Context is null, không thể tiếp tục.");
             return; // Không làm gì nếu context null
         }
 
@@ -295,10 +263,8 @@ public class FavouriteFragment extends Fragment implements FavouriteProductAdapt
         }
 
         if (apiService != null && authToken != null && !authToken.isEmpty()) {
-            Log.d(TAG, "onResume: Bắt đầu tải lại danh sách yêu thích (N+1 strategy).");
             loadInitialFavouriteList();
         } else {
-            Log.w(TAG, "onResume: Điều kiện để tải danh sách yêu thích không được đáp ứng.");
             displayLoginPrompt();
         }
     }

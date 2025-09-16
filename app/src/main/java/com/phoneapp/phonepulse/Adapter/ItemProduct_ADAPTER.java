@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Paint;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.google.gson.Gson;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.models.Variant;
 import com.phoneapp.phonepulse.request.ProductGirdItem;
@@ -31,21 +29,21 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
 
     private final List<ProductGirdItem> productList;
     private final Context context;
-    private OnProductActionListener onProductActionListener;
+    private OnProductActionListener listener;
 
     public interface OnProductActionListener {
         void onAddToCartClick(ProductGirdItem item);
         void onItemClick(ProductGirdItem item);
-        void onVariantSelected(ProductGirdItem productItem, Variant selectedVariant);
-    }
-
-    public void setOnProductActionListener(OnProductActionListener listener) {
-        this.onProductActionListener = listener;
+        void onVariantSelected(ProductGirdItem product, Variant variant);
     }
 
     public ItemProduct_ADAPTER(Context context, List<ProductGirdItem> productList) {
         this.context = context;
         this.productList = productList;
+    }
+
+    public void setOnProductActionListener(OnProductActionListener listener) {
+        this.listener = listener;
     }
 
     @NonNull
@@ -60,7 +58,7 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         ProductGirdItem item = productList.get(position);
 
-        // --- Load Image ---
+        // --- Load hình ảnh ---
         String imageUrl = null;
         if (item.getImages() != null && !item.getImages().isEmpty()) {
             imageUrl = item.getImages().get(0).getImageUrl();
@@ -106,19 +104,16 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
             holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
         }
 
-        // --- Product Name ---
+        // --- Tên sản phẩm ---
         holder.tvProductName.setText(item.getProduct_name() != null ? item.getProduct_name() : "");
 
-        // --- Variants RecyclerView ---
+// --- Variants ---
         List<Variant> variants = item.getVariants();
         if (variants != null && !variants.isEmpty()) {
             holder.rvProductVariants.setVisibility(View.VISIBLE);
-            VariantAdapter variantAdapter = new VariantAdapter(
-                    variants,
-                    selectedVariant -> {
-                        if (onProductActionListener != null) {
-                            onProductActionListener.onVariantSelected(item, selectedVariant);
-                        }
+            VariantAdapter variantAdapter = new VariantAdapter(variants,
+                    variant -> {
+                        if (listener != null) listener.onVariantSelected(item, variant);
                     });
             holder.rvProductVariants.setLayoutManager(
                     new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
@@ -127,46 +122,44 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
             holder.rvProductVariants.setVisibility(View.GONE);
         }
 
-        // --- Price & Discount ---
+// --- Giá & Giảm giá ---
         NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         nf.setMaximumFractionDigits(0);
 
+// Giá khuyến mãi luôn hiển thị
         holder.tvDiscountPrice.setText(nf.format(item.getPrice()));
 
+// Kiểm tra giảm giá
         if (item.getDiscount_percent() > 0 && item.getOriginal_price() > item.getPrice()) {
-            holder.tvOriginalPrice.setVisibility(View.VISIBLE);
             holder.tvOriginalPrice.setText(nf.format(item.getOriginal_price()));
             holder.tvOriginalPrice.setPaintFlags(
                     holder.tvOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.tvOriginalPrice.setVisibility(View.VISIBLE);
 
-            holder.tvDiscountPercent.setVisibility(View.VISIBLE);
             holder.tvDiscountPercent.setText("-" + item.getDiscount_percent() + "%");
+            holder.tvDiscountPercent.setVisibility(View.VISIBLE);
         } else {
-            holder.tvOriginalPrice.setVisibility(View.GONE);
-            holder.tvDiscountPercent.setVisibility(View.GONE);
+            holder.tvOriginalPrice.setText("");
+            holder.tvOriginalPrice.setVisibility(View.INVISIBLE); // giữ layout không dịch
+
+            holder.tvDiscountPercent.setText("");
+            holder.tvDiscountPercent.setVisibility(View.INVISIBLE); // giữ layout không dịch
         }
 
-        // --- Sold Count ---
-        if (item.getSold_count() >= 0) {
-            holder.tvSold.setText("Đã bán " + item.getSold_count());
-            holder.tvSold.setVisibility(View.VISIBLE);
-        } else {
-            holder.tvSold.setVisibility(View.INVISIBLE);
-        }
+// --- Đã bán ---
+        holder.tvSold.setText("Đã bán " + item.getSold_count());
+// luôn hiển thị, kể cả = 0
+        holder.tvSold.setVisibility(View.VISIBLE);
 
-        // --- Click Listeners ---
+// --- Click ---
         holder.btnAddtoCart.setOnClickListener(v -> {
-            if (onProductActionListener != null) {
-                onProductActionListener.onAddToCartClick(item);
-            }
+            if (listener != null) listener.onAddToCartClick(item);
         });
 
         holder.itemView.setOnClickListener(v -> {
-            if (onProductActionListener != null) {
-                onProductActionListener.onItemClick(item);
-            }
+            if (listener != null) listener.onItemClick(item);
         });
-        Log.d("API_DATA", "Product: " + new Gson().toJson(productList));
+
     }
 
     @Override
@@ -174,13 +167,13 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
         return productList.size();
     }
 
-    public static class ProductViewHolder extends RecyclerView.ViewHolder {
+    static class ProductViewHolder extends RecyclerView.ViewHolder {
         ImageView ivProductImage;
         TextView tvProductName, tvDiscountPrice, tvOriginalPrice, tvDiscountPercent, tvSold;
         Button btnAddtoCart;
         RecyclerView rvProductVariants;
 
-        public ProductViewHolder(@NonNull View itemView) {
+        ProductViewHolder(@NonNull View itemView) {
             super(itemView);
             ivProductImage = itemView.findViewById(R.id.iv_product_image);
             tvProductName = itemView.findViewById(R.id.tv_product_name);

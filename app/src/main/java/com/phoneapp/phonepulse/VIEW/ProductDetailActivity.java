@@ -138,19 +138,28 @@
             });
 
             btnAddToCart.setOnClickListener(v -> {
-                if (currentProduct != null && displayedVariant != null) {
-                    checkStockAndAddToCart(currentProduct.getId(), displayedVariant.getId(), 1);
-                } else {
-                    Toast.makeText(ProductDetailActivity.this, "Thông tin sản phẩm/biến thể chưa tải xong.", Toast.LENGTH_SHORT).show();
+                if (currentProduct == null) {
+                    Toast.makeText(ProductDetailActivity.this, "Thông tin sản phẩm chưa tải xong.", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+                if (displayedVariant == null) {
+                    Toast.makeText(ProductDetailActivity.this, "Vui lòng chọn biến thể trước khi thêm vào giỏ.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                checkStockAndAddToCart(currentProduct.getId(), displayedVariant.getId(), 1);
             });
 
             btnBuyNow.setOnClickListener(v -> {
-                if (currentProduct != null && displayedVariant != null) {
-                    Toast.makeText(ProductDetailActivity.this, "Mua ngay " + currentProduct.getName(), Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(ProductDetailActivity.this, "Thông tin sản phẩm/biến thể chưa tải xong.", Toast.LENGTH_SHORT).show();
+                if (currentProduct == null) {
+                    Toast.makeText(ProductDetailActivity.this, "Thông tin sản phẩm chưa tải xong.", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+                if (displayedVariant == null) {
+                    Toast.makeText(ProductDetailActivity.this, "Vui lòng chọn biến thể trước khi mua.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Toast.makeText(ProductDetailActivity.this, "Mua ngay " + currentProduct.getName(), Toast.LENGTH_SHORT).show();
+                // Ở đây bạn có thể chuyển sang màn hình thanh toán kèm biến thể đã chọn
             });
         }
 
@@ -262,13 +271,11 @@
                 return;
             }
             CartRequest.AddToCart request = new CartRequest.AddToCart(productId, variantId, quantity);
-            Toast.makeText(ProductDetailActivity.this, "Đang thêm sản phẩm vào giỏ hàng...", Toast.LENGTH_SHORT).show();
             apiService.addToCart(request).enqueue(new Callback<ApiResponse<Cart>>() {
                 @Override
                 public void onResponse(@androidx.annotation.NonNull Call<ApiResponse<com.phoneapp.phonepulse.models.Cart>> call, @androidx.annotation.NonNull Response<ApiResponse<com.phoneapp.phonepulse.models.Cart>> response) {
                     if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                         Toast.makeText(ProductDetailActivity.this, "Thêm vào giỏ hàng thành công!", Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "Product added to cart successfully. Current cart: " + response.body().getData());
                     } else {
                         String errorMsg = "Lỗi khi thêm vào giỏ hàng.";
                         if (response.body() != null && response.body().getMessage() != null) {
@@ -379,7 +386,6 @@
                             isLoadingInitialFavouriteStatus = false;
                             updateFavouriteIcon();
                             updateLoadingState();
-                            Log.e(TAG, "getFavourites network failure: " + t.getMessage(), t);
                             // Có thể hiển thị Toast cho người dùng nếu cần
                             // Toast.makeText(ProductDetailActivity.this, "Lỗi kiểm tra yêu thích.", Toast.LENGTH_SHORT).show();
                         }
@@ -389,7 +395,6 @@
                 @Override
                 public void onFailure(@NonNull Call<Product> call, @NonNull Throwable t) {
                     isLoadingProduct = false;
-                    showError("Lỗi mạng khi tải thông tin sản phẩm.");
                     updateLoadingState();
                 }
             });
@@ -417,7 +422,6 @@
                             Toast.makeText(ProductDetailActivity.this, "Đã xóa khỏi yêu thích.", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(ProductDetailActivity.this, "Lỗi khi xóa khỏi yêu thích.", Toast.LENGTH_SHORT).show();
-                            Log.e(TAG, "removeFavourite API error: " + response.code() + (response.body() != null ? " - " + response.body().getMessage() : ""));
                         }
                         finishToggleFavourite();
                     }
@@ -447,15 +451,10 @@
                                             isFavourite = true; // Set isFavourite to true if it was a 'duplicate' error
                                             errorMessage = "Sản phẩm này đã ở trong danh sách yêu thích!";
                                         }
-                                        Log.e(TAG, "addFavourite API error (400): " + errorBodyString);
-                                    } else {
-                                        Log.e(TAG, "addFavourite API error (400) with no error body.");
                                     }
                                 } catch (IOException e) {
                                     Log.e(TAG, "Error parsing 400 error body", e);
                                 }
-                            } else {
-                                Log.e(TAG, "addFavourite API error: " + response.code() + (response.body() != null ? " - " + response.body().getMessage() : ""));
                             }
                             Toast.makeText(ProductDetailActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                         }

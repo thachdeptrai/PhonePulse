@@ -101,7 +101,6 @@ public class CategoryFragment extends Fragment implements ItemProduct_ADAPTER.On
                     categoryAdapter = new CategoryAdapter(getContext(), categories);
                     categoryAdapter.setOnItemClickListener(category -> {
                         filterProductsByCategory(category.getId());
-                        Toast.makeText(getContext(), "Đã chọn: " + category.getName(), Toast.LENGTH_SHORT).show();
                     });
                     rvCategories.setAdapter(categoryAdapter);
                 } else {
@@ -175,7 +174,6 @@ public class CategoryFragment extends Fragment implements ItemProduct_ADAPTER.On
     @Override
     public void onVariantSelected(ProductGirdItem productItem, Variant selectedVariant) {
         // Bây giờ bạn có thể gọi hàm thêm vào giỏ hàng với thông tin biến thể chính xác
-        Toast.makeText(requireContext(), "Đã chọn biến thể: " + selectedVariant.getSize().getSizeName() + " - " + selectedVariant.getColor().getColorName(), Toast.LENGTH_SHORT).show();
         fetchVariantAndAddToCart(productItem.get_id(), selectedVariant.getId(), 1);
     }
 
@@ -271,7 +269,6 @@ public class CategoryFragment extends Fragment implements ItemProduct_ADAPTER.On
     @Override
     public void onItemClick(ProductGirdItem item) {
         if (isAdded() && getContext() != null) {
-            Toast.makeText(requireContext(), "Đang mở chi tiết: " + item.getProduct_name(), Toast.LENGTH_SHORT).show();
 
             Intent intent = new Intent(requireContext(), ProductDetailActivity.class);
             if (item.get_id() != null) {

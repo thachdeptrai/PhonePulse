@@ -7,13 +7,17 @@ public class Constants {
      // public static final String BASE_URL = "http://192.168.1.9:5000";
   //  public static final String BASE_URL = "http://10.24.32.145:5000";
   //public static final String BASE_URL = "http://192.168.1.9:5000";
-         public static final String BASE_URL = "http://192.168.100.188:5000"; // sơn home
-       //  public static final String BASE_URL = "http://10.128.57.42:5000";
+
+    //  public static final String BASE_URL = "http://192.168.100.188:5000"; // sơn home
+
+    //  public static final String BASE_URL = "http://10.128.57.42:5000";
 
     //  public static final String BASE_URL = "http://10.128.57.42:5000"; x
+
     //  public static final String BASE_URL = "http://10.24.49.108:5000"; mạng trường
 
-
+    //public static final String BASE_URL = "http://192.168.101.132:5000";
+    public static final String BASE_URL = "http://192.168.1.36:3000";// HCT
 
 
     public static final int TIMEOUT = 30;
@@ -21,7 +25,6 @@ public class Constants {
     public static final String TOKEN_KEY = "auth_token";
     public static final String PRODUCT_ID = "product_id";
     public static final String VARIANT_ID = "variant_id";
-
     // NEW: User Info Keys
     public static final String USER_NAME = "user_name";
     public static final String USER_EMAIL = "user_email";
@@ -33,17 +36,14 @@ public class Constants {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
         return prefs.getString(TOKEN_KEY, null);
     }
-
     public static void saveToken(Context context, String token) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
         prefs.edit().putString(TOKEN_KEY, token).apply();
     }
-
     public static void clearToken(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
         prefs.edit().remove(TOKEN_KEY).apply();
     }
-
     // NEW: User Info Save
     public static void saveUserInfo(Context context, String name, String email, String phone, String imageUrl) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
@@ -82,4 +82,5 @@ public class Constants {
                 .remove(USER_IMAGE)
                 .apply();
     }
+
 }

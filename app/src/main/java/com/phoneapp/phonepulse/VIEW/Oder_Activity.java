@@ -601,7 +601,7 @@ public class Oder_Activity extends AppCompatActivity {
      *
      * @param orderedItems Danh sách các sản phẩm đã được đặt.
      */
-    private void updateVariantStockOnServer(ArrayList<OrderItem> orderedItems) {
+    public void updateVariantStockOnServer(ArrayList<OrderItem> orderedItems) {
         if (orderedItems == null || orderedItems.isEmpty()) {
             Log.w(TAG, "Không có OrderedItems để cập nhật tồn kho. Chuyển hướng.");
             navigateToOrderHistory();
@@ -679,7 +679,7 @@ public class Oder_Activity extends AppCompatActivity {
         }).start();
     }
 
-    private void clearCartOnServer() {
+    public void clearCartOnServer() {
         if (orderItemList == null || orderItemList.isEmpty()) {
             Log.d(TAG, "Giỏ hàng đã rỗng. Chuyển hướng.");
             navigateToOrderHistory();

@@ -97,11 +97,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             } else {
                 // Các định dạng khác hoặc đường dẫn cục bộ không được hỗ trợ trực tiếp
                 holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
-                Log.w(TAG, "onBindViewHolder: Unrecognized image URL format for " + (currentItem.getProduct() != null ? currentItem.getProduct().getProductName() : "N/A") + ". Using placeholder. URL: " + imageUrl);
             }
         } else {
             holder.ivProductImage.setImageResource(R.drawable.placeholder_product);
-            Log.w(TAG, "onBindViewHolder: Image URL is null or empty for " + (currentItem.getProduct() != null ? currentItem.getProduct().getProductName() : "N/A") + ". Using placeholder.");
         }
 
         // 2. Tên sản phẩm

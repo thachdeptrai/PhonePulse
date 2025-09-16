@@ -58,8 +58,6 @@ public class DashBoar_Activity extends AppCompatActivity {
 
         // Xử lý sự kiện nhấn vào giỏ hàng
         iv_cart_icon.setOnClickListener(view -> {
-            Log.d("CartClick", "Bạn đã nhấn vào giỏ hàng");
-            Toast.makeText(DashBoar_Activity.this, "Đã nhấn giỏ hàng", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(DashBoar_Activity.this, Cart_Activity.class);
             startActivity(intent);
         });
@@ -129,7 +127,6 @@ public class DashBoar_Activity extends AppCompatActivity {
         // ✅ Tách riêng việc xử lý deep link/redirect từ MoMo hoặc các nguồn khác
         String fragmentToOpen = intent.getStringExtra("openFragment");
         if ("TatCaDonHang".equals(fragmentToOpen)) {
-            Log.d("DashBoar_Activity", "Nhận yêu cầu mở fragment TatCaDonHang từ MoMo redirect.");
             bottomNavigationView.setSelectedItemId(R.id.nav_profile);
             replaceFragment(new OrderHistory_FRAGMENT(), "Lịch sử đơn hàng", false);
             return; // Rất quan trọng để kết thúc xử lý tại đây
@@ -138,7 +135,6 @@ public class DashBoar_Activity extends AppCompatActivity {
         // ✅ Xử lý các Intent truyền dữ liệu khác (ví dụ: từ Cart_Activity)
         ArrayList<OrderItem> orderItems = intent.getParcelableArrayListExtra("order_items");
         if (orderItems != null && !orderItems.isEmpty()) {
-            Log.d("DashBoar_Activity", "Nhận được " + orderItems.size() + " item từ Intent.");
             OrderHistory_FRAGMENT fragment = new OrderHistory_FRAGMENT();
             Bundle bundle = new Bundle();
             bundle.putParcelableArrayList("order_items", orderItems);
@@ -151,7 +147,6 @@ public class DashBoar_Activity extends AppCompatActivity {
 
         // ✅ Xử lý các cờ Intent đơn giản (ví dụ: chỉ điều hướng)
         if (intent.getBooleanExtra("navigate_to_history", false)) {
-            Log.d("DashBoar_Activity", "Nhận yêu cầu navigate_to_history.");
             bottomNavigationView.setSelectedItemId(R.id.nav_profile);
             replaceFragment(new OrderHistory_FRAGMENT(), "Lịch sử đơn hàng", false);
             return;

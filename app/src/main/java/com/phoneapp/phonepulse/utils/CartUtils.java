@@ -54,11 +54,9 @@ public final class CartUtils {
      */
     public static boolean reduceStock(final Variant variant, final int quantityToReduce) {
         if (variant == null) {
-            Log.w(TAG, "reduceStock: variant == null. Bỏ qua thao tác giảm tồn kho.");
             return false;
         }
         if (quantityToReduce <= 0) {
-            Log.w(TAG, "reduceStock: Số lượng cần giảm không hợp lệ: " + quantityToReduce + ". Phải lớn hơn 0.");
             return false;
         }
 
@@ -67,13 +65,9 @@ public final class CartUtils {
         String vid = variant.getId() == null ? "(null)" : variant.getId();
 
         if (ok) {
-            Log.d(TAG, "reduceStock: Đã giảm -" + quantityToReduce + " -> tồn kho mới: "
-                    + variant.getQuantity() + " (variantId=" + vid + ")");
             return true;
         } else {
-            Log.w(TAG, "reduceStock: Không đủ hàng để giảm. Hiện có: "
-                    + variant.getQuantity() + ", cần giảm: " + quantityToReduce
-                    + " (variantId=" + vid + ")");
+
             return false;
         }
     }

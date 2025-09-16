@@ -132,7 +132,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             if (selectedId != -1) {
                 RadioButton selected = view.findViewById(selectedId);
                 String reason = selected.getText().toString();
-                Log.d(TAG, "❌ Hủy đơn " + orderId + " với lý do: " + reason);
 
                 // ✅ Phát ra sự kiện EventBus khi người dùng xác nhận hủy
                 EventBus.getDefault().post(new OrderCanceledEvent(orderId, reason));

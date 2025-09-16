@@ -6,6 +6,7 @@ import com.phoneapp.phonepulse.models.ProductImage;
 import com.phoneapp.phonepulse.request.ProductGirdItem;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class DataConverter {
@@ -37,11 +38,13 @@ public class DataConverter {
                 double discountedPrice = variant.getPrice();
                 int discountPercent = product.getDiscount();
                 double originalPrice = discountedPrice;
+
                 if (discountPercent > 0 && discountPercent <= 100) {
                     originalPrice = discountedPrice / (1 - (double) discountPercent / 100);
                 }
 
-                int soldCount = (int) (Math.random() * 500) + 1;
+                // 🔹 lấy số bán từ backend
+                int soldCount = variant.getSoldCount();
 
                 ProductGirdItem item = new ProductGirdItem(
                         product.getId(),
@@ -58,12 +61,13 @@ public class DataConverter {
                 );
 
                 item.setCategory_id(categoryId);
-
                 gridItems.add(item);
             }
         }
+
+        // ✅ Sắp xếp theo số bán nhiều nhất trước
+        gridItems.sort(Comparator.comparingInt(ProductGirdItem::getSold_count).reversed());
+
         return gridItems;
     }
-
-
 }

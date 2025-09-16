@@ -171,24 +171,28 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
 
         this.currentOrders = orders;
         Log.d(TAG, "setupOrders: Displaying " + orders.size() + " orders.");
-
         int total = orders.size();
         int cancelled = 0, shipping = 0, completed = 0, processing = 0;
 
         for (Order order : orders) {
             String status = order.getStatus() != null ? order.getStatus().toLowerCase(Locale.ROOT) : "";
             String shippingStatus = order.getShippingStatus() != null ? order.getShippingStatus().toLowerCase(Locale.ROOT) : "";
+            String paymentStatus = order.getPaymentStatus() != null ? order.getPaymentStatus().toLowerCase(Locale.ROOT) : "";
 
             if ("cancelled".equals(status)) {
                 cancelled++;
-            } else if ("pending".equals(status) || "processing".equals(status) || "confirmed".equals(status)) {
+            }
+            else if (("pending".equals(status) || "confirmed".equals(status)) && "not_shipped".equals(shippingStatus)) {
                 processing++;
-            } else if ("shipping".equals(shippingStatus)) {
+            }
+            else if ("confirmed".equals(status) && "shipping".equals(shippingStatus)) {
                 shipping++;
-            } else if ("shipped".equals(shippingStatus) || "delivered".equals(shippingStatus) || "completed".equals(status)) {
+            }
+            else if ("confirmed".equals(status) && "shipped".equals(shippingStatus) && "paid".equals(paymentStatus)) {
                 completed++;
             }
         }
+
 
         tvTotal.setText("Tổng số đơn: " + total);
         tvCancelled.setText("Đã hủy: " + cancelled);
