@@ -23,7 +23,6 @@ import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
 import com.phoneapp.phonepulse.models.Order;
 import com.phoneapp.phonepulse.models.Cart;
-import com.phoneapp.phonepulse.models.Variant;
 import com.phoneapp.phonepulse.utils.Constants;
 import com.phoneapp.phonepulse.request.OrderItem;
 import com.phoneapp.phonepulse.request.CartRequest;
@@ -40,12 +39,10 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
     private ApiService apiService;
     private WebView webView;
     private ImageView qrImage;
-    private boolean hasHandledResult = false;
+    private boolean daXuLyKetQua = false;
     private Handler pollHandler = new Handler();
-    private int pollAttempts = 0;
-    private static final int MAX_POLL_ATTEMPTS = 30; // ~30s
-
-    private static final int REDIRECT_DELAY_MS = 3000; // 3 giây
+    private int soLanKiemTra = 0;
+    private static final int MAX_SO_LAN_KIEM_TRA = 30; // ~30s
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,12 +58,12 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
         apiService = RetrofitClient.getApiService(Constants.getToken(this));
 
         if (url != null) {
-            setupWebView(url);
+            cauHinhWebView(url);
         }
 
         if (qrUrl != null && !qrUrl.isEmpty()) {
             qrImage.setVisibility(View.VISIBLE);
-            Bitmap qrBitmap = generateQRCode(qrUrl);
+            Bitmap qrBitmap = taoQRCode(qrUrl);
             if (qrBitmap != null) {
                 qrImage.setImageBitmap(qrBitmap);
             }
@@ -75,8 +72,8 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
         }
     }
 
-    // Tạo QR code từ chuỗi
-    private Bitmap generateQRCode(String text) {
+    // Tạo mã QR từ chuỗi
+    private Bitmap taoQRCode(String text) {
         try {
             MultiFormatWriter writer = new MultiFormatWriter();
             BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, 400, 400);
@@ -89,14 +86,14 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
     }
 
     // Cấu hình WebView và xử lý redirect MoMo
-    private void setupWebView(String url) {
+    private void cauHinhWebView(String url) {
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                android.util.Log.d(TAG, "shouldOverrideUrlLoading() url=" + url);
-                if (hasHandledResult) {
-                    android.util.Log.d(TAG, "Guard active: hasHandledResult=true, ignoring further loads");
+                android.util.Log.d(TAG, "URL đang tải = " + url);
+                if (daXuLyKetQua) {
+                    android.util.Log.d(TAG, "Đã xử lý kết quả trước đó -> bỏ qua");
                     return true;
                 }
 
@@ -109,52 +106,41 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
                     String extraData = uri.getQueryParameter("extraData");
                     int resultCode = resultCodeStr != null ? Integer.parseInt(resultCodeStr) : -1;
 
-                    hasHandledResult = true;
-                    android.util.Log.d(TAG, "Detected success-like URL. Params => orderId=" + orderId + ", resultCode=" + resultCode + ", message=" + message + ", extraData=" + extraData);
+                    daXuLyKetQua = true;
+                    android.util.Log.d(TAG, "Phát hiện URL trả về MoMo. orderId=" + orderId + ", resultCode=" + resultCode);
 
-                    // ✅ Nếu có đủ tham số thì xác nhận với server; nếu không, vẫn điều hướng để tránh treo
                     if (orderId != null && resultCode != -1) {
-                        android.util.Log.d(TAG, "Calling handleMomoReturn API...");
                         apiService.handleMomoReturn(resultCode, orderId, message, extraData)
-                            .enqueue(new Callback<ApiResponse<Order>>() {
-                                @Override
-                                public void onResponse(Call<ApiResponse<Order>> call, Response<ApiResponse<Order>> response) {
-                                    android.util.Log.d(TAG, "handleMomoReturn onResponse: success=" + response.isSuccessful() + ", code=" + response.code());
-                                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                                        // Lấy dữ liệu order từ ApiResponse
-                                        Order order = response.body().getData();
+                                .enqueue(new Callback<ApiResponse<Order>>() {
+                                    @Override
+                                    public void onResponse(Call<ApiResponse<Order>> call, Response<ApiResponse<Order>> response) {
+                                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                                            Order order = response.body().getData();
 
-                                        Toast.makeText(MomoPaymentWebViewActivity.this,
-                                                "Thanh toán thành công!", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(MomoPaymentWebViewActivity.this,
+                                                    "Thanh toán thành công!", Toast.LENGTH_SHORT).show();
 
-                                        // Cleanup tồn kho và giỏ hàng trước khi điều hướng
-                                        if (order != null && order.getItems() != null && !order.getItems().isEmpty()) {
-                                            performPostPaymentCleanup(order.getItems());
+                                            if (order != null && order.getItems() != null && !order.getItems().isEmpty()) {
+                                                xuLySauThanhToan(order.getItems());
+                                            } else {
+                                                navigateToHistory();
+                                            }
+
                                         } else {
-                                            android.util.Log.w(TAG, "Order null hoặc không có items. Điều hướng thẳng.");
-                                            navigateToHistory();
+                                            Toast.makeText(MomoPaymentWebViewActivity.this,
+                                                    "Thanh toán thành công nhưng tạo đơn thất bại!", Toast.LENGTH_LONG).show();
+                                            finish();
                                         }
+                                    }
 
-                                    } else {
-                                        String apiMsg = (response.body() != null ? response.body().getMessage() : "null body");
-                                        android.util.Log.w(TAG, "handleMomoReturn API NOT success. msg=" + apiMsg);
+                                    @Override
+                                    public void onFailure(Call<ApiResponse<Order>> call, Throwable t) {
                                         Toast.makeText(MomoPaymentWebViewActivity.this,
-                                                "Thanh toán thành công nhưng tạo đơn thất bại!", Toast.LENGTH_LONG).show();
+                                                "Lỗi kết nối server: " + t.getMessage(), Toast.LENGTH_LONG).show();
                                         finish();
                                     }
-                                }
-
-                                @Override
-                                public void onFailure(Call<ApiResponse<Order>> call, Throwable t) {
-                                    android.util.Log.e(TAG, "handleMomoReturn onFailure: " + t.getMessage(), t);
-                                    Toast.makeText(MomoPaymentWebViewActivity.this,
-                                            "Lỗi kết nối server: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                                    finish();
-                                }
-                            });
+                                });
                     } else {
-                        android.util.Log.w(TAG, "Missing return params. Fallback navigate to history.");
-                        // Không có tham số return — fallback: điều hướng thẳng để tránh treo
                         Toast.makeText(MomoPaymentWebViewActivity.this,
                                 "Thanh toán thành công!", Toast.LENGTH_SHORT).show();
                         navigateToHistory();
@@ -167,21 +153,17 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                android.util.Log.d(TAG, "onPageFinished() url=" + url + ", title=" + view.getTitle());
-                if (hasHandledResult) {
-                    android.util.Log.d(TAG, "Guard active onPageFinished: hasHandledResult=true");
+                if (daXuLyKetQua) {
                     return;
                 }
                 String title = view.getTitle() != null ? view.getTitle().toLowerCase() : "";
                 if (title.contains("thành công") || title.contains("success")) {
-                    hasHandledResult = true;
-                    android.util.Log.d(TAG, "Detected success by page title. Navigating to history.");
+                    daXuLyKetQua = true;
                     Toast.makeText(MomoPaymentWebViewActivity.this,
                             "Thanh toán thành công!", Toast.LENGTH_SHORT).show();
                     navigateToHistory();
                 } else {
-                    // Fallback: poll DOM text to detect success keyword on MoMo static success page
-                    startSuccessPolling();
+                    batDauKiemTraThanhCong();
                 }
             }
         });
@@ -189,31 +171,24 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
         webView.loadUrl(url);
     }
 
-    private void startSuccessPolling() {
-        pollAttempts = 0;
-        android.util.Log.d(TAG, "Start DOM polling for success text...");
-        pollHandler.post(pollRunnable);
+    private void batDauKiemTraThanhCong() {
+        soLanKiemTra = 0;
+        pollHandler.post(kiemTraThanhCongRunnable);
     }
 
-    private final Runnable pollRunnable = new Runnable() {
+    private final Runnable kiemTraThanhCongRunnable = new Runnable() {
         @Override
         public void run() {
-            if (hasHandledResult) {
-                android.util.Log.d(TAG, "Stop polling: already handled.");
-                return;
-            }
-            if (pollAttempts >= MAX_POLL_ATTEMPTS) {
-                android.util.Log.w(TAG, "Stop polling: max attempts reached without success.");
-                return;
-            }
-            pollAttempts++;
+            if (daXuLyKetQua) return;
+            if (soLanKiemTra >= MAX_SO_LAN_KIEM_TRA) return;
+
+            soLanKiemTra++;
             if (webView == null) return;
+
             webView.evaluateJavascript("(function(){try{return document.body && document.body.innerText || ''; }catch(e){return ''; }})()", value -> {
                 String text = value != null ? value.replace("\\n", " ").replace("\"", "").toLowerCase() : "";
-                android.util.Log.d(TAG, "Poll#" + pollAttempts + " bodyText.len=" + (text != null ? text.length() : 0));
-                if (!hasHandledResult && text != null && (text.contains("thành công") || text.contains("payment successful") || text.contains("success"))) {
-                    hasHandledResult = true;
-                    android.util.Log.d(TAG, "Detected success by DOM text. Navigating to history.");
+                if (!daXuLyKetQua && text.contains("thành công")) {
+                    daXuLyKetQua = true;
                     Toast.makeText(MomoPaymentWebViewActivity.this,
                             "Thanh toán thành công!", Toast.LENGTH_SHORT).show();
                     navigateToHistory();
@@ -232,9 +207,8 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
         } catch (Exception ignored) {}
     }
 
-    // ===== Post-payment cleanup and navigation =====
-    private void performPostPaymentCleanup(java.util.List<OrderItem> items) {
-        android.util.Log.d(TAG, "Start post-payment cleanup for items: " + (items != null ? items.size() : 0));
+    // ===== Xử lý sau khi thanh toán =====
+    private void xuLySauThanhToan(java.util.List<OrderItem> items) {
         if (items == null || items.isEmpty()) {
             navigateToHistory();
             return;
@@ -246,7 +220,6 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
             final String variantId = item.getVariantId();
             final int qty = item.getQuantity();
             if (productId == null || variantId == null || productId.trim().isEmpty() || variantId.trim().isEmpty()) {
-                android.util.Log.w(TAG, "Skip stock update: missing productId/variantId for " + item.getName());
                 stockLatch.countDown();
                 continue;
             }
@@ -263,29 +236,21 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
                                         .enqueue(new retrofit2.Callback<ApiResponse<com.phoneapp.phonepulse.models.Variant>>() {
                                             @Override
                                             public void onResponse(retrofit2.Call<ApiResponse<com.phoneapp.phonepulse.models.Variant>> call2, retrofit2.Response<ApiResponse<com.phoneapp.phonepulse.models.Variant>> resp2) {
-                                                if (resp2.isSuccessful() && resp2.body() != null && resp2.body().isSuccess()) {
-                                                    android.util.Log.d(TAG, "Stock updated variant=" + variantId + " -> " + newQty);
-                                                } else {
-                                                    android.util.Log.w(TAG, "Stock update failed for variant=" + variantId + ", code=" + resp2.code());
-                                                }
                                                 stockLatch.countDown();
                                             }
 
                                             @Override
                                             public void onFailure(retrofit2.Call<ApiResponse<com.phoneapp.phonepulse.models.Variant>> call2, Throwable t) {
-                                                android.util.Log.e(TAG, "Stock update API error: " + t.getMessage());
                                                 stockLatch.countDown();
                                             }
                                         });
                             } else {
-                                android.util.Log.w(TAG, "Fetch variant failed for " + variantId + ", code=" + response.code());
                                 stockLatch.countDown();
                             }
                         }
 
                         @Override
                         public void onFailure(retrofit2.Call<com.phoneapp.phonepulse.models.Variant> call, Throwable t) {
-                            android.util.Log.e(TAG, "Fetch variant API error: " + t.getMessage());
                             stockLatch.countDown();
                         }
                     });
@@ -294,15 +259,14 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
         new Thread(() -> {
             try {
                 stockLatch.await();
-                runOnUiThread(() -> clearCartForItems(items));
+                runOnUiThread(() -> xoaKhoiGioHang(items));
             } catch (InterruptedException e) {
-                runOnUiThread(() -> clearCartForItems(items));
+                runOnUiThread(() -> xoaKhoiGioHang(items));
             }
         }).start();
     }
 
-    private void clearCartForItems(java.util.List<OrderItem> items) {
-        android.util.Log.d(TAG, "Start clearCart for items: " + (items != null ? items.size() : 0));
+    private void xoaKhoiGioHang(java.util.List<OrderItem> items) {
         if (items == null || items.isEmpty()) {
             navigateToHistory();
             return;
@@ -312,7 +276,6 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
             String productId = item.getProductId();
             String variantId = item.getVariantId();
             if (productId == null || variantId == null || productId.trim().isEmpty() || variantId.trim().isEmpty()) {
-                android.util.Log.w(TAG, "Skip removeFromCart: missing productId/variantId for " + item.getName());
                 cartLatch.countDown();
                 continue;
             }
@@ -320,17 +283,11 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
             apiService.removeFromCart(req).enqueue(new retrofit2.Callback<ApiResponse<Cart>>() {
                 @Override
                 public void onResponse(retrofit2.Call<ApiResponse<Cart>> call, retrofit2.Response<ApiResponse<Cart>> response) {
-                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                        android.util.Log.d(TAG, "Removed from cart p=" + productId + " v=" + variantId);
-                    } else {
-                        android.util.Log.w(TAG, "RemoveFromCart failed p=" + productId + " v=" + variantId + ", code=" + response.code());
-                    }
                     cartLatch.countDown();
                 }
 
                 @Override
                 public void onFailure(retrofit2.Call<ApiResponse<Cart>> call, Throwable t) {
-                    android.util.Log.e(TAG, "RemoveFromCart API error: " + t.getMessage());
                     cartLatch.countDown();
                 }
             });

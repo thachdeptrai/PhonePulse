@@ -101,7 +101,6 @@ public class Profile_FRAGMENT extends Fragment {
 
         // THÊM MỚI: Gắn sự kiện click cho btn_settings để đăng xuất
         btn_settings.setOnClickListener(v -> {
-            Log.d(TAG, "Nút cài đặt (đăng xuất) được nhấn.");
             showLogoutConfirmationDialog();
         });
     }
@@ -120,7 +119,6 @@ public class Profile_FRAGMENT extends Fragment {
 
     private void loadUserProfile() {
         if (getContext() == null) {
-            Log.w(TAG, "loadUserProfile: Context is null, cannot proceed.");
             return;
         }
         String token = Constants.getToken(requireContext());
@@ -131,7 +129,6 @@ public class Profile_FRAGMENT extends Fragment {
             // navigateToLogin();
             return;
         }
-        Log.d(TAG, "🧪 Token lấy từ SharedPreferences cho getProfile: " + token);
 
         // Tạo instance ApiService CỤC BỘ với token hiện tại
         ApiService localApiService = RetrofitClient.getApiService(token);
@@ -140,10 +137,8 @@ public class Profile_FRAGMENT extends Fragment {
             @Override
             public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
                 if (!isAdded() || getContext() == null) {
-                    Log.w(TAG, "loadUserProfile onResponse: Fragment not added or context is null.");
                     return;
                 }
-                Log.d(TAG, "📥 getProfile onResponse - code: " + response.code());
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<User> apiResponse = response.body();
                     if (apiResponse.isSuccess() && apiResponse.getData() != null) {
@@ -152,7 +147,6 @@ public class Profile_FRAGMENT extends Fragment {
                     } else {
                         String message = apiResponse.getMessage() != null ? apiResponse.getMessage() : "Lỗi khi lấy dữ liệu profile";
                         Toast.makeText(requireContext(), "❌ " + message, Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "API Response (getProfile): " + message);
                     }
                 } else {
                     Toast.makeText(requireContext(), "❌ Lỗi kết nối hoặc phản hồi server (profile): " + response.code(), Toast.LENGTH_SHORT).show();
@@ -169,11 +163,9 @@ public class Profile_FRAGMENT extends Fragment {
             @Override
             public void onFailure(Call<ApiResponse<User>> call, Throwable t) {
                 if (!isAdded() || getContext() == null) {
-                    Log.w(TAG, "loadUserProfile onFailure: Fragment not added or context is null.");
                     return;
                 }
                 Toast.makeText(requireContext(), "❌ Lỗi kết nối (profile): " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "❌ onFailure (profile): " + t.getMessage(), t);
             }
         });
     }
@@ -283,7 +275,6 @@ public class Profile_FRAGMENT extends Fragment {
 
     private void performLogout() {
         if (getContext() == null) {
-            Log.w(TAG, "performLogout: Context is null, cannot proceed.");
             return;
         }
         String token = Constants.getToken(requireContext());
@@ -293,12 +284,10 @@ public class Profile_FRAGMENT extends Fragment {
             navigateToLogin();
             return;
         }
-        Log.d(TAG, "🧪 Token sẽ được dùng cho performLogout: " + token);
 
         // Tạo instance ApiService CỤC BỘ với token hiện tại
         ApiService logoutApiService = RetrofitClient.getApiService(token);
 
-        Log.d(TAG, "Đang thực hiện gọi API đăng xuất...");
         // Gọi API logout, truyền "Bearer " + token vào làm giá trị cho header Authorization
         // vì phương thức logout trong ApiService của bạn được định nghĩa với @Header
         Call<ApiResponse> call = logoutApiService.logout("Bearer " + token);
@@ -312,7 +301,6 @@ public class Profile_FRAGMENT extends Fragment {
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 // if(progressBarLogout!=null) progressBarLogout.setVisibility(View.GONE);
                 if (!isAdded() || getContext() == null) {
-                    Log.w(TAG, "performLogout onResponse: Fragment not added or context is null.");
                     return;
                 }
 
@@ -320,12 +308,10 @@ public class Profile_FRAGMENT extends Fragment {
                     ApiResponse apiResponse = response.body();
                     // Giả sử ApiResponse có trường isSuccess() hoặc một cách để kiểm tra thành công logic
                     if (apiResponse.isSuccess()) {
-                        Log.i(TAG, "Đăng xuất thành công từ server.");
                         Toast.makeText(requireContext(), "Đăng xuất thành công!", Toast.LENGTH_SHORT).show();
                         clearLocalDataAndNavigate();
                     } else {
                         String message = apiResponse.getMessage() != null ? apiResponse.getMessage() : "Đăng xuất không thành công.";
-                        Log.w(TAG, "Đăng xuất không thành công từ server (logic error): " + message);
                         Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
                         // Cân nhắc có nên clearLocalDataAndNavigate() ở đây không
                     }
@@ -335,8 +321,8 @@ public class Profile_FRAGMENT extends Fragment {
                         if (response.errorBody() != null) {
                             errorMsg += " - " + response.errorBody().string();
                         }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Lỗi đọc errorBody khi đăng xuất", e);
+                    } catch (IOException e) {
+                        Log.e(TAG, "Không đọc được errorBody khi logout", e);
                     }
                     Log.e(TAG, "API đăng xuất thất bại (HTTP error): " + errorMsg);
                     Toast.makeText(requireContext(), "Lỗi khi đăng xuất, vui lòng thử lại.", Toast.LENGTH_LONG).show();
@@ -348,10 +334,8 @@ public class Profile_FRAGMENT extends Fragment {
             public void onFailure(Call<ApiResponse> call, Throwable t) {
                 // if(progressBarLogout!=null) progressBarLogout.setVisibility(View.GONE);
                 if (!isAdded() || getContext() == null) {
-                    Log.w(TAG, "performLogout onFailure: Fragment not added or context is null.");
                     return;
                 }
-                Log.e(TAG, "Lỗi mạng khi đăng xuất: ", t);
                 Toast.makeText(requireContext(), "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 // Cân nhắc có nên clearLocalDataAndNavigate() ở đây không
             }
@@ -360,21 +344,18 @@ public class Profile_FRAGMENT extends Fragment {
 
     private void clearLocalDataAndNavigate() {
         if (getContext() == null) {
-            Log.w(TAG, "clearLocalDataAndNavigate: Context is null.");
             return;
         }
         SharedPreferences tokenPrefs = requireContext().getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE);
         SharedPreferences.Editor tokenEditor = tokenPrefs.edit();
         tokenEditor.remove(Constants.TOKEN_KEY); // SỬ DỤNG ĐÚNG HẰNG SỐ CỦA BẠN
         tokenEditor.apply();
-        Log.i(TAG, "Token đã được xóa khỏi SharedPreferences: " + Constants.SHARED_PREFS);
 
         SharedPreferences userPrefs = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor userEditor = userPrefs.edit();
         userEditor.clear(); // Xóa tất cả dữ liệu trong "user_prefs"
         userEditor.apply();
 
-        Log.i(TAG, "Dữ liệu người dùng cục bộ (token và user_prefs) đã được xóa.");
 
         // 2. (Tùy chọn) Xóa dữ liệu trong CartManager hoặc các Singleton khác
         // ví dụ: CartManager.getInstance().clearCartData();
@@ -385,27 +366,15 @@ public class Profile_FRAGMENT extends Fragment {
 
     private void navigateToLogin() {
         if (getActivity() == null) {
-            Log.w(TAG, "navigateToLogin: Activity is null.");
             return;
         }
         Intent intent = new Intent(requireActivity(), LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         requireActivity().finish(); // Kết thúc Activity chứa Fragment này
-        Log.i(TAG, "Đã điều hướng đến LoginActivity.");
     }
 
 
-    // Bỏ phương thức getSupportFragmentManager() nếu không dùng nữa
-
-//    private FragmentManager getSupportFragmentManager() {
-//        if (getActivity() != null) {
-//            return getActivity().getSupportFragmentManager();
-//        } else {
-//            Log.e(TAG, "❌ getActivity() is null, cannot get FragmentManager");
-//            return null;
-//        }
-//    }
 
 }
 

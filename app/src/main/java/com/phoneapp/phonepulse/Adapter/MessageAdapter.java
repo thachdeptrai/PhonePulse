@@ -76,16 +76,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     long timestampMillis = date.getTime(); // Lấy timestamp dạng long (milliseconds)
                     formattedTime = formatTimestamp(timestampMillis); // Gọi phương thức formatTimestamp hiện có của bạn
                 } else {
-                    Log.w(TAG, "Parsed date was null for timestamp string: " + isoTimestampString);
                     // formattedTime sẽ giữ giá trị mặc định
                 }
             } catch (ParseException e) {
-                Log.e(TAG, "Error parsing timestamp string: " + isoTimestampString, e);
                 // formattedTime sẽ giữ giá trị mặc định trong trường hợp lỗi parse
             }
-        } else {
-            Log.w(TAG, "Timestamp string from message was null or empty.");
-            // formattedTime sẽ giữ giá trị mặc định
         }
 
         switch (holder.getItemViewType()) {

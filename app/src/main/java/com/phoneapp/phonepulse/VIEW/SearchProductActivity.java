@@ -74,7 +74,6 @@ public class SearchProductActivity extends AppCompatActivity {
         if (authToken != null && !authToken.isEmpty()) {
             apiService = RetrofitClient.getApiService(authToken);
         } else {
-            Log.w(TAG, "AuthToken is null or empty. API calls might fail.");
         }
 
         productList = (ArrayList<ProductGirdItem>) getIntent().getSerializableExtra("product_list");
@@ -180,12 +179,10 @@ public class SearchProductActivity extends AppCompatActivity {
     private void checkStockAndAddToCart(final String productId, final String variantId, final int addedQuantity, final String productNameForToast) {
         if (apiService == null) {
             Toast.makeText(this, "Lỗi dịch vụ, không thể thêm vào giỏ hàng.", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "ApiService is null in checkStockAndAddToCart");
             return;
         }
         if (productId == null || productId.isEmpty() || variantId == null || variantId.isEmpty()) {
             Toast.makeText(this, "Thông tin sản phẩm không hợp lệ.", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "ProductId or VariantId is null/empty in checkStockAndAddToCart.");
             return;
         }
 
@@ -205,8 +202,6 @@ public class SearchProductActivity extends AppCompatActivity {
                             }
                         }
                     }
-                } else {
-                    Log.w(TAG, "Không thể lấy giỏ hàng hiện tại, hoặc giỏ hàng trống. Code: " + response.code());
                 }
 
                 final int finalExistingQuantity = existingQuantity;
@@ -219,11 +214,6 @@ public class SearchProductActivity extends AppCompatActivity {
                             int stockQuantity = variant.getQuantity();
                             int totalRequested = finalExistingQuantity + addedQuantity;
 
-                            Log.d(TAG, "Kiểm tra tồn kho cho VariantID: " + variantId +
-                                    ". Tồn kho: " + stockQuantity +
-                                    ". Đã có trong giỏ: " + finalExistingQuantity +
-                                    ". Muốn thêm: " + addedQuantity +
-                                    ". Tổng yêu cầu: " + totalRequested);
 
                             if (totalRequested > stockQuantity) {
                                 Toast.makeText(SearchProductActivity.this,
@@ -234,7 +224,6 @@ public class SearchProductActivity extends AppCompatActivity {
                             }
                         } else {
                             Toast.makeText(SearchProductActivity.this, "Không thể lấy thông tin tồn kho.", Toast.LENGTH_SHORT).show();
-                            Log.e(TAG, "Lỗi lấy thông tin variant. Code: " + response.code());
                         }
                     }
 
@@ -242,14 +231,12 @@ public class SearchProductActivity extends AppCompatActivity {
                     public void onFailure(Call<Variant> call, Throwable t) {
                         if (progressBarSearch != null) progressBarSearch.setVisibility(View.GONE);
                         Toast.makeText(SearchProductActivity.this, "Lỗi mạng khi kiểm tra tồn kho: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                        Log.e(TAG, "Lỗi mạng lấy thông tin variant: ", t);
                     }
                 });
             }
 
             @Override
             public void onFailure(Call<ApiResponse<Cart>> call, Throwable t) {
-                Log.w(TAG, "Lỗi mạng khi lấy giỏ hàng. Tiếp tục kiểm tra tồn kho và thêm.", t);
                 apiService.getVariantForProductById(productId, variantId).enqueue(new Callback<Variant>() {
                     @Override
                     public void onResponse(Call<Variant> call, Response<Variant> response) {
@@ -281,13 +268,12 @@ public class SearchProductActivity extends AppCompatActivity {
     private void callAddToCartApi(String productId, String variantId, int quantity, final String productNameForToast) {
         if (apiService == null) {
             Toast.makeText(this, "Lỗi dịch vụ, không thể thêm vào giỏ hàng.", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "ApiService is null in callAddToCartApi");
             return;
         }
 
         CartRequest.AddToCart request = new CartRequest.AddToCart(productId, variantId, quantity);
         if (progressBarSearch != null) progressBarSearch.setVisibility(View.VISIBLE);
-        Log.d(TAG, "Gửi yêu cầu AddToCart: " + new Gson().toJson(request));
+        Log.d(TAG, "Gửi yêu cầu thêm giỏ hàng : " + new Gson().toJson(request));
 
         apiService.addToCart(request).enqueue(new Callback<ApiResponse<Cart>>() {
             @Override
@@ -312,7 +298,6 @@ public class SearchProductActivity extends AppCompatActivity {
                         }
                     }
                     Toast.makeText(SearchProductActivity.this, errorMsg, Toast.LENGTH_LONG).show();
-                    Log.e(TAG, "Thêm vào giỏ hàng thất bại: Code " + response.code() + " - " + errorMsg);
                 }
             }
 
@@ -320,7 +305,6 @@ public class SearchProductActivity extends AppCompatActivity {
             public void onFailure(Call<ApiResponse<Cart>> call, Throwable t) {
                 if (progressBarSearch != null) progressBarSearch.setVisibility(View.GONE);
                 Toast.makeText(SearchProductActivity.this, "Lỗi mạng khi thêm vào giỏ hàng: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                Log.e(TAG, "Lỗi mạng khi thêm vào giỏ hàng: ", t);
             }
         });
     }
@@ -328,15 +312,11 @@ public class SearchProductActivity extends AppCompatActivity {
     private void loadProducts() {
         if (filteredProductList == null || suggestionList == null || productList == null ||
                 productAdapter == null || suggestionAdapter == null) {
-            Log.e(TAG, "Lỗi khởi tạo trong loadProducts. Một thành phần là null.");
             if (productList == null) productList = new ArrayList<>();
             if (filteredProductList == null) filteredProductList = new ArrayList<>();
             if (suggestionList == null) suggestionList = new ArrayList<>();
             // Không cần khởi tạo lại adapter ở đây nếu đã làm trong onCreate
             if (productAdapter == null || suggestionAdapter == null) {
-                 Log.e(TAG, "Adapter chưa được khởi tạo trước khi gọi loadProducts.");
-                 // Có thể cần khởi tạo lại adapter nếu logic cho phép,
-                 // nhưng tốt hơn là đảm bảo nó được khởi tạo trong onCreate.
                  return;
             }
         }

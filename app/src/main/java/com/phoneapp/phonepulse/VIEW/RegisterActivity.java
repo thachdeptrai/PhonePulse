@@ -50,7 +50,6 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.register_activity);
 
         apiService = RetrofitClient.getApiService(null);
-        Log.d(TAG, "ApiService initialized. Base URL: " + com.phoneapp.phonepulse.utils.Constants.BASE_URL);
 
         initViews();
 
@@ -68,7 +67,7 @@ public class RegisterActivity extends AppCompatActivity {
         layoutEmail.setEndIconOnClickListener(v -> {
             String email = edEmail.getText().toString().trim();
             if (TextUtils.isEmpty(email) || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                edEmail.setError("Please enter a valid email to send OTP");
+                edEmail.setError("Vui lòng nhập email hợp lệ để gửi mã OTP");
                 return;
             }
             sendOtpToEmail(email);
@@ -96,65 +95,62 @@ public class RegisterActivity extends AppCompatActivity {
         String otp = enteredOtp;
 
         if (TextUtils.isEmpty(name)) {
-            edFullName.setError("Full Name is required");
+            edFullName.setError("Vui lòng nhập họ và tên");
             return false;
         }
         if (TextUtils.isEmpty(email) || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            edEmail.setError("Invalid Email");
+            edEmail.setError("Email không hợp lệ");
             return false;
         }
         if (!TextUtils.isEmpty(phone) && !Patterns.PHONE.matcher(phone).matches()) {
-            edPhone.setError("Invalid Phone Number");
+            edPhone.setError("Số điện thoại không hợp lệ");
             return false;
         }
         if (TextUtils.isEmpty(password) || password.length() < 6) {
-            edPassword.setError("Password must be at least 6 characters long");
+            edPassword.setError("Mật khẩu phải có ít nhất 6 ký tự");
             return false;
         }
         Pattern pattern = Pattern.compile("^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+=|<>?{}\\[\\]~-]).{6,}$");
         Matcher matcher = pattern.matcher(password);
         if (!matcher.matches()) {
-            edPassword.setError("Password must contain at least 1 uppercase letter, 1 digit, and 1 special character");
+            edPassword.setError("Mật khẩu phải có ít nhất 1 chữ in hoa, 1 chữ số và 1 ký tự đặc biệt");
             return false;
         }
         if (!password.equals(confirmPassword)) {
-            edConfirmPassword.setError("Passwords do not match");
+            edConfirmPassword.setError("Mật khẩu không khớp");
             return false;
         }
         if (!cbTerms.isChecked()) {
-            Toast.makeText(this, "Please accept the Terms & Conditions", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Vui lòng chấp nhận Điều khoản & Điều kiện", Toast.LENGTH_SHORT).show();
             return false;
         }
         if (TextUtils.isEmpty(otp) || otp.length() != 6) {
-            Toast.makeText(this, "Please enter a valid 6-digit OTP.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Vui lòng nhập mã OTP 6 chữ số hợp lệ", Toast.LENGTH_LONG).show();
             return false;
         }
         return true;
     }
 
     private void sendOtpToEmail(String email) {
-        Toast.makeText(this, "Sending OTP...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Đang gửi OTP...", Toast.LENGTH_SHORT).show();
         apiService.sendOtp(new OtpRequest(email)).enqueue(new Callback<com.phoneapp.phonepulse.Response.OtpResponse>() {
             @Override
             public void onResponse(Call<com.phoneapp.phonepulse.Response.OtpResponse> call, Response<com.phoneapp.phonepulse.Response.OtpResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     com.phoneapp.phonepulse.Response.OtpResponse otpResponse = response.body();
                     if (otpResponse.isSuccess()) {
-                        Toast.makeText(RegisterActivity.this, "OTP sent! Please check your email.", Toast.LENGTH_LONG).show();
-                        showOtpDialog(email);
+                        Toast.makeText(RegisterActivity.this, "OTP đã được gửi! Vui lòng kiểm tra email.", Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(RegisterActivity.this, otpResponse.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 } else {
-                    Log.e(TAG, "OTP send failed. Response code: " + response.code());
-                    Toast.makeText(RegisterActivity.this, "Failed to send OTP. Please try again.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(RegisterActivity.this, "Gửi OTP thất bại. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<com.phoneapp.phonepulse.Response.OtpResponse> call, Throwable t) {
-                Log.e(TAG, "Network error during OTP send.", t);
-                Toast.makeText(RegisterActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(RegisterActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -171,7 +167,7 @@ public class RegisterActivity extends AppCompatActivity {
         TextView txtResendOtp = view.findViewById(R.id.txtResendOtp);
         TextView btnCancel = view.findViewById(R.id.btnCancel);
 
-        txtTitle.setText("A verification code has been sent to:\n" + email);
+        txtTitle.setText("Mã xác thực đã được gửi đến:\n" + email);
         AlertDialog dialog = builder.create();
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         dialog.show();
@@ -179,11 +175,11 @@ public class RegisterActivity extends AppCompatActivity {
         btnConfirmOtp.setOnClickListener(v -> {
             String otp = edtOtp.getText().toString().trim();
             if (TextUtils.isEmpty(otp) || otp.length() != 6) {
-                edtOtp.setError("Please enter a valid 6-digit OTP.");
+                edtOtp.setError("Vui lòng nhập mã OTP 6 chữ số hợp lệ");
                 return;
             }
             enteredOtp = otp;
-            Toast.makeText(RegisterActivity.this, "OTP accepted.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(RegisterActivity.this, "Xác thực OTP thành công", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
         });
 
@@ -199,9 +195,8 @@ public class RegisterActivity extends AppCompatActivity {
 
         RegisterRequest request = new RegisterRequest(name, email, phone, password, enteredOtp);
 
-        Log.d(TAG, "Starting registration for: " + email + " with OTP: " + enteredOtp);
         btnRegister.setEnabled(false);
-        Toast.makeText(this, "Registering...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Đang đăng ký...", Toast.LENGTH_SHORT).show();
 
         apiService.register(request).enqueue(new Callback<ApiResponse>() {
             @Override
@@ -222,7 +217,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                         // ✅ Hiển thị Toast thành công với dữ liệu
                         Toast.makeText(RegisterActivity.this,
-                                "Registration Successful!\n" + userData,
+                                "Đăng ký thành công!\n" + userData,
                                 Toast.LENGTH_LONG).show();
 
                         // Điều hướng về LoginActivity
@@ -236,14 +231,14 @@ public class RegisterActivity extends AppCompatActivity {
                         Toast.makeText(RegisterActivity.this, apiResponse.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 } else {
-                    Toast.makeText(RegisterActivity.this, "Registration failed. Please try again.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(RegisterActivity.this, "Đăng ký thất bại. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse> call, Throwable t) {
                 btnRegister.setEnabled(true);
-                Toast.makeText(RegisterActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(RegisterActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
 

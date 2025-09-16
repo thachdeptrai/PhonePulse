@@ -74,7 +74,6 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnPro
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView: Fragment creating view.");
         View fragmentView = inflater.inflate(R.layout.home_fragment, container, false);
 
         authToken = Constants.getToken(requireContext());

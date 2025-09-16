@@ -46,7 +46,6 @@ public class LoginActivity extends AppCompatActivity {
 
         // Khởi tạo ApiService lần đầu (chưa có token)
         apiService = RetrofitClient.getApiService(null);
-        Log.d("DEBUG", "apiService = " + apiService);
 
         // Map views
         edEmail = findViewById(R.id.edEmail);
@@ -124,7 +123,6 @@ public class LoginActivity extends AppCompatActivity {
 
         LoginRequest request = new LoginRequest(email, password);
         btnLogin.setEnabled(false); // Vô hiệu hóa nút để tránh spam click
-        Toast.makeText(this, "Đang đăng nhập...", Toast.LENGTH_SHORT).show();
 
         apiService.login(request).enqueue(new Callback<ApiResponse<LoginResponse>>() {
             @Override
@@ -161,7 +159,6 @@ public class LoginActivity extends AppCompatActivity {
                 } else {
                     // Xử lý lỗi HTTP (ví dụ: 404, 500) hoặc phản hồi không thành công
                     Toast.makeText(LoginActivity.this, "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.", Toast.LENGTH_SHORT).show();
-                    Log.e("LoginActivity", "Login failed: " + response.code() + " " + response.message());
                 }
             }
 
@@ -169,7 +166,6 @@ public class LoginActivity extends AppCompatActivity {
             public void onFailure(Call<ApiResponse<LoginResponse>> call, Throwable t) {
                 btnLogin.setEnabled(true); // Kích hoạt lại nút
                 Toast.makeText(LoginActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                Log.e("LoginActivity", "Network error during login", t);
             }
         });
     }

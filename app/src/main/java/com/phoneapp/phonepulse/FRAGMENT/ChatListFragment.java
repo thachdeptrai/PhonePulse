@@ -76,7 +76,6 @@ public class ChatListFragment extends Fragment implements ChatOverviewAdapter.On
             apiService = RetrofitClient.getApiService(token);
             loadChatOverview(token);
         } else {
-            Log.w(TAG, "Token is null or empty. Cannot load chat overview.");
             Toast.makeText(getContext(), "Vui lòng đăng nhập để xem tin nhắn.", Toast.LENGTH_LONG).show();
             // Có thể chuyển người dùng đến màn hình đăng nhập ở đây
         }
@@ -91,11 +90,9 @@ public class ChatListFragment extends Fragment implements ChatOverviewAdapter.On
 
     private void loadChatOverview(String token) {
         if (getContext() == null || getActivity() == null) {
-            Log.e(TAG, "Context or Activity is null, cannot load chat overview.");
             return;
         }
         if (apiService == null) {
-            Log.e(TAG, "ApiService is null. Cannot load chat overview.");
             Toast.makeText(getContext(), "Lỗi dịch vụ. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -105,10 +102,8 @@ public class ChatListFragment extends Fragment implements ChatOverviewAdapter.On
         String userIdFromPrefs = prefs.getString("user_id", null);
 
         if (userIdFromPrefs != null && !userIdFromPrefs.isEmpty()) {
-            Log.d(TAG, "User ID found in SharedPreferences: " + userIdFromPrefs);
             fetchOrCreateChatRoom(token, userIdFromPrefs);
         } else {
-            Log.d(TAG, "User ID not found in SharedPreferences. Fetching from API...");
             fetchUserProfileThenRoom(token);
         }
     }
@@ -121,27 +116,22 @@ public class ChatListFragment extends Fragment implements ChatOverviewAdapter.On
                     User user = response.body().getData();
                     if (user != null && user.getId() != null && !user.getId().isEmpty()) {
                         String fetchedUserId = user.getId();
-                        Log.d(TAG, "User ID fetched from API: " + fetchedUserId);
 
                         SharedPreferences prefs = requireActivity().getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE);
                         // Sử dụng key "user_id" để lưu.
                         prefs.edit().putString("user_id", fetchedUserId).apply();
-                        Log.d(TAG, "User ID saved to SharedPreferences.");
 
                         fetchOrCreateChatRoom(token, fetchedUserId);
                     } else {
-                        Log.e(TAG, "User data or User ID is null/empty in API profile response.");
                         Toast.makeText(getContext(), "Không thể lấy ID người dùng từ hồ sơ.", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Log.e(TAG, "Failed to fetch profile: " + response.code() + " - " + response.message());
                     Toast.makeText(getContext(), "Lỗi khi lấy thông tin người dùng: " + response.message(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<User>> call, @NonNull Throwable t) {
-                Log.e(TAG, "API call failed for getProfile: " + t.getMessage(), t);
                 Toast.makeText(getContext(), "Lỗi mạng khi lấy thông tin người dùng.", Toast.LENGTH_SHORT).show();
             }
         });
@@ -149,12 +139,10 @@ public class ChatListFragment extends Fragment implements ChatOverviewAdapter.On
 
     private void fetchOrCreateChatRoom(String token, String userId) {
         if (apiService == null) {
-            Log.e(TAG, "ApiService is null when trying to fetch/create chat room.");
             Toast.makeText(getContext(), "Lỗi dịch vụ, không thể tải phòng chat.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Log.d(TAG, "Fetching or creating chat room for User ID: " + userId);
         apiService.createOrGetRoom(new UserIdRequest(userId)).enqueue(new Callback<RoomApiResponse>() {
             @Override
             public void onResponse(@NonNull Call<RoomApiResponse> call, @NonNull Response<RoomApiResponse> response) {
@@ -163,7 +151,6 @@ public class ChatListFragment extends Fragment implements ChatOverviewAdapter.On
                     if (apiResponse.isSuccess() && apiResponse.getRoom() != null) {
                         ChatRoom room = apiResponse.getRoom();
                         if (room != null && room.getRoomId() != null && !room.getRoomId().isEmpty()) {
-                            Log.d(TAG, "Chat room obtained: " + room.getRoomId() + ", Status: " + room.getStatus());
                             // Xử lý chat room, ví dụ: cập nhật UI
                             ChatOverviewItem item = convertChatRoomToOverviewItem(room);
                             // Kiểm tra xem item đã tồn tại trong list chưa dựa trên roomId
@@ -247,7 +234,6 @@ public class ChatListFragment extends Fragment implements ChatOverviewAdapter.On
                     updatedAtTimestamp = date.getTime();
                 }
             } catch (ParseException e) {
-                Log.e(TAG, "Error parsing updatedAt string: " + updatedAtString, e);
                 // Giữ giá trị mặc định hoặc có thể đặt là System.currentTimeMillis()
                 // Hoặc xử lý lỗi theo cách khác nếu cần
             }
@@ -266,9 +252,7 @@ public class ChatListFragment extends Fragment implements ChatOverviewAdapter.On
 
     @Override
     public void onChatItemClick(ChatOverviewItem item) {
-        Log.d(TAG, "Chat item clicked: " + item.getRoomId());
         if (getContext() == null) {
-             Log.e(TAG, "Context is null in onChatItemClick.");
              return;
         }
         String token = Constants.getToken(requireContext().getApplicationContext());
@@ -286,16 +270,13 @@ public class ChatListFragment extends Fragment implements ChatOverviewAdapter.On
 
     private void launchChatSupportActivity(String token, String userId, String roomId) {
         if (getActivity() == null) {
-            Log.e(TAG, "Activity is null when trying to launch ChatSupportActivity.");
             return;
         }
         if (roomId == null || roomId.isEmpty()) {
-            Log.e(TAG, "Room ID is null or empty, cannot launch chat.");
             Toast.makeText(getContext(), "Không thể mở phòng chat.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Log.d(TAG, "Launching ChatSupportActivity with Token, UserID: " + userId + ", RoomID: " + roomId);
         Intent intent = new Intent(getActivity(), ChatSupportActivity.class);
         intent.putExtra("AUTH_TOKEN", token);
         intent.putExtra("USER_ID_FOR_CHAT", userId);
