@@ -334,17 +334,17 @@ public class SearchProductActivity extends AppCompatActivity {
             if (suggestionList == null) suggestionList = new ArrayList<>();
             // Không cần khởi tạo lại adapter ở đây nếu đã làm trong onCreate
             if (productAdapter == null || suggestionAdapter == null) {
-                 Log.e(TAG, "Adapter chưa được khởi tạo trước khi gọi loadProducts.");
-                 // Có thể cần khởi tạo lại adapter nếu logic cho phép,
-                 // nhưng tốt hơn là đảm bảo nó được khởi tạo trong onCreate.
-                 return;
+                Log.e(TAG, "Adapter chưa được khởi tạo trước khi gọi loadProducts.");
+                // Có thể cần khởi tạo lại adapter nếu logic cho phép,
+                // nhưng tốt hơn là đảm bảo nó được khởi tạo trong onCreate.
+                return;
             }
         }
 
         filteredProductList.clear(); // Xóa danh sách lọc cũ
         // Ban đầu, hiển thị tất cả sản phẩm nếu có, hoặc danh sách rỗng nếu không có query
         if (productList != null && !productList.isEmpty()) {
-             // Nếu muốn hiển thị tất cả sản phẩm ban đầu khi et_search rỗng:
+            // Nếu muốn hiển thị tất cả sản phẩm ban đầu khi et_search rỗng:
             if(et_search.getText().toString().trim().isEmpty()){
                 filteredProductList.addAll(productList);
             }
@@ -404,7 +404,7 @@ public class SearchProductActivity extends AppCompatActivity {
 
         List<ProductGirdItem> top = new ArrayList<>(productList);
         // Sắp xếp gợi ý nếu cần, ví dụ theo số lượng bán (nếu có)
-        // Collections.sort(top, (p1, p2) -> Integer.compare(p2.getSold_count(), p1.getSold_count()));
+// Collections.sort(top, (p1, p2) -> Integer.compare(p2.getSold_count(), p1.getSold_count()));
 
         suggestionList.clear();
         suggestionList.addAll(top.subList(0, Math.min(5, top.size()))); // Hiển thị 5 gợi ý

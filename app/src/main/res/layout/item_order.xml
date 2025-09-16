@@ -91,7 +91,7 @@
                 android:layout_weight="1"
                 android:text="Tổng tiền: 520.000đ"
                 android:textSize="20sp"
-                android:textColor="#FF6B00"
+                android:textColor="#FF0000"
                 android:textStyle="bold" />
 
             <TextView

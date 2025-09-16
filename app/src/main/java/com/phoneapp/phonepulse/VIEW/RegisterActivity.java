@@ -169,7 +169,7 @@ public class RegisterActivity extends AppCompatActivity {
         edtOtp = view.findViewById(R.id.edtOtp);
         Button btnConfirmOtp = view.findViewById(R.id.btnVerifyOtp);
         TextView txtResendOtp = view.findViewById(R.id.txtResendOtp);
-        TextView btnCancel = view.findViewById(R.id.btnCancel);
+
 
         txtTitle.setText("A verification code has been sent to:\n" + email);
         AlertDialog dialog = builder.create();
@@ -187,7 +187,6 @@ public class RegisterActivity extends AppCompatActivity {
             dialog.dismiss();
         });
 
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
         txtResendOtp.setOnClickListener(v -> sendOtpToEmail(email));
     }
 

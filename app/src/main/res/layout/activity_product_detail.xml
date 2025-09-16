@@ -30,7 +30,7 @@
                 android:layout_gravity="end"
                 android:layout_marginEnd="16dp"
                 android:src="@drawable/ic_heart_outline"
-                app:tint="#03A9F4"
+                app:tint="#FFFFFF"
                 android:contentDescription="Favourite" />
 
             <TextView
@@ -67,7 +67,6 @@
                     android:layout_gravity="top|end"
                     android:elevation="2dp"
                     android:gravity="center"
-                    android:text="3"
                     android:textColor="@android:color/white"
                     android:textSize="10sp"
                     android:textStyle="bold" />
@@ -89,7 +88,7 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="400dp"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
@@ -140,7 +139,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="₫25.990.000"
-                            android:textColor="#FF6B00"
+                            android:textColor="#E91E1E"
                             android:textSize="24sp"
                             android:textStyle="bold" />
 
@@ -150,7 +149,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
-                            android:background="@drawable/discount_badge_bg"
+                            android:background="@drawable/button_gradient"
                             android:paddingHorizontal="8dp"
                             android:paddingVertical="4dp"
                             android:text="-15%"
@@ -315,10 +314,10 @@
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:text="Thêm vào giỏ"
-            android:textColor="#FF6B00"
+            android:textColor="@color/primary_purple"
             android:textSize="16sp"
             app:cornerRadius="8dp"
-            app:strokeColor="#FF6B00"
+            app:strokeColor="@color/primary_purple"
             app:strokeWidth="2dp" />
 
         <com.google.android.material.button.MaterialButton
@@ -327,7 +326,7 @@
             android:layout_height="56dp"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:backgroundTint="#FF6B00"
+            android:background="@drawable/button_gradient"
             android:text="Mua ngay"
             android:textColor="@android:color/white"
             android:textSize="16sp"

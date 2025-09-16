@@ -10,11 +10,11 @@
         android:id="@+id/toolbar_chat_support"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:theme="?attr/actionBarTheme"
+        android:background="@drawable/gradient_toolbar"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:title="Hỗ trợ trực tuyến"
-        app:titleTextColor="@android:color/white"
-        android:layout_alignParentTop="true"/>
+        app:navigationIcon="?attr/homeAsUpIndicator" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_chat_messages"

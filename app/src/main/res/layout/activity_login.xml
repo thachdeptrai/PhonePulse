@@ -179,7 +179,7 @@
                 style="@style/PrimaryButton"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:text="Sign In"
+                android:text="Đăng nhập"
                 android:backgroundTint="#673AB7"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"

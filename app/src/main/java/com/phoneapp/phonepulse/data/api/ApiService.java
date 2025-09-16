@@ -231,15 +231,10 @@ public interface ApiService {
     @PUT("/api/notifications/{id}/read")
     Call<ApiResponse> markNotificationAsRead(@Header("Authorization") String token, @Path("id") String id);
 
-    // ========== Chat ==========
+// ========== Chat ==========
 
     @POST("api/chat/room")
     Call<RoomApiResponse> createOrGetRoom(@Body UserIdRequest userIdRequest);
-
-    // API để lấy tất cả tin nhắn của một phòng chat cụ thể
-// API để lấy tất cả tin nhắn của một phòng chat cụ thể
     @GET("api/chat/messages/{roomId}")
     Call<MessagesListApiResponse> getMessagesByRoomId(@Path("roomId") String roomId);
-
-
 }

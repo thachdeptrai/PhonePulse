@@ -49,7 +49,7 @@
             android:layout_marginStart="8dp"
             android:text="Áp dụng"
             android:textColor="@android:color/white"
-            android:backgroundTint="#FF5722"
+            android:background="@drawable/gradient_toolbar"
             android:textStyle="bold" />
     </LinearLayout>
 

@@ -70,7 +70,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp"
-        android:backgroundTint="@color/shopee_orange"
+        android:background="@drawable/button_gradient"
         android:textColor="@android:color/white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
