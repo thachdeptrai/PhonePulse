@@ -58,23 +58,27 @@ public class LoginActivity extends AppCompatActivity {
         // Load saved credentials if "Remember Me" was checked previously
         loadSavedCredentials();
 
-        // Check for extras from RegisterActivity
+        // Nhận dữ liệu từ RegisterActivity
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("REGISTERED_EMAIL")) {
             String registeredEmail = intent.getStringExtra("REGISTERED_EMAIL");
             String registeredPassword = intent.getStringExtra("REGISTERED_PASSWORD");
 
-            if (registeredEmail != null) {
+            if (!TextUtils.isEmpty(registeredEmail)) {
                 edEmail.setText(registeredEmail);
             }
-            if (registeredPassword != null) {
+            if (!TextUtils.isEmpty(registeredPassword)) {
                 edPassword.setText(registeredPassword);
             }
+
             Toast.makeText(this, "Đăng ký thành công! Vui lòng đăng nhập.", Toast.LENGTH_LONG).show();
-            // Xóa extras để tránh hiển thị lại khi xoay màn hình hoặc khởi tạo lại Activity
+
+            // Xóa extras để tránh hiển thị lại khi xoay màn hình
             intent.removeExtra("REGISTERED_EMAIL");
             intent.removeExtra("REGISTERED_PASSWORD");
         }
+
+
 
         // Set click listeners
         btnLogin.setOnClickListener(v -> {

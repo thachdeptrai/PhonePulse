@@ -302,10 +302,18 @@ public class MomoPaymentWebViewActivity extends AppCompatActivity {
     }
 
     private void navigateToHistory() {
+        // Gửi kết quả về Cart_Activity
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("order_success", true);
+        setResult(RESULT_OK, resultIntent);
+
+        // Sau đó điều hướng sang History
         Intent intent = new Intent(MomoPaymentWebViewActivity.this, DashBoar_Activity.class);
         intent.putExtra("navigate_to_history", true);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
-        finish();
+
+        finish(); // Quan trọng: đóng activity và trả result
     }
+
 }

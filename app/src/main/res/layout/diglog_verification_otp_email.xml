@@ -15,7 +15,7 @@
         android:text="Nhập mã OTP"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="#000000"
+        android:textColor="@color/gradient_text"
         android:layout_marginBottom="8dp"/>
 
     <TextView
@@ -23,7 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Mã OTP đã được gửi tới email:"
-        android:textColor="#44000000"
+        android:textColor="@color/gradient_text"
         android:textSize="14sp"
         android:layout_marginBottom="16dp"/>
 
@@ -37,9 +37,9 @@
         app:boxCornerRadiusTopEnd="12dp"
         app:boxCornerRadiusBottomStart="12dp"
         app:boxCornerRadiusBottomEnd="12dp"
-        app:boxStrokeColor="#000000"
-        app:boxStrokeErrorColor="#000000"
-        app:hintTextColor="@color/gray">
+        app:boxStrokeColor="@color/gradient_text"
+        app:boxStrokeErrorColor="@color/red"
+        app:hintTextColor="@color/gradient_text">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edtOtp"
@@ -48,7 +48,7 @@
             android:inputType="number"
             android:maxLength="6"
             android:textSize="16sp"
-            android:textColor="#000000" />
+            android:textColor="@color/gradient_text" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
@@ -57,7 +57,7 @@
         android:layout_height="wrap_content"
         android:text="Xác minh"
         android:layout_marginTop="16dp"
-        android:background="@drawable/button_gradient"
+        android:backgroundTint="@color/primary_purple"
         android:textColor="@color/white"
         app:cornerRadius="24dp" />
 
@@ -66,11 +66,36 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Chưa nhận được mã? Gửi lại"
-        android:textColor="#5F000000"
+        android:textColor="@color/gradient_text"
         android:textStyle="bold"
         android:textSize="14sp"
         android:layout_marginTop="12dp"
         android:layout_gravity="center_horizontal" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="24dp"
+        android:gravity="end">
 
+        <TextView
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HUỶ"
+            android:textColor="@color/red"
+            android:textStyle="bold"
+            android:paddingEnd="24dp"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:id="@+id/btnConfirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="XÁC NHẬN"
+            android:textColor="@color/gradient_text"
+            android:textStyle="bold"
+            android:textSize="14sp"/>
+    </LinearLayout>
 </LinearLayout>

@@ -182,7 +182,8 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
             if ("cancelled".equals(status)) {
                 cancelled++;
             }
-            else if (("pending".equals(status) || "confirmed".equals(status)) && "not_shipped".equals(shippingStatus)) {
+            // 🚨 Giữ trạng thái pending ngay cả khi đã thanh toán
+            else if ("pending".equals(status)) {
                 processing++;
             }
             else if ("confirmed".equals(status) && "shipping".equals(shippingStatus)) {
@@ -192,6 +193,7 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
                 completed++;
             }
         }
+
 
 
         tvTotal.setText("Tổng số đơn: " + total);
@@ -219,7 +221,7 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
 
         ApiService service = RetrofitClient.getApiService(token);
         Call<ApiResponse> call = service.cancelOrder("Bearer " + token, orderId);
-        Log.d(TAG, "cancelOrderApi: Attempting to cancel order with ID: " + orderId);
+        Log.d(TAG, "📌 Gửi yêu cầu hủy đơn hàng, ID: " + orderId);
 
         call.enqueue(new Callback<ApiResponse>() {
             @Override
@@ -227,21 +229,21 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
                 if (!isAdded()) return;
 
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Log.i(TAG, "✅ Đơn hàng " + orderId + " đã hủy thành công trên server. Lý do: " + reason);
+                    Log.i(TAG, "✅ Đơn hàng " + orderId + " đã được hủy thành công. Lý do: " + reason);
                     Toast.makeText(getContext(), "Đã hủy đơn: " + reason, Toast.LENGTH_SHORT).show();
 
                     Order canceledOrder = findOrderInCurrentList(orderId);
                     if (canceledOrder != null && canceledOrder.getItems() != null && !canceledOrder.getItems().isEmpty()) {
-                        Log.d(TAG, "📦 Found " + canceledOrder.getItems().size() + " items in the canceled order. Proceeding to update stock on server.");
+                        Log.d(TAG, "📦 Đã tìm thấy " + canceledOrder.getItems().size() + " sản phẩm trong đơn hủy. Tiến hành cập nhật tồn kho trên server.");
                         updateStockOnServer(canceledOrder.getItems());
                     } else {
-                        Log.w(TAG, "⚠️ Canceled order not found locally or has no items. Cannot update stock. Refreshing order list.");
+                        Log.w(TAG, "⚠️ Không tìm thấy đơn hàng trong danh sách hiện tại hoặc không có sản phẩm. Làm mới danh sách đơn.");
                         fetchOrdersFromApi();
                     }
 
                 } else {
-                    String errorMessage = "Hủy thất bại: " + (response.body() != null ? response.body().getMessage() : "Lỗi không xác định.");
-                    Log.e(TAG, "❌ Lỗi khi hủy đơn hàng " + orderId + ". Mã lỗi: " + response.code() + ". Chi tiết: " + errorMessage);
+                    String errorMessage = "Hủy đơn thất bại: " + (response.body() != null ? response.body().getMessage() : "Lỗi không xác định.");
+                    Log.e(TAG, "❌ Hủy đơn hàng " + orderId + " thất bại. Mã lỗi: " + response.code() + ". Chi tiết: " + errorMessage);
                     Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -250,113 +252,114 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
             public void onFailure(Call<ApiResponse> call, Throwable t) {
                 if (!isAdded()) return;
                 Toast.makeText(getContext(), "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "🌐 Lỗi mạng/API khi hủy đơn hàng " + orderId, t);
+                Log.e(TAG, "🌐 Lỗi mạng khi hủy đơn hàng " + orderId + ": " + t.getMessage(), t);
             }
         });
     }
 
 
-
     /**
      * Cập nhật tồn kho trên server cho từng sản phẩm trong đơn hàng đã hủy.
-     * Phương thức này đảm bảo lấy số lượng tồn kho hiện tại từ server trước,
-     * sau đó cộng thêm số lượng sản phẩm đã hủy và gửi lại tổng số lượng mới.
+     * Số lượng sẽ được cộng thêm đúng bằng số lượng khách đã đặt.
      *
-     * @param items Danh sách các OrderItem từ đơn hàng đã bị hủy.
+     * @param items Danh sách OrderItem từ đơn hàng đã bị hủy.
      */
     private void updateStockOnServer(List<OrderItem> items) {
         final CountDownLatch latch = new CountDownLatch(items.size());
         Log.d(TAG, "✨ Bắt đầu cập nhật tồn kho cho " + items.size() + " sản phẩm.");
 
         for (OrderItem item : items) {
-            final String variantId = item.getVariantId(); // Đảm bảo final
-            final String productId = item.getProductId(); // Đảm bảo final
-            final int quantityToIncrease = item.getQuantity(); // Đảm bảo final
+            final String variantId = item.getVariantId();
+            final String productId = item.getProductId();
+            final int quantityToIncrease = item.getQuantity();
 
-            if (variantId == null || variantId.trim().isEmpty() || productId == null || productId.trim().isEmpty()) {
-                Log.w(TAG, "⚠️ Bỏ qua cập nhật tồn kho: Thiếu variantId hoặc productId cho một sản phẩm.");
+            if (variantId == null || variantId.trim().isEmpty() ||
+                    productId == null || productId.trim().isEmpty()) {
+                Log.w(TAG, "⚠️ Bỏ qua: Thiếu variantId hoặc productId cho sản phẩm.");
                 latch.countDown();
                 continue;
             }
 
-            // --- BƯỚC 1: GỌI API ĐỂ LẤY THÔNG TIN BIẾN THỂ HIỆN TẠI TỪ SERVER ---
-            // Yêu cầu API để lấy chi tiết biến thể bao gồm số lượng tồn kho hiện tại
+            // --- BƯỚC 1: Lấy số lượng tồn kho hiện tại ---
             apiService.getVariantForProductById(productId, variantId)
-                    .enqueue(new Callback<Variant>() { // <--- **Đã thay đổi ở đây để khớp với Call<Variant>**
+                    .enqueue(new Callback<Variant>() {
                         @Override
                         public void onResponse(Call<Variant> call, Response<Variant> response) {
-                            if (response.isSuccessful() && response.body() != null) { // body() sẽ là Variant, không phải ApiResponse
-                                Variant currentVariant = response.body(); // Lấy trực tiếp đối tượng Variant
-                                int currentServerQuantity = currentVariant.getQuantity(); // Số lượng tồn kho hiện tại trên server
-                                int newTotalQuantity = currentServerQuantity + quantityToIncrease; // Tính toán tổng số lượng mới
+                            if (response.isSuccessful() && response.body() != null) {
+                                Variant currentVariant = response.body();
+                                int currentServerQuantity = currentVariant.getQuantity();
+                                int newTotalQuantity = currentServerQuantity + quantityToIncrease;
 
-                                Log.d(TAG, "🚀 Đã lấy tồn kho hiện tại từ server cho Variant ID: " + variantId + " là " + currentServerQuantity + ". Tính toán tồn kho mới: " + newTotalQuantity);
+                                Log.d(TAG, "📦 Variant ID " + variantId +
+                                        " tồn kho hiện tại: " + currentServerQuantity +
+                                        " | hoàn trả thêm: " + quantityToIncrease +
+                                        " | tồn kho mới = " + newTotalQuantity);
 
-                                // --- BƯỚC 2: GỌI API ĐỂ CẬP NHẬT TỒN KHO VỚI SỐ LƯỢNG MỚI ĐÃ TÍNH TOÁN ---
-                                // Tạo payload chỉ chứa số lượng mới (và có thể các trường khác nếu API PUT yêu cầu đầy đủ)
+                                // --- BƯỚC 2: Gọi API update với số lượng mới ---
                                 Variant updatedVariantPayload = new Variant();
-                                // Quan trọng: Nếu API PUT yêu cầu tất cả các trường, hãy sao chép từ currentVariant
-                                // Ví dụ: updatedVariantPayload.setId(currentVariant.getId());
-                                // updatedVariantPayload.setName(currentVariant.getName());
-                                // updatedVariantPayload.setPrice(currentVariant.getPrice());
-                                // ... và các thuộc tính khác
-                                updatedVariantPayload.setQuantity(newTotalQuantity); // Đặt số lượng LÀ TỔNG MỚI
+                                updatedVariantPayload.setId(currentVariant.getId());
+                                updatedVariantPayload.setQuantity(newTotalQuantity);
+
+                                // Nếu API yêu cầu các field khác -> copy thêm:
+                                updatedVariantPayload.setPrice(currentVariant.getPrice());
+                                updatedVariantPayload.setColor(currentVariant.getColor());
+                                updatedVariantPayload.setSize(currentVariant.getSize());
 
                                 apiService.updateVariantForProductById(productId, variantId, updatedVariantPayload)
-                                        .enqueue(new Callback<ApiResponse<Variant>>() { // API update này vẫn là ApiResponse<Variant>
+                                        .enqueue(new Callback<ApiResponse<Variant>>() {
                                             @Override
                                             public void onResponse(Call<ApiResponse<Variant>> call, Response<ApiResponse<Variant>> response) {
                                                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                                                    Log.i(TAG, "✅ Tồn kho đã cập nhật thành công cho variant ID: " + variantId + ". Tồn kho mới trên server: " + (response.body().getData() != null ? response.body().getData().getQuantity() : "N/A"));
+                                                    Log.i(TAG, "✅ Cập nhật thành công Variant ID: " + variantId +
+                                                            ". Tồn kho mới: " + response.body().getData().getQuantity());
                                                 } else {
-                                                    String errorDetail = (response.body() != null ? response.body().getMessage() : "Không rõ lỗi.");
-                                                    Log.e(TAG, "❌ Lỗi cập nhật tồn kho cho variant ID: " + variantId +
-                                                            ". Mã lỗi: " + response.code() + ". Chi tiết: " + errorDetail + ". Payload: " + (call.request().body() != null ? call.request().body().toString() : "null"));
+                                                    String err = response.body() != null ? response.body().getMessage() : "Không rõ lỗi.";
+                                                    Log.e(TAG, "❌ Lỗi update Variant ID: " + variantId +
+                                                            " | Mã lỗi: " + response.code() +
+                                                            " | Chi tiết: " + err);
                                                 }
-                                                latch.countDown(); // Đảm bảo latch được giảm sau khi yêu cầu thứ 2 hoàn thành
+                                                latch.countDown();
                                             }
 
                                             @Override
                                             public void onFailure(Call<ApiResponse<Variant>> call, Throwable t) {
-                                                Log.e(TAG, "🌐 Lỗi mạng/API khi gửi cập nhật tồn kho cho variant ID: " + variantId + ": " + t.getMessage(), t);
-                                                latch.countDown(); // Đảm bảo latch được giảm ngay cả khi yêu cầu thứ 2 thất bại
+                                                Log.e(TAG, "🌐 Lỗi mạng khi update Variant ID: " + variantId, t);
+                                                latch.countDown();
                                             }
                                         });
 
                             } else {
-                                // Nếu response.isSuccessful() là false hoặc body là null
-                                // Hoặc nếu body có nhưng quantity là null hoặc không hợp lệ (tùy thuộc vào model Variant của bạn)
-                                String errorMessage;
-                                if (response.code() == 404) {
-                                    errorMessage = "Không tìm thấy biến thể.";
-                                } else {
-                                    errorMessage = "Lỗi khi lấy dữ liệu tồn kho: " + response.code() + " - " + response.message();
-                                    try {
-                                        if (response.errorBody() != null) {
-                                            errorMessage += " (" + response.errorBody().string() + ")";
-                                        }
-                                    } catch (Exception e) {
-                                        Log.e(TAG, "Lỗi đọc errorBody: " + e.getMessage());
-                                    }
-                                }
-                                Log.e(TAG, "❌ Lỗi khi lấy tồn kho hiện tại cho variant ID: " + variantId + ". Chi tiết: " + errorMessage);
-                                // Có thể thông báo cho người dùng ở đây nếu lỗi nghiêm trọng
-                                // Toast.makeText(getContext(), "Không thể lấy tồn kho cho " + item.getName(), Toast.LENGTH_SHORT).show();
-                                latch.countDown(); // Đảm bảo latch được giảm nếu yêu cầu đầu tiên thất bại
+                                Log.e(TAG, "❌ Không lấy được tồn kho cho Variant ID: " + variantId +
+                                        " | Mã lỗi: " + response.code());
+                                latch.countDown();
                             }
                         }
 
                         @Override
-                        public void onFailure(Call<Variant> call, Throwable t) { // <--- **Đã thay đổi ở đây để khớp với Call<Variant>**
-                            Log.e(TAG, "🌐 Lỗi mạng/API khi lấy tồn kho hiện tại cho variant ID: " + variantId + ": " + t.getMessage(), t);
-                            // Có thể thông báo cho người dùng ở đây
-                            // Toast.makeText(getContext(), "Lỗi kết nối khi lấy tồn kho cho " + item.getName(), Toast.LENGTH_SHORT).show();
-                            latch.countDown(); // Đảm bảo latch được giảm ngay cả khi yêu cầu đầu tiên thất bại
+                        public void onFailure(Call<Variant> call, Throwable t) {
+                            Log.e(TAG, "🌐 Lỗi mạng khi lấy tồn kho Variant ID: " + variantId, t);
+                            latch.countDown();
                         }
                     });
         }
 
-        // Luồng riêng để chờ tất cả các cập nhật tồn kho hoàn tất
+        // --- BƯỚC 3: Sau khi tất cả cập nhật xong thì refresh ---
+        new Thread(() -> {
+            try {
+                latch.await();
+                if (isAdded()) {
+                    Log.d(TAG, "🎉 Hoàn tất cập nhật tồn kho. Làm mới danh sách đơn.");
+                    requireActivity().runOnUiThread(this::fetchOrdersFromApi);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                Log.e(TAG, "⚠️ Luồng bị gián đoạn khi chờ cập nhật tồn kho.", e);
+            }
+        }).start();
+
+
+
+    // Luồng riêng để chờ tất cả các cập nhật tồn kho hoàn tất
         new Thread(() -> {
             try {
                 latch.await(); // Chờ tất cả các latch.countDown() hoàn thành

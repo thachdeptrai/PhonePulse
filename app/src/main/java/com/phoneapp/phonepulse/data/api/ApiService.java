@@ -4,6 +4,7 @@ import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.Response.MessagesApiResponse;
 import com.phoneapp.phonepulse.Response.MessagesListApiResponse;
 import com.phoneapp.phonepulse.Response.OtpResponse;
+import com.phoneapp.phonepulse.Response.RegisterResponse;
 import com.phoneapp.phonepulse.Response.RoomApiResponse;
 import com.phoneapp.phonepulse.models.*;
 import com.phoneapp.phonepulse.Response.LoginResponse;
@@ -20,14 +21,13 @@ public interface ApiService {
 
     // ========== AUTH ==========
     @POST("/api/users/register")
-    Call<ApiResponse> register(@Body RegisterRequest body);
+    Call<RegisterResponse> register(@Body RegisterRequest body);
 
     @POST("/api/users/login")
     Call<ApiResponse<LoginResponse>> login(@Body LoginRequest body);
     @POST("/api/users/send-otp")
     Call<OtpResponse> sendOtp(@Body OtpRequest request);
-    @POST("/api/users/verify-otp")
-    Call<OtpResponse> verifyOtp(@Body VerifyOtpRequest request);
+
     @POST("/api/users/logout")
     Call<ApiResponse> logout(@Header("Authorization") String token);
 

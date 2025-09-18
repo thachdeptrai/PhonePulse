@@ -1,6 +1,7 @@
 package com.phoneapp.phonepulse.repository;
 
 import com.phoneapp.phonepulse.Response.LoginResponse;
+import com.phoneapp.phonepulse.Response.RegisterResponse;
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.request.LoginRequest;
@@ -19,7 +20,7 @@ public class AuthRepository {
         return apiService.login(request);
     }
 
-    public Call<ApiResponse> register(RegisterRequest request) {
+    public Call<RegisterResponse> register(RegisterRequest request) {
         return apiService.register(request);
     }
 

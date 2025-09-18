@@ -102,17 +102,13 @@ public class Oder_Activity extends AppCompatActivity {
             confirmMomoPayment(resultCode, orderId, message, extraData);
         }
     }
-
-
     // ✅ Phương thức mới để xử lý Intent ban đầu (khi đến từ giỏ hàng)
     private void handleInitialOrderIntent(Intent intent) {
-        getIntentData(); // Lấy dữ liệu từ Intent
-        if (orderItemList != null && !orderItemList.isEmpty()) {
-            loadVariantsInCart();
-        } else {
-            Log.w(TAG, "Không tìm thấy sản phẩm trong Intent để đặt hàng.");
-            Toast.makeText(this, "Không có sản phẩm nào để đặt hàng. Vui lòng thêm sản phẩm vào giỏ hàng.", Toast.LENGTH_LONG).show();
+        getIntentData(); // ✅ lấy dữ liệu orderItemList
+        if (orderItemList == null || orderItemList.isEmpty()) {
+            Toast.makeText(this, "Không có sản phẩm nào để đặt hàng.", Toast.LENGTH_LONG).show();
             finish();
+            return;
         }
 
         // Khởi tạo ApiService sớm
@@ -121,24 +117,15 @@ public class Oder_Activity extends AppCompatActivity {
         initViews();
         setupToolbar();
         bindUserToUI();
-        getIntentData();
         setupListeners();
 
-        if (orderItemList != null && !orderItemList.isEmpty()) {
-            loadVariantsInCart();
-        } else {
-            Log.w(TAG, "Không tìm thấy sản phẩm trong Intent để đặt hàng. Kết thúc Activity.");
-            Toast.makeText(this, "Không có sản phẩm nào để đặt hàng. Vui lòng thêm sản phẩm vào giỏ hàng.", Toast.LENGTH_LONG).show();
-            finish();
-        }
-
+        loadVariantsInCart(); // ✅ chỉ gọi 1 lần
     }
+
     private void confirmMomoPayment(int resultCode, String orderId, String message, String extraData) {
-        Log.d(TAG, "confirmMomoPayment: Calling API to confirm payment.");
 
         String token = Constants.getToken(Oder_Activity.this);
         if (token == null || token.isEmpty()) {
-            Log.e(TAG, "confirmMomoPayment: Token is null or empty. Cannot confirm payment.");
             Toast.makeText(this, "Vui lòng đăng nhập để xác nhận thanh toán.", Toast.LENGTH_SHORT).show();
         }
 
@@ -168,13 +155,11 @@ public class Oder_Activity extends AppCompatActivity {
                         updateVariantStockOnServer(orderItemList);
 
                     } else {
-                        Log.e(TAG, "Thanh toán thất bại: " + apiResponse.getMessage());
                         Toast.makeText(Oder_Activity.this,
                                 "Thanh toán thất bại: " + apiResponse.getMessage(),
                                 Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Log.e(TAG, "Lỗi khi xác nhận thanh toán. HTTP " + response.code() + " - " + response.message());
                     Toast.makeText(Oder_Activity.this,
                             "Lỗi khi xác nhận thanh toán! (HTTP " + response.code() + ")",
                             Toast.LENGTH_SHORT).show();
@@ -183,7 +168,6 @@ public class Oder_Activity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ApiResponse<Order>> call, Throwable t) {
-                Log.e(TAG, "API lỗi: " + t.getMessage(), t);
                 Toast.makeText(Oder_Activity.this,
                         "API lỗi: " + t.getMessage(),
                         Toast.LENGTH_SHORT).show();
@@ -372,6 +356,17 @@ public class Oder_Activity extends AppCompatActivity {
             return;
         }
 
+
+        // ✅ Check địa chỉ trước khi gọi API
+        if (!isValidAddress(shippingAddress)) {
+            Toast.makeText(this,
+                    "⚠️ Vui lòng nhập địa chỉ hợp lệ trước khi đặt hàng.",
+                    Toast.LENGTH_LONG).show();
+            return; // Dừng lại, không cho đặt hàng
+        }
+
+        // 🚀 Nếu địa chỉ hợp lệ thì tiếp tục flow đặt hàng
+        Log.d(TAG, "Địa chỉ hợp lệ: " + shippingAddress);
         String paymentMethod = radioCod.isChecked() ? "COD" : "MOMO";
         String note = etOrderNote.getText().toString().trim();
         int discount = calculateDiscount(subtotal, selectedVoucher);
@@ -819,4 +814,22 @@ public class Oder_Activity extends AppCompatActivity {
             return 0;
         }
     }
+    // Hàm kiểm tra địa chỉ
+    private boolean isValidAddress(String address) {
+        if (address == null || address.trim().isEmpty()) {
+            return false; // Địa chỉ rỗng
+        }
+
+        // Địa chỉ phải ít nhất 10 ký tự
+        if (address.length() < 10) {
+            return false;
+        }
+
+        // Bắt buộc phải có cả chữ và số
+        boolean hasLetter = address.matches(".*[a-zA-ZÀ-ỹ].*");
+        boolean hasNumber = address.matches(".*\\d.*");
+
+        return hasLetter && hasNumber;
+    }
+
 }

@@ -2,6 +2,7 @@ package com.phoneapp.phonepulse.FRAGMENT;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -47,7 +49,8 @@ import retrofit2.Response;
 
 public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnProductActionListener {
     private static final String TAG = "Home_FRAGMENT";
-
+    private Handler bannerHandler = new Handler();
+    private Runnable bannerRunnable;
     private ViewPager2 vpBanner;
     private RecyclerView rvProductList;
     private EditText etSearchProduct;
@@ -127,10 +130,64 @@ public class Home_FRAGMENT extends Fragment implements ItemProduct_ADAPTER.OnPro
         rvProductList.setLayoutManager(gridLayoutManager);
         rvProductList.setAdapter(productListAdapter);
         rvProductList.setNestedScrollingEnabled(false);
+        rvProductList.setHasFixedSize(true);
     }
 
     private void setupViewPager() {
+
         // banner setup nếu cần
+        bannerAdapter = new BannerAdapter(requireContext(), getSampleBanners());
+        vpBanner.setAdapter(bannerAdapter);
+        vpBanner.setClipToPadding(false);
+        vpBanner.setClipChildren(false);
+        vpBanner.setOffscreenPageLimit(3);
+        vpBanner.getChildAt(0).setOverScrollMode(RecyclerView.OVER_SCROLL_NEVER);
+        // Auto slide
+          bannerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                int currentItem = vpBanner.getCurrentItem();
+                int totalItems = bannerAdapter.getItemCount();
+
+                if (currentItem < totalItems - 1) {
+                    vpBanner.setCurrentItem(currentItem + 1);
+                } else {
+                    vpBanner.setCurrentItem(0); // quay lại ảnh đầu
+                }
+
+                bannerHandler.postDelayed(this, 2000); // 1.5 giây
+            }
+        };
+
+        // Bắt đầu auto chạy
+        bannerHandler.postDelayed(bannerRunnable, 2000);
+
+        // Dừng khi user vuốt bằng tay
+        vpBanner.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                bannerHandler.removeCallbacks(bannerRunnable);
+                bannerHandler.postDelayed(bannerRunnable, 2000);
+            }
+        });
+    }
+
+    // Đừng quên clear handler khi Fragment/Activity destroy
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        bannerHandler.removeCallbacks(bannerRunnable);
+    }
+
+    private List<String> getSampleBanners() {
+        List<String> banners = new ArrayList<>();
+        banners.add("https://img.pikbest.com/origin/10/01/53/35bpIkbEsTBzN.png!sw800");
+        banners.add("https://cdn.tgdd.vn/hoi-dap/1355217/banner-tgdd-800x300.jpg");
+        banners.add("https://i.ytimg.com/vi/vMVwdSp489E/maxresdefault.jpg");
+        banners.add("https://cdn.tgdd.vn/hoi-dap/1355217/banner-tgdd-800x300.jpg");
+        return banners;
+
     }
 
     private void setupSearchFunction() {

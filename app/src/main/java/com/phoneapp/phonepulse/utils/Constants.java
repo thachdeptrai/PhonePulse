@@ -7,9 +7,6 @@ public class Constants {
      // public static final String BASE_URL = "http://192.168.1.9:5000";
   //  public static final String BASE_URL = "http://10.24.32.145:5000";
   //public static final String BASE_URL = "http://192.168.1.9:5000";
-
-    //  public static final String BASE_URL = "http://192.168.100.188:5000"; // sơn home
-
     //  public static final String BASE_URL = "http://10.128.57.42:5000";
 
     //  public static final String BASE_URL = "http://10.128.57.42:5000"; x
@@ -17,7 +14,9 @@ public class Constants {
     //  public static final String BASE_URL = "http://10.24.49.108:5000"; mạng trường
 
     //public static final String BASE_URL = "http://192.168.101.132:5000";
-    public static final String BASE_URL = "http://192.168.1.36:3000";// HCT
+  //  public static final String BASE_URL = "http://192.168.2.9:5000";// HCT
+    public static final String BASE_URL = "http://192.168.0.124:5000"; // trọ
+
 
 
     public static final int TIMEOUT = 30;
