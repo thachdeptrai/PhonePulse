@@ -63,10 +63,7 @@ public class Profile_FRAGMENT extends Fragment {
         View view = inflater.inflate(R.layout.profile_fragment, container, false);
         initViews(view);
 
-        // ✅ Load từ SharedPreferences trước (hiển thị ngay)
         loadUserFromPrefs();
-
-        // ✅ Sau đó gọi API để cập nhật dữ liệu mới nhất
         loadUserProfile();
 
         NextHistory_Oder();
@@ -76,7 +73,8 @@ public class Profile_FRAGMENT extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1001 && getActivity() != null && resultCode == getActivity().RESULT_OK && data != null) {
+        if (requestCode == 1001 && getActivity() != null && resultCode == getActivity().RESULT_OK) {
+            loadUserFromPrefs();
             loadUserProfile();
         }
     }
@@ -96,24 +94,20 @@ public class Profile_FRAGMENT extends Fragment {
         detailsLayout = view.findViewById(R.id.details_layout);
         ivExpandDetails = view.findViewById(R.id.iv_expand_details);
 
-        // Edit Profile
         tvFullName.setOnClickListener(v -> goToEditProfile());
         tvPhone.setOnClickListener(v -> goToEditProfile());
         tvAddress.setOnClickListener(v -> goToEditProfile());
         tvGender.setOnClickListener(v -> goToEditProfile());
         tvBirthday.setOnClickListener(v -> goToEditProfile());
 
-        // Đổi mật khẩu
         LinearLayout changePasswordLayout = view.findViewById(R.id.change_password_layout);
         changePasswordLayout.setOnClickListener(v -> {
             if (getContext() == null) return;
             startActivity(new Intent(requireContext(), ChangePasswordActivity.class));
         });
 
-        // Logout
         btn_settings.setOnClickListener(v -> showLogoutConfirmationDialog());
 
-        // Expand/Collapse personal info
         personalInfoHeader.setOnClickListener(v -> {
             if (detailsLayout.getVisibility() == View.GONE) {
                 detailsLayout.setVisibility(View.VISIBLE);
@@ -140,10 +134,13 @@ public class Profile_FRAGMENT extends Fragment {
 
         tvFullName.setText(prefs.getString("fullname", "Chưa có tên"));
         tvEmail.setText(prefs.getString("email", "Không có email"));
-        tvPhone.setText(prefs.getString("phone", "Không có số điện thoại"));
         tvAddress.setText(prefs.getString("address", "Chưa có địa chỉ"));
         tvGender.setText(prefs.getString("gender", "Không chia sẻ"));
         tvBirthday.setText(prefs.getString("birthday", "Chưa có ngày sinh"));
+
+        // Load và định dạng số điện thoại
+        String rawPhone = prefs.getString("phone", "Không có số điện thoại");
+        tvPhone.setText(formatPhoneNumber(rawPhone));
 
         String avatar = prefs.getString("avatar_url", "");
         if (!TextUtils.isEmpty(avatar)) {
@@ -203,7 +200,6 @@ public class Profile_FRAGMENT extends Fragment {
         if (getContext() == null) return;
         this.currentUser = user;
 
-        // Lưu lại vào SharedPreferences
         SharedPreferences prefs = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("fullname", user.getName());
@@ -217,9 +213,12 @@ public class Profile_FRAGMENT extends Fragment {
 
         tvFullName.setText(nonNull(user.getName(), "Chưa có tên"));
         tvEmail.setText(nonNull(user.getEmail(), "Không có email"));
-        tvPhone.setText(nonNull(user.getPhone(), "Không có số điện thoại"));
         tvAddress.setText(nonNull(user.getAddress(), "Chưa có địa chỉ"));
         tvGender.setText(nonNull(user.getGender(), "Không chia sẻ"));
+
+        // Định dạng và hiển thị số điện thoại
+        String formattedPhone = formatPhoneNumber(user.getPhone());
+        tvPhone.setText(formattedPhone);
 
         if (!TextUtils.isEmpty(user.getBirthday())) {
             String rawBirthday = user.getBirthday();
@@ -244,6 +243,26 @@ public class Profile_FRAGMENT extends Fragment {
         } else {
             imgAvatar.setImageResource(R.drawable.avatar_circle);
         }
+    }
+
+    // Phương thức mới để định dạng số điện thoại
+    private String formatPhoneNumber(String phone) {
+        if (phone == null || phone.trim().isEmpty()) {
+            return "Không có số điện thoại";
+        }
+        String cleanPhone = phone.replaceAll("[^0-9]", "");
+        if (cleanPhone.length() == 9) { // Số 9 chữ số (thiếu số 0 đầu)
+            return String.format("0%s %s %s",
+                    cleanPhone.substring(0, 3),
+                    cleanPhone.substring(3, 6),
+                    cleanPhone.substring(6));
+        } else if (cleanPhone.length() == 10) { // Số 10 chữ số
+            return String.format("%s %s %s",
+                    cleanPhone.substring(0, 4),
+                    cleanPhone.substring(4, 7),
+                    cleanPhone.substring(7));
+        }
+        return phone; // Giữ nguyên nếu không đúng định dạng
     }
 
     private String nonNull(String value, String fallback) {
@@ -311,11 +330,9 @@ public class Profile_FRAGMENT extends Fragment {
     private void clearLocalDataAndNavigate() {
         if (getContext() == null) return;
 
-        // Xóa token
         SharedPreferences tokenPrefs = requireContext().getSharedPreferences(Constants.SHARED_PREFS, Context.MODE_PRIVATE);
         tokenPrefs.edit().remove(Constants.TOKEN_KEY).apply();
 
-        // Xóa user_prefs
         SharedPreferences userPrefs = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         userPrefs.edit().clear().apply();
 

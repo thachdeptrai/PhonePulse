@@ -65,7 +65,6 @@ public class ItemProduct_ADAPTER extends RecyclerView.Adapter<ItemProduct_ADAPTE
         } else {
             imageUrl = item.getImage_url();
         }
-
         if (!TextUtils.isEmpty(imageUrl)) {
             if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
                 Glide.with(context)

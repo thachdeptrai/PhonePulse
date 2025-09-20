@@ -1,6 +1,7 @@
 package com.phoneapp.phonepulse.Adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.util.Log;
@@ -69,6 +70,17 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         holder.tvOrderDate.setText("Ngày đặt: " + formatDate(order.getCreatedDate()));
         holder.tvOrderStatus.setText("Trạng thái: " + mapTrangThaiDonHang(order.getStatus()));
         holder.tvOrderTotal.setText("Tổng tiền: " + formatCurrency(order.getFinalPrice()));
+
+        // ===== Hiển thị thông tin khách hàng =====
+        SharedPreferences prefs = holder.itemView.getContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        String fullname = prefs.getString("fullname", "Chưa có tên");
+        String phone = prefs.getString("phone", "Không có số điện thoại");
+        String address = prefs.getString("address", "Chưa có địa chỉ");
+
+        holder.tvCustomerName.setText("Khách hàng: " + fullname);
+        holder.tvCustomerPhone.setText("SĐT: " + phone);
+        holder.tvCustomerAddress.setText("Địa chỉ: " + address);
+
 
         // ===== Trạng thái thanh toán =====
         String paymentStatus = safeString(order.getPaymentStatus()).toLowerCase(Locale.ROOT);
@@ -153,7 +165,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
     // ================== ViewHolder ==================
     public static class OrderViewHolder extends RecyclerView.ViewHolder {
-        TextView tvOrderId, tvOrderDate, tvOrderStatus, tvOrderTotal, tvPaymentStatus;
+        TextView tvOrderId, tvOrderDate, tvOrderStatus, tvOrderTotal, tvPaymentStatus,
+                tvCustomerName, tvCustomerPhone, tvCustomerAddress;
         RecyclerView rvOrderItems;
         MaterialButton btnCancelOrder;
 
@@ -166,6 +179,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
             tvPaymentStatus = itemView.findViewById(R.id.tv_payment_status);
             rvOrderItems = itemView.findViewById(R.id.rv_order_items);
             btnCancelOrder = itemView.findViewById(R.id.btn_cancel_order);
+
+            tvCustomerName = itemView.findViewById(R.id.tv_customer_name);
+            tvCustomerPhone = itemView.findViewById(R.id.tv_customer_phone);
+            tvCustomerAddress = itemView.findViewById(R.id.tv_customer_address);
         }
     }
 

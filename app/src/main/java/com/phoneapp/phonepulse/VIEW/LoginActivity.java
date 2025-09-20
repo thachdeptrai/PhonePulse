@@ -92,7 +92,8 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         tvForgotPassword.setOnClickListener(v -> {
-            Toast.makeText(LoginActivity.this, "Chức năng quên mật khẩu đang phát triển!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, "Chức năng quên mật khẩu đang phát triển!",
+                    Toast.LENGTH_SHORT).show();
             // Example: startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
         });
     }

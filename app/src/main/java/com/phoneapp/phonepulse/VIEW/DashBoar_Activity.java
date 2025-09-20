@@ -9,6 +9,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
@@ -16,16 +18,26 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.gson.Gson;
 import com.phoneapp.phonepulse.FRAGMENT.CategoryFragment;
 import com.phoneapp.phonepulse.FRAGMENT.ChatListFragment;
 import com.phoneapp.phonepulse.FRAGMENT.FavouriteFragment;
 import com.phoneapp.phonepulse.FRAGMENT.Home_FRAGMENT;
+import com.phoneapp.phonepulse.FRAGMENT.OrderHistory_FRAGMENT;
 import com.phoneapp.phonepulse.FRAGMENT.Profile_FRAGMENT;
 import com.phoneapp.phonepulse.R;
-import com.phoneapp.phonepulse.FRAGMENT.OrderHistory_FRAGMENT; // Thêm import cho OrderHistory_FRAGMENT
+import com.phoneapp.phonepulse.Response.ApiResponse;
+import com.phoneapp.phonepulse.data.api.ApiService;
+import com.phoneapp.phonepulse.data.api.RetrofitClient;
+import com.phoneapp.phonepulse.models.User;
 import com.phoneapp.phonepulse.request.OrderItem;
+import com.phoneapp.phonepulse.utils.Constants;
 
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DashBoar_Activity extends AppCompatActivity {
 
@@ -36,6 +48,17 @@ public class DashBoar_Activity extends AppCompatActivity {
     private EditText et_search_product;
     private CardView card_search_view;
 
+    // ✅ ActivityResultLauncher để nhận kết quả từ EditProfileActivity
+    private final ActivityResultLauncher<Intent> editProfileLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    // Người dùng đã cập nhật profile xong -> load lại Home và không cần kiểm tra lại
+                    replaceFragment(new Home_FRAGMENT(), "Trang Chủ", true);
+                } else {
+                    // Nếu người dùng thoát ra mà chưa cập nhật, tiếp tục kiểm tra để buộc họ cập nhật lại.
+                    // Loại bỏ dòng này nếu bạn muốn người dùng tự cập nhật
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +79,7 @@ public class DashBoar_Activity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        // Xử lý sự kiện nhấn vào giỏ hàng
+        // Sự kiện giỏ hàng
         iv_cart_icon.setOnClickListener(view -> {
             Intent intent = new Intent(DashBoar_Activity.this, Cart_Activity.class);
             startActivity(intent);
@@ -65,7 +88,7 @@ public class DashBoar_Activity extends AppCompatActivity {
         // Xử lý Intent đến từ Oder_Activity
         handleIntent(getIntent());
 
-        // Xử lý chọn BottomNavigationView
+        // BottomNavigation xử lý chọn tab
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_home) {
@@ -80,17 +103,8 @@ public class DashBoar_Activity extends AppCompatActivity {
             } else if (id == R.id.nav_favorites) {
                 replaceFragment(new FavouriteFragment(), "Yêu thích", true);
                 return true;
-            } else if (id == R.id.nav_message) { // THÊM BLOCK NÀY
-                // Xử lý khi chọn mục "Tin nhắn"
-                // Tùy chọn 1: Nếu bạn muốn hiển thị danh sách chat bằng một Fragment
-                // Giả sử bạn sẽ tạo một Fragment tên là ChatListFragment
-                // Tham số thứ 3 (showSearchBar) có thể cần điều chỉnh tùy theo thiết kế của bạn
-                replaceFragment(new ChatListFragment(), "Tin Nhắn", false); // Hoặc true nếu muốn thanh tìm kiếm
-
-                // Tùy chọn 2: Nếu bạn muốn mở một Activity mới cho danh sách chat
-                // Intent intent = new Intent(DashBoar_Activity.this, ChatListActivity.class); // Tạo Activity này
-                // startActivity(intent);
-
+            } else if (id == R.id.nav_message) {
+                replaceFragment(new ChatListFragment(), "Tin Nhắn", false);
                 return true;
             }
             return false;
@@ -99,40 +113,41 @@ public class DashBoar_Activity extends AppCompatActivity {
         // Theo dõi để ẩn BottomNavigation nếu đang ở Fragment toàn màn hình
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
             Fragment current = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-
             if (current != null && "FULLSCREEN".equals(current.getTag())) {
                 bottomNavigationView.setVisibility(View.GONE);
             } else {
                 bottomNavigationView.setVisibility(View.VISIBLE);
             }
         });
+
+        // ✅ Bỏ checkUserProfile() tại đây để không tự động chuyển hướng khi khởi động
+        // Thay vào đó, bạn có thể gọi nó trong Profile_FRAGMENT để kiểm tra và hiển thị thông báo.
+        // Hoặc bạn có thể gọi ở đây nhưng chỉ hiển thị Toast.
+
+        // Ví dụ, gọi checkUserProfile() để chỉ hiển thị thông báo, không chuyển hướng
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        // Xử lý Intent nếu Activity đã tồn tại
         handleIntent(intent);
     }
 
     private void handleIntent(Intent intent) {
         if (intent == null) {
-            // Load Home mặc định nếu không có Intent nào
             if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) == null) {
                 replaceFragment(new Home_FRAGMENT(), "Trang Chủ", true);
             }
             return;
         }
 
-        // ✅ Tách riêng việc xử lý deep link/redirect từ MoMo hoặc các nguồn khác
         String fragmentToOpen = intent.getStringExtra("openFragment");
         if ("TatCaDonHang".equals(fragmentToOpen)) {
             bottomNavigationView.setSelectedItemId(R.id.nav_profile);
             replaceFragment(new OrderHistory_FRAGMENT(), "Lịch sử đơn hàng", false);
-            return; // Rất quan trọng để kết thúc xử lý tại đây
+            return;
         }
 
-        // ✅ Xử lý các Intent truyền dữ liệu khác (ví dụ: từ Cart_Activity)
         ArrayList<OrderItem> orderItems = intent.getParcelableArrayListExtra("order_items");
         if (orderItems != null && !orderItems.isEmpty()) {
             OrderHistory_FRAGMENT fragment = new OrderHistory_FRAGMENT();
@@ -145,26 +160,17 @@ public class DashBoar_Activity extends AppCompatActivity {
             return;
         }
 
-        // ✅ Xử lý các cờ Intent đơn giản (ví dụ: chỉ điều hướng)
         if (intent.getBooleanExtra("navigate_to_history", false)) {
             bottomNavigationView.setSelectedItemId(R.id.nav_profile);
             replaceFragment(new OrderHistory_FRAGMENT(), "Lịch sử đơn hàng", false);
             return;
         }
 
-        // Load Home mặc định nếu không có điều kiện nào ở trên được thỏa mãn
         if (getSupportFragmentManager().findFragmentById(R.id.fragment_container) == null) {
             replaceFragment(new Home_FRAGMENT(), "Trang Chủ", true);
         }
     }
 
-
-    /**
-     * Thay thế Fragment và cập nhật trạng thái UI tương ứng.
-     * @param fragment Fragment mới sẽ được hiển thị.
-     * @param title Tiêu đề của Toolbar cho Fragment đó.
-     * @param showSearchBar True nếu muốn hiển thị thanh tìm kiếm, False nếu muốn ẩn.
-     */
     private void replaceFragment(Fragment fragment, String title, boolean showSearchBar) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, fragment);
@@ -174,14 +180,14 @@ public class DashBoar_Activity extends AppCompatActivity {
         }
         transaction.commit();
 
-        // Cập nhật tiêu đề Toolbar
         if (tv_greeting != null) {
             tv_greeting.setText(title);
         }
 
-        // Ẩn hoặc hiện thanh tìm kiếm
-        if (card_search_view != null) {
-            card_search_view.setVisibility(showSearchBar ? View.VISIBLE : View.GONE);
-        }
     }
+
+    // ✅ Thêm tham số `autoRedirect` để kiểm soát hành vi chuyển hướng
+
+
+
 }

@@ -44,6 +44,14 @@ public interface ApiService {
 
     @DELETE("/api/users/delete-self")
     Call<ApiResponse> deleteAccount(@Header("Authorization") String token);
+    @GET("p/")
+    Call<List<Province>> getProvinces();
+
+    @GET("p/{code}?depth=2")
+    Call<Province> getProvinceDetail(@Path("code") int code);
+
+    @GET("d/{code}?depth=2")
+    Call<District> getDistrictDetail(@Path("code") int code);
 
              // ========== PRODUCTS ==========
     @GET("/api/products")
