@@ -12,7 +12,7 @@
         <domain includeSubdomains="true">192.168.101.132</domain>
         <domain includeSubdomains="true">192.168.2.9</domain>
         <domain includeSubdomains="true">192.168.16.131</domain>
-        <domain includeSubdomains="true">https://6e5eb0980f3e.ngrok-free.app</domain>
+        <domain includeSubdomains="true">https://b8fc34d4a070.ngrok-free.app</domain>
 
     </domain-config>
 </network-security-config>
