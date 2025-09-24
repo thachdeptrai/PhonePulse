@@ -4,6 +4,7 @@ import com.phoneapp.phonepulse.Response.ApiResponse;
 import com.phoneapp.phonepulse.Response.MessagesApiResponse;
 import com.phoneapp.phonepulse.Response.MessagesListApiResponse;
 import com.phoneapp.phonepulse.Response.OtpResponse;
+import com.phoneapp.phonepulse.Response.RegisterResponse;
 import com.phoneapp.phonepulse.Response.RoomApiResponse;
 import com.phoneapp.phonepulse.models.*;
 import com.phoneapp.phonepulse.Response.LoginResponse;
@@ -20,14 +21,13 @@ public interface ApiService {
 
     // ========== AUTH ==========
     @POST("/api/users/register")
-    Call<ApiResponse> register(@Body RegisterRequest body);
+    Call<RegisterResponse> register(@Body RegisterRequest body);
 
     @POST("/api/users/login")
     Call<ApiResponse<LoginResponse>> login(@Body LoginRequest body);
     @POST("/api/users/send-otp")
     Call<OtpResponse> sendOtp(@Body OtpRequest request);
-    @POST("/api/users/verify-otp")
-    Call<OtpResponse> verifyOtp(@Body VerifyOtpRequest request);
+
     @POST("/api/users/logout")
     Call<ApiResponse> logout(@Header("Authorization") String token);
 
@@ -44,8 +44,16 @@ public interface ApiService {
 
     @DELETE("/api/users/delete-self")
     Call<ApiResponse> deleteAccount(@Header("Authorization") String token);
+    @GET("p/")
+    Call<List<Province>> getProvinces();
 
-    // ========== PRODUCTS ==========
+    @GET("p/{code}?depth=2")
+    Call<Province> getProvinceDetail(@Path("code") int code);
+
+    @GET("d/{code}?depth=2")
+    Call<District> getDistrictDetail(@Path("code") int code);
+
+             // ========== PRODUCTS ==========
     @GET("/api/products")
     Call<List<Product>> getAllProductsRaw();
 
@@ -53,6 +61,9 @@ public interface ApiService {
     // Backend route: GET /api/products/{id}
     @GET("/api/products/{id}")
     Call<Product> getProductById(@Path("id") String id);
+    // ✅ Lấy danh sách sản phẩm cho Home (chỉ có ảnh + thông tin cơ bản)
+    @GET("/api/products/grid")
+    Call<List<ProductGirdItem>> getAllProductsGrid();
 
 
     // ========== CATEGORY ==========
@@ -228,15 +239,10 @@ public interface ApiService {
     @PUT("/api/notifications/{id}/read")
     Call<ApiResponse> markNotificationAsRead(@Header("Authorization") String token, @Path("id") String id);
 
-    // ========== Chat ==========
+// ========== Chat ==========
 
     @POST("api/chat/room")
     Call<RoomApiResponse> createOrGetRoom(@Body UserIdRequest userIdRequest);
-
-    // API để lấy tất cả tin nhắn của một phòng chat cụ thể
-// API để lấy tất cả tin nhắn của một phòng chat cụ thể
     @GET("api/chat/messages/{roomId}")
     Call<MessagesListApiResponse> getMessagesByRoomId(@Path("roomId") String roomId);
-
-
 }

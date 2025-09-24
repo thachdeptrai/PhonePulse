@@ -16,8 +16,8 @@ public class Message {
     @SerializedName("messageType")
     private String messageType; // Ví dụ: "text", "image"
     private boolean isSentByCurrentUser; // Để adapter biết cách hiển thị (trái/phải)
-                                        // Trường này thường không có trong JSON từ server,
-                                        // mà được tính toán ở client.
+    // Trường này thường không có trong JSON từ server,
+    // mà được tính toán ở client.
 
     // Constructor trống cho một số thư viện (ví dụ: Firebase) hoặc để tạo thủ công
     public Message() {

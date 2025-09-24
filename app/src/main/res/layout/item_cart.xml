@@ -39,7 +39,7 @@
                 android:id="@+id/tv_product_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="tên sp  "
+                android:text="Tên sản phẩm"
                 android:textStyle="bold"
                 android:textColor="@color/black"
                 android:maxLines="2"
@@ -50,7 +50,7 @@
                 android:id="@+id/tv_variant_details"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Màu: Xanh Titan, Kích thước: 6.7 inch, Bộ nhớ: 256GB, RAM: 8GB"
+                android:text="Màu: "
                 android:textColor="@android:color/darker_gray"
                 android:textSize="14sp"
                 android:layout_marginTop="2dp"
@@ -69,7 +69,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="₫24.990.000"
-                    android:textColor="#FF6B00"
+                    android:textColor="#FF0000"
                     android:textSize="16sp"
                     android:textStyle="bold"/>
             </LinearLayout>
@@ -128,7 +128,7 @@
                 android:src="@drawable/xoa"
                 android:contentDescription="Delete item"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:tint="@color/red"
+                android:tint="#FF0F00"
                 android:scaleType="centerInside"
                 tools:ignore="UseAppTint" />
         </androidx.cardview.widget.CardView>

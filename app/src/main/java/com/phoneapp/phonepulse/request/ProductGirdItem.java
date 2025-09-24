@@ -2,6 +2,7 @@ package com.phoneapp.phonepulse.request;
 
 import com.google.gson.annotations.SerializedName;
 import com.phoneapp.phonepulse.models.ProductImage;
+import com.phoneapp.phonepulse.models.Variant;
 
 import java.io.Serializable;
 import java.util.List;
@@ -38,6 +39,8 @@ public class ProductGirdItem implements Serializable {
     private List<ProductImage> images;
     @SerializedName("category_id")
     private String category_id;
+    @SerializedName("variants")
+    private List<Variant> variants;
 
     public ProductGirdItem() {
     }
@@ -154,5 +157,12 @@ public class ProductGirdItem implements Serializable {
 
     public void setImages(List<ProductImage> images) {
         this.images = images;
+    }
+    public List<Variant> getVariants() {
+        return variants;
+    }
+
+    public void setVariants(List<Variant> variants) {
+        this.variants = variants;
     }
 }

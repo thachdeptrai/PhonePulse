@@ -25,6 +25,41 @@
             android:textSize="16sp"
             android:textColor="#212121" />
 
+        <!-- Thông tin khách hàng -->
+        <TextView
+            android:id="@+id/tv_customer_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tên: Nguyễn Văn A"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#212121"
+            android:layout_marginTop="6dp" />
+
+        <TextView
+            android:id="@+id/tv_customer_phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SĐT: 0909 123 456"
+            android:textSize="14sp"
+            android:textColor="#333333"
+            android:layout_marginTop="3dp"
+            android:drawablePadding="6dp"
+            android:paddingStart="4dp" />
+
+        <TextView
+            android:id="@+id/tv_customer_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Địa chỉ: 123 Lý Thường Kiệt, Q.10, TP.HCM"
+            android:textSize="14sp"
+            android:textColor="#333333"
+            android:layout_marginTop="3dp"
+            android:drawablePadding="6dp"
+            android:paddingStart="4dp"
+            android:ellipsize="end"
+            android:singleLine="false" />
+
         <!-- Ngày đặt -->
         <TextView
             android:id="@+id/tv_order_date"
@@ -33,7 +68,8 @@
             android:text="Ngày đặt: 30/05/2025"
             android:textSize="14sp"
             android:textColor="#757575"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="8dp" />
+
 
         <!-- Trạng thái đơn -->
         <LinearLayout
@@ -91,7 +127,7 @@
                 android:layout_weight="1"
                 android:text="Tổng tiền: 520.000đ"
                 android:textSize="20sp"
-                android:textColor="#FF6B00"
+                android:textColor="#FF0000"
                 android:textStyle="bold" />
 
             <TextView
@@ -125,6 +161,5 @@
             android:layout_marginBottom="4dp"
             android:backgroundTint="@android:color/transparent"
             android:padding="10dp"/>
-
     </LinearLayout>
 </androidx.cardview.widget.CardView>

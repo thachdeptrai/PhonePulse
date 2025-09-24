@@ -1,8 +1,8 @@
 package com.phoneapp.phonepulse.models;
 
 import com.google.gson.annotations.SerializedName;
-
-import java.util.List; // Thêm import này cho List
+import java.util.ArrayList;
+import java.util.List;
 
 public class Product {
     @SerializedName("_id")
@@ -14,12 +14,16 @@ public class Product {
     @SerializedName("description")
     private String description;
 
-    @SerializedName("category_id") // Backend populate thành đối tượng Category
+    @SerializedName("category_id")
     private Category category;
 
-    // THAY ĐỔI: Đây là mảng các biến thể mà backend trả về
-    @SerializedName("variants") // Tên trường trong JSON là "variants"
-    private List<Variant> variants; // Loại dữ liệu là List<Variant>
+    // Khi backend trả về list
+    @SerializedName("variants")
+    private List<Variant> variants;
+
+    // Khi backend chỉ trả về 1 variant (object)
+    @SerializedName("variant")
+    private Variant variant;
 
     @SerializedName("created_date")
     private String createdDate;
@@ -30,48 +34,12 @@ public class Product {
     @SerializedName("discount")
     private int discount = 0;
 
-    // THAY ĐỔI: Đổi tên trường và @SerializedName cho khớp với backend
-    @SerializedName("productImage") // Tên trường trong JSON là "productImage"
+    @SerializedName("productImage")
     private ProductImage productImage;
 
-    // Constructor mặc định (cần cho Gson)
-    public Product() {
-    }
+    public Product() {}
 
-    // Constructor đầy đủ (Tùy chọn, nhưng hữu ích)
-    public Product(String id, String name, String description, Category category,
-                   List<Variant> variants, String createdDate, String modifiedDate,
-                   int discount, ProductImage productImage) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.category = category;
-        this.variants = variants;
-        this.createdDate = createdDate;
-        this.modifiedDate = modifiedDate;
-        this.discount = discount;
-        this.productImage = productImage;
-    }
-
-
-    // ✅ Hàm an toàn để lấy image URL (vẫn giữ nguyên, rất tốt!)
-    public String getImageUrlSafe() {
-        if (productImage != null && productImage.getImageUrl() != null) {
-            return productImage.getImageUrl();
-        } else {
-            // Có thể trả về một URL ảnh mặc định nếu không có ảnh nào
-            return null;
-        }
-    }
-
-    // --- Getters and Setters ---
-    // Đảm bảo có getter/setter cho List<Variant>
-    public List<Variant> getVariants() { return variants; }
-    public void setVariants(List<Variant> variants) { this.variants = variants; }
-
-    public ProductImage getProductImage() { return productImage; }
-    public void setProductImage(ProductImage productImage) { this.productImage = productImage; }
-
+    // --- Getters & Setters ---
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
@@ -84,6 +52,22 @@ public class Product {
     public Category getCategory() { return category; }
     public void setCategory(Category category) { this.category = category; }
 
+    public List<Variant> getVariants() {
+        // Nếu API trả về object variant thì tự chuyển thành list 1 phần tử
+        if ((variants == null || variants.isEmpty()) && variant != null) {
+            variants = new ArrayList<>();
+            variants.add(variant);
+        }
+        return variants;
+    }
+    public void setVariants(List<Variant> variants) { this.variants = variants; }
+
+    public Variant getVariant() { return variant; }
+    public void setVariant(Variant variant) { this.variant = variant; }
+
+    public ProductImage getProductImage() { return productImage; }
+    public void setProductImage(ProductImage productImage) { this.productImage = productImage; }
+
     public String getCreatedDate() { return createdDate; }
     public void setCreatedDate(String createdDate) { this.createdDate = createdDate; }
 
@@ -92,4 +76,9 @@ public class Product {
 
     public int getDiscount() { return discount; }
     public void setDiscount(int discount) { this.discount = discount; }
+
+    // ✅ Lấy image url an toàn
+    public String getImageUrlSafe() {
+        return productImage != null ? productImage.getImageUrl() : null;
+    }
 }

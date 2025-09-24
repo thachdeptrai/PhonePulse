@@ -34,13 +34,11 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
 
     public OrderItemAdapter(List<OrderItem> orderItems) {
         this.orderItems = orderItems;
-        Log.d(TAG, "✅ Khởi tạo OrderItemAdapter - số lượng OrderItems = " + (orderItems != null ? orderItems.size() : 0));
     }
 
     @NonNull
     @Override
     public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.d(TAG, "📦 onCreateViewHolder() - Tạo ViewHolder mới.");
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_order_product, parent, false);
         return new OrderViewHolder(view);
@@ -49,23 +47,16 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
     @Override
     public void onBindViewHolder(@NonNull OrderViewHolder holder, @SuppressLint("RecyclerView") int position) {
         if (orderItems == null || position < 0 || position >= orderItems.size()) {
-            Log.w(TAG, "⚠ onBindViewHolder: Danh sách orderItems rỗng hoặc vị trí không hợp lệ.");
             return;
         }
 
         OrderItem item = orderItems.get(position);
         if (item == null) {
-            Log.w(TAG, "⚠ onBindViewHolder: OrderItem tại vị trí " + position + " là null.");
             setDefaultUI(holder);
             return;
         }
 
-        Log.d(TAG, "➡️ onBindViewHolder: Xử lý OrderItem #" + position +
-                " - ProductId: " + item.getProductId() +
-                ", VariantId: " + item.getVariantId() +
-                ", Giá trong OrderItem (ban đầu): " + item.getPrice() +
-                ", Tên trong OrderItem (ban đầu): " + item.getName() +
-                ", Biến thể trong OrderItem (ban đầu): " + item.getVariant());
+
 
 
         // --- LUÔN LUÔN hiển thị giá và số lượng từ OrderItem đã có ---
@@ -82,10 +73,8 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
                 item.getPrice() <= 0; // Vẫn cần kiểm tra để lấy giá nếu nó là 0
 
         if (needsProductApiCall) {
-            Log.d(TAG, "🟡 OrderItem #" + position + " thiếu thông tin hiển thị (tên, ảnh, biến thể) hoặc giá là 0. Gọi API Product.");
             String token = Constants.getToken(holder.itemView.getContext());
             if (token == null || token.isEmpty()) {
-                Log.e(TAG, "❌ Token rỗng khi gọi API Product cho OrderItem #" + position);
                 setDefaultUI(holder);
                 return;
             }
@@ -96,7 +85,6 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
                 public void onResponse(Call<Product> call, Response<Product> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         Product product = response.body();
-                        Log.d(TAG, "✅ API Product thành công cho ProductId: " + item.getProductId() + ", Tên SP từ API: " + product.getName());
 
                         // Cập nhật tên sản phẩm nếu OrderItem chưa có
                         if (TextUtils.isEmpty(item.getName())) {
@@ -116,7 +104,6 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
                                     .placeholder(R.drawable.placeholder_product)
                                     .error(R.drawable.placeholder_product)
                                     .into(holder.ivImage);
-                            Log.d(TAG, "    Cập nhật ảnh từ API: " + item.getImageUrl());
                         } else {
                             // Nếu OrderItem đã có ảnh, tải nó
                             Glide.with(holder.itemView.getContext())
@@ -144,11 +131,9 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
                                     } else if (!TextUtils.isEmpty(sizeName)) {
                                         displayVariantName = sizeName;
                                     }
-                                    Log.d(TAG, "    Tìm thấy Variant khớp. Tên biến thể (từ Color/Size): " + displayVariantName);
 
                                     // Lấy giá từ Variant
                                     priceFromVariant = v.getPrice();
-                                    Log.d(TAG, "    Giá từ Variant (API): " + priceFromVariant);
                                     break;
                                 }
                             }
@@ -157,7 +142,6 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
                         // Cập nhật trường 'variant' trong OrderItem nếu chưa có (để hiển thị và lưu tạm)
                         if (TextUtils.isEmpty(item.getVariant())) {
                             item.setVariant(displayVariantName);
-                            Log.d(TAG, "    Cập nhật tên biến thể trong OrderItem: " + item.getVariant());
                         }
 
                         // Hiển thị tên biến thể (ưu tiên từ OrderItem, nếu không thì dùng từ API fetch)
@@ -169,7 +153,6 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
                             holder.tvVariant.setVisibility(View.VISIBLE);
                         } else {
                             holder.tvVariant.setVisibility(View.GONE);
-                            Log.d(TAG, "    Không thể hiển thị tên biến thể.");
                         }
 
 
@@ -178,7 +161,6 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
                         if (item.getPrice() <= 0 && priceFromVariant > 0) {
                             item.setPrice((int)priceFromVariant); // Cập nhật giá của OrderItem
                             holder.tvPrice.setText("Giá: " + formatCurrency(item.getPrice())); // Cập nhật UI
-                            Log.d(TAG, "    ⚠ Đã cập nhật giá OrderItem từ API Variant (giá ban đầu là 0): " + item.getPrice());
                         } else if (item.getPrice() <= 0 && priceFromVariant <= 0) {
                             Log.w(TAG, "    Không thể lấy giá biến thể từ API để cập nhật OrderItem (giá biến thể cũng là 0 hoặc không tìm thấy).");
                             // Giữ nguyên giá 0 hoặc cập nhật UI để cảnh báo
@@ -193,22 +175,18 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
                                 errorBody = response.errorBody().string();
                             }
                         } catch (Exception e) {
-                            Log.e(TAG, "Lỗi đọc errorBody khi gọi API Product: " + e.getMessage());
                         }
-                        Log.e(TAG, "❌ Lỗi phản hồi API Product cho ProductId: " + item.getProductId() + ". Code: " + response.code() + ", Message: " + response.message() + ", Error Body: " + errorBody);
                         setDefaultUI(holder);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Product> call, Throwable t) {
-                    Log.e(TAG, "❌ Lỗi kết nối API Product cho ProductId: " + item.getProductId() + ": " + t.getMessage(), t);
                     setDefaultUI(holder);
                 }
             });
         } else {
             // Nếu đã có dữ liệu đầy đủ trong OrderItem (tên, ảnh, biến thể và giá khác 0) thì bind trực tiếp
-            Log.d(TAG, "✅ OrderItem #" + position + " đã có đủ thông tin. Bind trực tiếp.");
             holder.tvName.setText(item.getName());
             holder.tvVariant.setText(item.getVariant());
             holder.tvVariant.setVisibility(!TextUtils.isEmpty(item.getVariant()) ? View.VISIBLE : View.GONE);
@@ -243,7 +221,6 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
         try {
             return String.format("%,d đ", amount).replace(",", ".");
         } catch (Exception e) {
-            Log.w(TAG, "⚠ Định dạng tiền tệ thất bại: " + e.getMessage());
             return amount + " đ";
         }
     }

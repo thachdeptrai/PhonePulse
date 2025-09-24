@@ -6,11 +6,13 @@
         <domain includeSubdomains="true">192.168.1.9</domain>
         <domain includeSubdomains="true">10.128.57.42</domain>
         <domain includeSubdomains="true">10.24.60.244</domain>
-        <domain includeSubdomains="true">10.24.32.145</domain>
-        <domain includeSubdomains="true">192.168.100.188</domain>
+        <domain includeSubdomains="true">10.24.40.144   </domain>
+        <domain includeSubdomains="true">192.168.0.124</domain>
         <domain includeSubdomains="true">10.24.49.108</domain>
-        <domain includeSubdomains="true">https://c5b87c444556.ngrok-free.app</domain>
-
+        <domain includeSubdomains="true">192.168.101.132</domain>
+        <domain includeSubdomains="true">192.168.2.9</domain>
+        <domain includeSubdomains="true">192.168.16.131</domain>
+        <domain includeSubdomains="true">https://b8fc34d4a070.ngrok-free.app</domain>
 
     </domain-config>
 </network-security-config>

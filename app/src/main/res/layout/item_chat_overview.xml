@@ -43,7 +43,7 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
-                tools:text="Hỗ trợ Khách hàng" />
+                tools:text="Bạn cẫn hỗ trợ ?" />
 
             <!-- Last Message Preview -->
             <TextView

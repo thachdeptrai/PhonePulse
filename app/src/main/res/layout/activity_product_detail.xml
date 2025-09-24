@@ -15,8 +15,6 @@
 
 
         <androidx.appcompat.widget.Toolbar
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/toolbar_product_detail"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -32,7 +30,7 @@
                 android:layout_gravity="end"
                 android:layout_marginEnd="16dp"
                 android:src="@drawable/ic_heart_outline"
-                app:tint="#03A9F4"
+                app:tint="#FFFFFF"
                 android:contentDescription="Favourite" />
 
             <TextView
@@ -69,7 +67,6 @@
                     android:layout_gravity="top|end"
                     android:elevation="2dp"
                     android:gravity="center"
-                    android:text="3"
                     android:textColor="@android:color/white"
                     android:textSize="10sp"
                     android:textStyle="bold" />
@@ -91,7 +88,7 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="400dp"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
@@ -142,7 +139,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="₫25.990.000"
-                            android:textColor="#FF6B00"
+                            android:textColor="#E91E1E"
                             android:textSize="24sp"
                             android:textStyle="bold" />
 
@@ -152,7 +149,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
-                            android:background="@drawable/discount_badge_bg"
+                            android:background="@drawable/button_gradient"
                             android:paddingHorizontal="8dp"
                             android:paddingVertical="4dp"
                             android:text="-15%"
@@ -184,7 +181,6 @@
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
-
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -218,80 +214,54 @@
                         android:textColor="#666666"
                         android:textSize="14sp" />
 
-                    <LinearLayout
-                        android:id="@+id/ll_color_options"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_color_options"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:background="@drawable/bg_option_selected"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="8dp"
-                            android:text="Xám Titan"
-                            android:textColor="@android:color/black"
-                            android:textSize="14sp"
-                            tools:ignore="HardcodedText" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:background="@drawable/bg_option_selected"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="8dp"
-                            android:text="Xanh Titan"
-                            android:textColor="#666666"
-                            android:textSize="14sp"
-                            tools:ignore="HardcodedText" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="Dung lượng:"
-                        android:textColor="#666666"
-                        android:textSize="14sp" />
-
-                    <LinearLayout
-                        android:id="@+id/ll_storage_options"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:background="@drawable/bg_option_selected"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="8dp"
-                            android:text="256GB"
-                            android:textColor="#666666"
-                            android:textSize="14sp"
-                            tools:ignore="HardcodedText" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:background="@drawable/bg_option_selected"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="8dp"
-                            android:text="512GB"
-                            android:textColor="@android:color/black"
-                            android:textSize="14sp"
-                            tools:ignore="HardcodedText" />
-                    </LinearLayout>
-
+                        android:orientation="horizontal"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        tools:listitem="@layout/item_variant" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Card Thông số kỹ thuật chi tiết -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="Thông số kỹ thuật chi tiết"
+                        android:textColor="#333333"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_product_specs"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:lineSpacingExtra="4dp"
+                        android:text="Màn hình: Super Retina XDR OLED, 120Hz, 6.7 inch\nCPU: Apple A17 Pro\nRAM: 8GB\nBộ nhớ trong: 256GB\nCamera sau: 48MP + 12MP + 12MP\nCamera trước: 12MP\nPin: 4422 mAh"
+                        android:textColor="#666666"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Card Mô tả sản phẩm -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -327,40 +297,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="Thông số kỹ thuật chi tiết"
-                        android:textColor="#333333"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tv_product_specs"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:lineSpacingExtra="4dp"
-                        android:text="Màn hình: Super Retina XDR OLED, 120Hz, 6.7 inch\nCPU: Apple A17 Pro\nRAM: 8GB\nBộ nhớ trong: 256GB\nCamera sau: 48MP + 12MP + 12MP\nCamera trước: 12MP\nPin: 4422 mAh"
-                        android:textColor="#666666"
-                        android:textSize="14sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -381,10 +317,10 @@
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:text="Thêm vào giỏ"
-            android:textColor="#FF6B00"
+            android:textColor="@color/primary_purple"
             android:textSize="16sp"
             app:cornerRadius="8dp"
-            app:strokeColor="#FF6B00"
+            app:strokeColor="@color/primary_purple"
             app:strokeWidth="2dp" />
 
         <com.google.android.material.button.MaterialButton
@@ -393,7 +329,7 @@
             android:layout_height="56dp"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:backgroundTint="#FF6B00"
+            android:background="@drawable/button_gradient"
             android:text="Mua ngay"
             android:textColor="@android:color/white"
             android:textSize="16sp"

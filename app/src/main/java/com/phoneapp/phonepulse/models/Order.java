@@ -53,6 +53,15 @@ public class Order implements Serializable {
 
     @SerializedName("modified_date")
     private Date modifiedDate;
+    private Address address; // ✅ thêm field này
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
 
     // --- Getters & Setters ---
     public String getId() { return id; }

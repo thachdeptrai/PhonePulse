@@ -202,7 +202,7 @@ public class ChatListFragment extends Fragment implements ChatOverviewAdapter.On
                     }
                 } else {
                     String errorBodyString = "";
-                     if (response.errorBody() != null) {
+                    if (response.errorBody() != null) {
                         try {
                             errorBodyString = response.errorBody().string();
                         } catch (Exception e) {
@@ -268,8 +268,8 @@ public class ChatListFragment extends Fragment implements ChatOverviewAdapter.On
     public void onChatItemClick(ChatOverviewItem item) {
         Log.d(TAG, "Chat item clicked: " + item.getRoomId());
         if (getContext() == null) {
-             Log.e(TAG, "Context is null in onChatItemClick.");
-             return;
+            Log.e(TAG, "Context is null in onChatItemClick.");
+            return;
         }
         String token = Constants.getToken(requireContext().getApplicationContext());
         if (token == null || token.isEmpty()) {

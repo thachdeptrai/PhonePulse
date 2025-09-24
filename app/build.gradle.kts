@@ -76,6 +76,13 @@ dependencies {
     implementation ("com.google.code.gson:gson:2.10.1")
     implementation ("org.greenrobot:eventbus:3.3.1")
     implementation ("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation ("io.socket:socket.io-client:2.1.0")
+    implementation ("com.google.android.gms:play-services-maps:18.2.0")
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
+    implementation ("com.google.android.libraries.places:places:3.5.0")
+    implementation ("io.michaelrocks:libphonenumber-android:8.12.57")
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
 
 
 

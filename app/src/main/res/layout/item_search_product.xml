@@ -72,7 +72,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:textColor="@color/shopee_orange"
+                    android:textColor="#FF0000"
                     android:text="₫25.990.000" />
 
                 <TextView

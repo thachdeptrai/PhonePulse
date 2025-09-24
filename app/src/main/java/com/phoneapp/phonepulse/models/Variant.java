@@ -1,6 +1,7 @@
 package com.phoneapp.phonepulse.models;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.List;
 
 public class Variant {
 
@@ -19,8 +20,20 @@ public class Variant {
     @SerializedName("quantity")
     private int quantity;
 
+    @SerializedName("sold_count")
+    private int soldCount;   // ✅ Thêm số lượng đã bán
+
     @SerializedName("price")
     private double price;
+
+    @SerializedName("original_price")
+    private Double originalPrice; // ✅ Giá gốc (có thể null)
+
+    @SerializedName("discount_percent")
+    private int discountPercent;  // ✅ % giảm giá
+
+    @SerializedName("images")
+    private List<String> images;  // ✅ Ảnh riêng cho biến thể
 
     @SerializedName("created_date")
     private String createdDate;
@@ -29,22 +42,22 @@ public class Variant {
     private String modifiedDate;
 
     // --- Constructors ---
-    public Variant() {
-        // Constructor mặc định cho Gson
-    }
-
-    public Variant(int quantity) {
-        this.quantity = quantity;
-    }
+    public Variant() {}
 
     public Variant(String id, String productId, Color color, Size size,
-                   int quantity, double price, String createdDate, String modifiedDate) {
+                   int quantity, int soldCount, double price, Double originalPrice,
+                   int discountPercent, List<String> images,
+                   String createdDate, String modifiedDate) {
         this.id = id;
         this.productId = productId;
         this.color = color;
         this.size = size;
         this.quantity = quantity;
+        this.soldCount = soldCount;
         this.price = price;
+        this.originalPrice = originalPrice;
+        this.discountPercent = discountPercent;
+        this.images = images;
         this.createdDate = createdDate;
         this.modifiedDate = modifiedDate;
     }
@@ -65,8 +78,20 @@ public class Variant {
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
 
+    public int getSoldCount() { return soldCount; }
+    public void setSoldCount(int soldCount) { this.soldCount = soldCount; }
+
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }
+
+    public Double getOriginalPrice() { return originalPrice; }
+    public void setOriginalPrice(Double originalPrice) { this.originalPrice = originalPrice; }
+
+    public int getDiscountPercent() { return discountPercent; }
+    public void setDiscountPercent(int discountPercent) { this.discountPercent = discountPercent; }
+
+    public List<String> getImages() { return images; }
+    public void setImages(List<String> images) { this.images = images; }
 
     public String getCreatedDate() { return createdDate; }
     public void setCreatedDate(String createdDate) { this.createdDate = createdDate; }
@@ -75,27 +100,15 @@ public class Variant {
     public void setModifiedDate(String modifiedDate) { this.modifiedDate = modifiedDate; }
 
     // --- Stock Update Methods ---
-    /**
-     * Giảm số lượng tồn kho.
-     *
-     * @param amount Số lượng cần giảm (phải > 0).
-     * @return true nếu giảm thành công, false nếu không hợp lệ hoặc không đủ hàng.
-     */
     public boolean reduceQuantity(int amount) {
-        if (amount <= 0) {
-            return false; // Số lượng giảm không hợp lệ
-        }
+        if (amount <= 0) return false;
         if (quantity >= amount) {
             quantity -= amount;
             return true;
         }
-        return false; // Không đủ hàng
+        return false;
     }
 
-    /**
-     * Kiểm tra còn hàng hay không.
-     * @return true nếu quantity > 0, false nếu hết hàng.
-     */
     public boolean isInStock() {
         return quantity > 0;
     }

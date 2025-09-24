@@ -30,4 +30,3 @@ public class MessagesApiResponse {
         this.messages = messages;
     }
 }
-    

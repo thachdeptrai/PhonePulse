@@ -46,7 +46,6 @@ public class LoginActivity extends AppCompatActivity {
 
         // Khởi tạo ApiService lần đầu (chưa có token)
         apiService = RetrofitClient.getApiService(null);
-        Log.d("DEBUG", "apiService = " + apiService);
 
         // Map views
         edEmail = findViewById(R.id.edEmail);
@@ -59,23 +58,27 @@ public class LoginActivity extends AppCompatActivity {
         // Load saved credentials if "Remember Me" was checked previously
         loadSavedCredentials();
 
-        // Check for extras from RegisterActivity
+        // Nhận dữ liệu từ RegisterActivity
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("REGISTERED_EMAIL")) {
             String registeredEmail = intent.getStringExtra("REGISTERED_EMAIL");
             String registeredPassword = intent.getStringExtra("REGISTERED_PASSWORD");
 
-            if (registeredEmail != null) {
+            if (!TextUtils.isEmpty(registeredEmail)) {
                 edEmail.setText(registeredEmail);
             }
-            if (registeredPassword != null) {
+            if (!TextUtils.isEmpty(registeredPassword)) {
                 edPassword.setText(registeredPassword);
             }
+
             Toast.makeText(this, "Đăng ký thành công! Vui lòng đăng nhập.", Toast.LENGTH_LONG).show();
-            // Xóa extras để tránh hiển thị lại khi xoay màn hình hoặc khởi tạo lại Activity
+
+            // Xóa extras để tránh hiển thị lại khi xoay màn hình
             intent.removeExtra("REGISTERED_EMAIL");
             intent.removeExtra("REGISTERED_PASSWORD");
         }
+
+
 
         // Set click listeners
         btnLogin.setOnClickListener(v -> {
@@ -89,7 +92,8 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         tvForgotPassword.setOnClickListener(v -> {
-            Toast.makeText(LoginActivity.this, "Chức năng quên mật khẩu đang phát triển!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, "Chức năng quên mật khẩu đang phát triển!",
+                    Toast.LENGTH_SHORT).show();
             // Example: startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
         });
     }
@@ -124,7 +128,6 @@ public class LoginActivity extends AppCompatActivity {
 
         LoginRequest request = new LoginRequest(email, password);
         btnLogin.setEnabled(false); // Vô hiệu hóa nút để tránh spam click
-        Toast.makeText(this, "Đang đăng nhập...", Toast.LENGTH_SHORT).show();
 
         apiService.login(request).enqueue(new Callback<ApiResponse<LoginResponse>>() {
             @Override
@@ -161,7 +164,6 @@ public class LoginActivity extends AppCompatActivity {
                 } else {
                     // Xử lý lỗi HTTP (ví dụ: 404, 500) hoặc phản hồi không thành công
                     Toast.makeText(LoginActivity.this, "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.", Toast.LENGTH_SHORT).show();
-                    Log.e("LoginActivity", "Login failed: " + response.code() + " " + response.message());
                 }
             }
 
@@ -169,7 +171,6 @@ public class LoginActivity extends AppCompatActivity {
             public void onFailure(Call<ApiResponse<LoginResponse>> call, Throwable t) {
                 btnLogin.setEnabled(true); // Kích hoạt lại nút
                 Toast.makeText(LoginActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                Log.e("LoginActivity", "Network error during login", t);
             }
         });
     }

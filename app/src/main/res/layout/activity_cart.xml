@@ -104,7 +104,7 @@
                         android:id="@+id/cb_select_all"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:buttonTint="@color/colorPrimary" />
+                        android:buttonTint="@color/background_dark" />
 
                     <TextView
                         android:id="@+id/tv_clear_cart"
@@ -112,7 +112,7 @@
                         android:layout_height="wrap_content"
                         android:text="Xóa giỏ hàng"
                         android:textSize="16sp"
-                        android:textColor="@android:color/holo_red_dark"
+                        android:textColor="#FF0000"
                         android:layout_marginStart="8dp"
                         android:clickable="true"
                         android:focusable="true" />

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/white">
 
-    <!-- Material Toolbar -->
+    <!-- Toolbar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbarEdit"
         android:layout_width="match_parent"
@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 
-    <!-- ScrollView cho nội dung -->
+    <!-- Nội dung -->
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -70,20 +70,58 @@
                     android:inputType="phone"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Địa chỉ -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tilAddress"
-                android:layout_width="0dp"
+            <!-- Địa chỉ: chọn Tỉnh / Huyện / Xã -->
+            <TextView
+                android:id="@+id/tvAddress"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="Địa chỉ"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:text="Địa chỉ"
+                android:textAppearance="?attr/textAppearanceSubtitle1"
                 app:layout_constraintTop_toBottomOf="@id/tilPhone"
                 app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="16dp"/>
+
+            <Spinner
+                android:id="@+id/spProvince"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/tvAddress"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="16dp">
+                android:layout_marginTop="8dp"/>
+
+            <Spinner
+                android:id="@+id/spDistrict"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/spProvince"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="8dp"/>
+
+            <Spinner
+                android:id="@+id/spWard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/spDistrict"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="8dp"/>
+
+            <!-- Số nhà / Thôn xóm -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilStreet"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="Số nhà, thôn/xóm"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:layout_constraintTop_toBottomOf="@id/spWard"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="8dp">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edtAddress"
+                    android:id="@+id/edtStreet"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPostalAddress"/>
@@ -96,7 +134,7 @@
                 android:layout_height="wrap_content"
                 android:text="Giới tính"
                 android:textAppearance="?attr/textAppearanceSubtitle1"
-                app:layout_constraintTop_toBottomOf="@id/tilAddress"
+                app:layout_constraintTop_toBottomOf="@id/tilStreet"
                 app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginTop="16dp"/>
 

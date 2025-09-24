@@ -1,5 +1,6 @@
 package com.phoneapp.phonepulse.FRAGMENT.HISTORY_ORDER_FRAGMENT;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,11 +14,14 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.phoneapp.phonepulse.Adapter.OrderAdapter;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.Response.ApiResponse; // Keep this if other APIs use it
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
+import com.phoneapp.phonepulse.models.Address;
 import com.phoneapp.phonepulse.models.Order;
 import com.phoneapp.phonepulse.models.Variant; // This is the direct Variant model
 import com.phoneapp.phonepulse.request.OrderItem;
@@ -28,6 +32,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -59,6 +64,7 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
             Toast.makeText(getContext(), "Không tìm thấy token. Vui lòng đăng nhập lại.", Toast.LENGTH_SHORT).show();
             Log.e(TAG, "onCreateView: Token is null or empty. Cannot initialize API service.");
             return view;
+
         }
         apiService = RetrofitClient.getApiService(rawToken);
 
@@ -72,6 +78,22 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
         tvProcessing = view.findViewById(R.id.tv_processing_orders);
 
         handleBundleData();
+        // Lấy danh sách địa chỉ đã lưu
+        List<Address> savedAddresses = loadAddressesFromPrefs();
+        if (!savedAddresses.isEmpty()) {
+            // Lấy địa chỉ cuối cùng (hoặc mặc định)
+            Address lastAddress = savedAddresses.get(savedAddresses.size() - 1);
+
+            String displayAddr = lastAddress.getFullAddress() != null
+                    ? lastAddress.getFullAddress()
+                    : "Địa chỉ chưa rõ";
+            Log.d(TAG, "📌 Địa chỉ đã lưu: " + displayAddr);
+        } else {
+            Log.d(TAG, "⚠️ Chưa có địa chỉ nào được lưu trong prefs.");
+        }
+
+
+
         return view;
     }
 
@@ -171,24 +193,30 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
 
         this.currentOrders = orders;
         Log.d(TAG, "setupOrders: Displaying " + orders.size() + " orders.");
-
         int total = orders.size();
         int cancelled = 0, shipping = 0, completed = 0, processing = 0;
 
         for (Order order : orders) {
             String status = order.getStatus() != null ? order.getStatus().toLowerCase(Locale.ROOT) : "";
             String shippingStatus = order.getShippingStatus() != null ? order.getShippingStatus().toLowerCase(Locale.ROOT) : "";
+            String paymentStatus = order.getPaymentStatus() != null ? order.getPaymentStatus().toLowerCase(Locale.ROOT) : "";
 
             if ("cancelled".equals(status)) {
                 cancelled++;
-            } else if ("pending".equals(status) || "processing".equals(status) || "confirmed".equals(status)) {
+            }
+            // 🚨 Giữ trạng thái pending ngay cả khi đã thanh toán
+            else if ("pending".equals(status)) {
                 processing++;
-            } else if ("shipping".equals(shippingStatus)) {
+            }
+            else if ("confirmed".equals(status) && "shipping".equals(shippingStatus)) {
                 shipping++;
-            } else if ("shipped".equals(shippingStatus) || "delivered".equals(shippingStatus) || "completed".equals(status)) {
+            }
+            else if ("confirmed".equals(status) && "shipped".equals(shippingStatus) && "paid".equals(paymentStatus)) {
                 completed++;
             }
         }
+
+
 
         tvTotal.setText("Tổng số đơn: " + total);
         tvCancelled.setText("Đã hủy: " + cancelled);
@@ -205,6 +233,15 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
         Log.d(TAG, "onOrderCanceledEvent: Received cancel event for Order ID: " + event.getOrderId());
         cancelOrderApi(event.getOrderId(), event.getCancelReason());
     }
+    private List<Address> loadAddressesFromPrefs() {
+        SharedPreferences prefs = requireContext().getSharedPreferences("address_prefs", android.content.Context.MODE_PRIVATE);
+        String json = prefs.getString("address_list", null);
+        if (json != null) {
+            Type type = new TypeToken<List<Address>>() {}.getType();
+            return new Gson().fromJson(json, type);
+        }
+        return new ArrayList<>();
+    }
 
     private void cancelOrderApi(String orderId, String reason) {
         String token = Constants.getToken(requireContext());
@@ -215,7 +252,7 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
 
         ApiService service = RetrofitClient.getApiService(token);
         Call<ApiResponse> call = service.cancelOrder("Bearer " + token, orderId);
-        Log.d(TAG, "cancelOrderApi: Attempting to cancel order with ID: " + orderId);
+        Log.d(TAG, "📌 Gửi yêu cầu hủy đơn hàng, ID: " + orderId);
 
         call.enqueue(new Callback<ApiResponse>() {
             @Override
@@ -223,21 +260,18 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
                 if (!isAdded()) return;
 
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Log.i(TAG, "✅ Đơn hàng " + orderId + " đã hủy thành công trên server. Lý do: " + reason);
+                    Log.i(TAG, "✅ Đơn hàng " + orderId + " đã được hủy thành công. Lý do: " + reason);
                     Toast.makeText(getContext(), "Đã hủy đơn: " + reason, Toast.LENGTH_SHORT).show();
 
-                    Order canceledOrder = findOrderInCurrentList(orderId);
-                    if (canceledOrder != null && canceledOrder.getItems() != null && !canceledOrder.getItems().isEmpty()) {
-                        Log.d(TAG, "📦 Found " + canceledOrder.getItems().size() + " items in the canceled order. Proceeding to update stock on server.");
-                        updateStockOnServer(canceledOrder.getItems());
-                    } else {
-                        Log.w(TAG, "⚠️ Canceled order not found locally or has no items. Cannot update stock. Refreshing order list.");
-                        fetchOrdersFromApi();
-                    }
+                    // 🔄 Làm mới danh sách đơn hàng từ server
+                    fetchOrdersFromApi();
 
                 } else {
-                    String errorMessage = "Hủy thất bại: " + (response.body() != null ? response.body().getMessage() : "Lỗi không xác định.");
-                    Log.e(TAG, "❌ Lỗi khi hủy đơn hàng " + orderId + ". Mã lỗi: " + response.code() + ". Chi tiết: " + errorMessage);
+                    String errorMessage = "Hủy đơn thất bại: " + (response.body() != null
+                            ? response.body().getMessage()
+                            : "Lỗi không xác định.");
+                    Log.e(TAG, "❌ Hủy đơn hàng " + orderId + " thất bại. Mã lỗi: " + response.code()
+                            + ". Chi tiết: " + errorMessage);
                     Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -246,7 +280,7 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
             public void onFailure(Call<ApiResponse> call, Throwable t) {
                 if (!isAdded()) return;
                 Toast.makeText(getContext(), "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "🌐 Lỗi mạng/API khi hủy đơn hàng " + orderId, t);
+                Log.e(TAG, "🌐 Lỗi mạng khi hủy đơn hàng " + orderId + ": " + t.getMessage(), t);
             }
         });
     }
@@ -255,104 +289,106 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
 
     /**
      * Cập nhật tồn kho trên server cho từng sản phẩm trong đơn hàng đã hủy.
-     * Phương thức này đảm bảo lấy số lượng tồn kho hiện tại từ server trước,
-     * sau đó cộng thêm số lượng sản phẩm đã hủy và gửi lại tổng số lượng mới.
+     * Số lượng sẽ được cộng thêm đúng bằng số lượng khách đã đặt.
      *
-     * @param items Danh sách các OrderItem từ đơn hàng đã bị hủy.
+     * @param items Danh sách OrderItem từ đơn hàng đã bị hủy.
      */
     private void updateStockOnServer(List<OrderItem> items) {
         final CountDownLatch latch = new CountDownLatch(items.size());
         Log.d(TAG, "✨ Bắt đầu cập nhật tồn kho cho " + items.size() + " sản phẩm.");
 
         for (OrderItem item : items) {
-            final String variantId = item.getVariantId(); // Đảm bảo final
-            final String productId = item.getProductId(); // Đảm bảo final
-            final int quantityToIncrease = item.getQuantity(); // Đảm bảo final
+            final String variantId = item.getVariantId();
+            final String productId = item.getProductId();
+            final int quantityToIncrease = item.getQuantity();
 
-            if (variantId == null || variantId.trim().isEmpty() || productId == null || productId.trim().isEmpty()) {
-                Log.w(TAG, "⚠️ Bỏ qua cập nhật tồn kho: Thiếu variantId hoặc productId cho một sản phẩm.");
+            if (variantId == null || variantId.trim().isEmpty() ||
+                    productId == null || productId.trim().isEmpty()) {
+                Log.w(TAG, "⚠️ Bỏ qua: Thiếu variantId hoặc productId cho sản phẩm.");
                 latch.countDown();
                 continue;
             }
 
-            // --- BƯỚC 1: GỌI API ĐỂ LẤY THÔNG TIN BIẾN THỂ HIỆN TẠI TỪ SERVER ---
-            // Yêu cầu API để lấy chi tiết biến thể bao gồm số lượng tồn kho hiện tại
+            // --- BƯỚC 1: Lấy số lượng tồn kho hiện tại ---
             apiService.getVariantForProductById(productId, variantId)
-                    .enqueue(new Callback<Variant>() { // <--- **Đã thay đổi ở đây để khớp với Call<Variant>**
+                    .enqueue(new Callback<Variant>() {
                         @Override
                         public void onResponse(Call<Variant> call, Response<Variant> response) {
-                            if (response.isSuccessful() && response.body() != null) { // body() sẽ là Variant, không phải ApiResponse
-                                Variant currentVariant = response.body(); // Lấy trực tiếp đối tượng Variant
-                                int currentServerQuantity = currentVariant.getQuantity(); // Số lượng tồn kho hiện tại trên server
-                                int newTotalQuantity = currentServerQuantity + quantityToIncrease; // Tính toán tổng số lượng mới
+                            if (response.isSuccessful() && response.body() != null) {
+                                Variant currentVariant = response.body();
+                                int currentServerQuantity = currentVariant.getQuantity();
+                                int newTotalQuantity = currentServerQuantity + quantityToIncrease;
 
-                                Log.d(TAG, "🚀 Đã lấy tồn kho hiện tại từ server cho Variant ID: " + variantId + " là " + currentServerQuantity + ". Tính toán tồn kho mới: " + newTotalQuantity);
+                                Log.d(TAG, "📦 Variant ID " + variantId +
+                                        " tồn kho hiện tại: " + currentServerQuantity +
+                                        " | hoàn trả thêm: " + quantityToIncrease +
+                                        " | tồn kho mới = " + newTotalQuantity);
 
-                                // --- BƯỚC 2: GỌI API ĐỂ CẬP NHẬT TỒN KHO VỚI SỐ LƯỢNG MỚI ĐÃ TÍNH TOÁN ---
-                                // Tạo payload chỉ chứa số lượng mới (và có thể các trường khác nếu API PUT yêu cầu đầy đủ)
+                                // --- BƯỚC 2: Gọi API update với số lượng mới ---
                                 Variant updatedVariantPayload = new Variant();
-                                // Quan trọng: Nếu API PUT yêu cầu tất cả các trường, hãy sao chép từ currentVariant
-                                // Ví dụ: updatedVariantPayload.setId(currentVariant.getId());
-                                // updatedVariantPayload.setName(currentVariant.getName());
-                                // updatedVariantPayload.setPrice(currentVariant.getPrice());
-                                // ... và các thuộc tính khác
-                                updatedVariantPayload.setQuantity(newTotalQuantity); // Đặt số lượng LÀ TỔNG MỚI
+                                updatedVariantPayload.setId(currentVariant.getId());
+                                updatedVariantPayload.setQuantity(newTotalQuantity);
+
+                                // Nếu API yêu cầu các field khác -> copy thêm:
+                                updatedVariantPayload.setPrice(currentVariant.getPrice());
+                                updatedVariantPayload.setColor(currentVariant.getColor());
+                                updatedVariantPayload.setSize(currentVariant.getSize());
 
                                 apiService.updateVariantForProductById(productId, variantId, updatedVariantPayload)
-                                        .enqueue(new Callback<ApiResponse<Variant>>() { // API update này vẫn là ApiResponse<Variant>
+                                        .enqueue(new Callback<ApiResponse<Variant>>() {
                                             @Override
                                             public void onResponse(Call<ApiResponse<Variant>> call, Response<ApiResponse<Variant>> response) {
                                                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                                                    Log.i(TAG, "✅ Tồn kho đã cập nhật thành công cho variant ID: " + variantId + ". Tồn kho mới trên server: " + (response.body().getData() != null ? response.body().getData().getQuantity() : "N/A"));
+                                                    Log.i(TAG, "✅ Cập nhật thành công Variant ID: " + variantId +
+                                                            ". Tồn kho mới: " + response.body().getData().getQuantity());
                                                 } else {
-                                                    String errorDetail = (response.body() != null ? response.body().getMessage() : "Không rõ lỗi.");
-                                                    Log.e(TAG, "❌ Lỗi cập nhật tồn kho cho variant ID: " + variantId +
-                                                            ". Mã lỗi: " + response.code() + ". Chi tiết: " + errorDetail + ". Payload: " + (call.request().body() != null ? call.request().body().toString() : "null"));
+                                                    String err = response.body() != null ? response.body().getMessage() : "Không rõ lỗi.";
+                                                    Log.e(TAG, "❌ Lỗi update Variant ID: " + variantId +
+                                                            " | Mã lỗi: " + response.code() +
+                                                            " | Chi tiết: " + err);
                                                 }
-                                                latch.countDown(); // Đảm bảo latch được giảm sau khi yêu cầu thứ 2 hoàn thành
+                                                latch.countDown();
                                             }
 
                                             @Override
                                             public void onFailure(Call<ApiResponse<Variant>> call, Throwable t) {
-                                                Log.e(TAG, "🌐 Lỗi mạng/API khi gửi cập nhật tồn kho cho variant ID: " + variantId + ": " + t.getMessage(), t);
-                                                latch.countDown(); // Đảm bảo latch được giảm ngay cả khi yêu cầu thứ 2 thất bại
+                                                Log.e(TAG, "🌐 Lỗi mạng khi update Variant ID: " + variantId, t);
+                                                latch.countDown();
                                             }
                                         });
 
                             } else {
-                                // Nếu response.isSuccessful() là false hoặc body là null
-                                // Hoặc nếu body có nhưng quantity là null hoặc không hợp lệ (tùy thuộc vào model Variant của bạn)
-                                String errorMessage;
-                                if (response.code() == 404) {
-                                    errorMessage = "Không tìm thấy biến thể.";
-                                } else {
-                                    errorMessage = "Lỗi khi lấy dữ liệu tồn kho: " + response.code() + " - " + response.message();
-                                    try {
-                                        if (response.errorBody() != null) {
-                                            errorMessage += " (" + response.errorBody().string() + ")";
-                                        }
-                                    } catch (Exception e) {
-                                        Log.e(TAG, "Lỗi đọc errorBody: " + e.getMessage());
-                                    }
-                                }
-                                Log.e(TAG, "❌ Lỗi khi lấy tồn kho hiện tại cho variant ID: " + variantId + ". Chi tiết: " + errorMessage);
-                                // Có thể thông báo cho người dùng ở đây nếu lỗi nghiêm trọng
-                                // Toast.makeText(getContext(), "Không thể lấy tồn kho cho " + item.getName(), Toast.LENGTH_SHORT).show();
-                                latch.countDown(); // Đảm bảo latch được giảm nếu yêu cầu đầu tiên thất bại
+                                Log.e(TAG, "❌ Không lấy được tồn kho cho Variant ID: " + variantId +
+                                        " | Mã lỗi: " + response.code());
+                                latch.countDown();
                             }
                         }
 
                         @Override
-                        public void onFailure(Call<Variant> call, Throwable t) { // <--- **Đã thay đổi ở đây để khớp với Call<Variant>**
-                            Log.e(TAG, "🌐 Lỗi mạng/API khi lấy tồn kho hiện tại cho variant ID: " + variantId + ": " + t.getMessage(), t);
-                            // Có thể thông báo cho người dùng ở đây
-                            // Toast.makeText(getContext(), "Lỗi kết nối khi lấy tồn kho cho " + item.getName(), Toast.LENGTH_SHORT).show();
-                            latch.countDown(); // Đảm bảo latch được giảm ngay cả khi yêu cầu đầu tiên thất bại
+                        public void onFailure(Call<Variant> call, Throwable t) {
+                            Log.e(TAG, "🌐 Lỗi mạng khi lấy tồn kho Variant ID: " + variantId, t);
+                            latch.countDown();
                         }
                     });
         }
 
-        // Luồng riêng để chờ tất cả các cập nhật tồn kho hoàn tất
+        // --- BƯỚC 3: Sau khi tất cả cập nhật xong thì refresh ---
+        new Thread(() -> {
+            try {
+                latch.await();
+                if (isAdded()) {
+                    Log.d(TAG, "🎉 Hoàn tất cập nhật tồn kho. Làm mới danh sách đơn.");
+                    requireActivity().runOnUiThread(this::fetchOrdersFromApi);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                Log.e(TAG, "⚠️ Luồng bị gián đoạn khi chờ cập nhật tồn kho.", e);
+            }
+        }).start();
+
+
+
+    // Luồng riêng để chờ tất cả các cập nhật tồn kho hoàn tất
         new Thread(() -> {
             try {
                 latch.await(); // Chờ tất cả các latch.countDown() hoàn thành
@@ -381,4 +417,13 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
         }
         return null;
     }
+    private Address loadSelectedAddress() {
+        SharedPreferences prefs = requireContext().getSharedPreferences("address_prefs", android.content.Context.MODE_PRIVATE);
+        String json = prefs.getString("selected_address", null);
+        if (json != null) {
+            return new Gson().fromJson(json, Address.class);
+        }
+        return null;
+    }
+
 }
