@@ -657,7 +657,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             tvDiscountPercent.setVisibility(View.GONE);
             tvOriginalPrice.setVisibility(View.GONE);
 
-            tvDiscountPrice.setText(numberFormat.format(originalPrice) + "₫");
+            tvDiscountPrice.setText(numberFormat.format(originalPrice) + "");
 
             // bỏ gạch ngang nếu có từ trước
             tvOriginalPrice.setPaintFlags(0);

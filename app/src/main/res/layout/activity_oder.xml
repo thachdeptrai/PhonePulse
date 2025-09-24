@@ -65,7 +65,7 @@
                             android:layout_weight="1"
                             android:text="Nguyễn Văn A"
                             android:textColor="@color/black"
-                            android:textSize="16sp"
+                            android:textSize="22sp"
                             android:textStyle="bold" />
 
                         <TextView

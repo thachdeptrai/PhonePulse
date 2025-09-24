@@ -1,5 +1,6 @@
 package com.phoneapp.phonepulse.FRAGMENT.HISTORY_ORDER_FRAGMENT;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,11 +14,14 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.phoneapp.phonepulse.Adapter.OrderAdapter;
 import com.phoneapp.phonepulse.R;
 import com.phoneapp.phonepulse.Response.ApiResponse; // Keep this if other APIs use it
 import com.phoneapp.phonepulse.data.api.ApiService;
 import com.phoneapp.phonepulse.data.api.RetrofitClient;
+import com.phoneapp.phonepulse.models.Address;
 import com.phoneapp.phonepulse.models.Order;
 import com.phoneapp.phonepulse.models.Variant; // This is the direct Variant model
 import com.phoneapp.phonepulse.request.OrderItem;
@@ -28,6 +32,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -59,6 +64,7 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
             Toast.makeText(getContext(), "Không tìm thấy token. Vui lòng đăng nhập lại.", Toast.LENGTH_SHORT).show();
             Log.e(TAG, "onCreateView: Token is null or empty. Cannot initialize API service.");
             return view;
+
         }
         apiService = RetrofitClient.getApiService(rawToken);
 
@@ -72,6 +78,22 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
         tvProcessing = view.findViewById(R.id.tv_processing_orders);
 
         handleBundleData();
+        // Lấy danh sách địa chỉ đã lưu
+        List<Address> savedAddresses = loadAddressesFromPrefs();
+        if (!savedAddresses.isEmpty()) {
+            // Lấy địa chỉ cuối cùng (hoặc mặc định)
+            Address lastAddress = savedAddresses.get(savedAddresses.size() - 1);
+
+            String displayAddr = lastAddress.getFullAddress() != null
+                    ? lastAddress.getFullAddress()
+                    : "Địa chỉ chưa rõ";
+            Log.d(TAG, "📌 Địa chỉ đã lưu: " + displayAddr);
+        } else {
+            Log.d(TAG, "⚠️ Chưa có địa chỉ nào được lưu trong prefs.");
+        }
+
+
+
         return view;
     }
 
@@ -211,6 +233,15 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
         Log.d(TAG, "onOrderCanceledEvent: Received cancel event for Order ID: " + event.getOrderId());
         cancelOrderApi(event.getOrderId(), event.getCancelReason());
     }
+    private List<Address> loadAddressesFromPrefs() {
+        SharedPreferences prefs = requireContext().getSharedPreferences("address_prefs", android.content.Context.MODE_PRIVATE);
+        String json = prefs.getString("address_list", null);
+        if (json != null) {
+            Type type = new TypeToken<List<Address>>() {}.getType();
+            return new Gson().fromJson(json, type);
+        }
+        return new ArrayList<>();
+    }
 
     private void cancelOrderApi(String orderId, String reason) {
         String token = Constants.getToken(requireContext());
@@ -232,18 +263,15 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
                     Log.i(TAG, "✅ Đơn hàng " + orderId + " đã được hủy thành công. Lý do: " + reason);
                     Toast.makeText(getContext(), "Đã hủy đơn: " + reason, Toast.LENGTH_SHORT).show();
 
-                    Order canceledOrder = findOrderInCurrentList(orderId);
-                    if (canceledOrder != null && canceledOrder.getItems() != null && !canceledOrder.getItems().isEmpty()) {
-                        Log.d(TAG, "📦 Đã tìm thấy " + canceledOrder.getItems().size() + " sản phẩm trong đơn hủy. Tiến hành cập nhật tồn kho trên server.");
-                        updateStockOnServer(canceledOrder.getItems());
-                    } else {
-                        Log.w(TAG, "⚠️ Không tìm thấy đơn hàng trong danh sách hiện tại hoặc không có sản phẩm. Làm mới danh sách đơn.");
-                        fetchOrdersFromApi();
-                    }
+                    // 🔄 Làm mới danh sách đơn hàng từ server
+                    fetchOrdersFromApi();
 
                 } else {
-                    String errorMessage = "Hủy đơn thất bại: " + (response.body() != null ? response.body().getMessage() : "Lỗi không xác định.");
-                    Log.e(TAG, "❌ Hủy đơn hàng " + orderId + " thất bại. Mã lỗi: " + response.code() + ". Chi tiết: " + errorMessage);
+                    String errorMessage = "Hủy đơn thất bại: " + (response.body() != null
+                            ? response.body().getMessage()
+                            : "Lỗi không xác định.");
+                    Log.e(TAG, "❌ Hủy đơn hàng " + orderId + " thất bại. Mã lỗi: " + response.code()
+                            + ". Chi tiết: " + errorMessage);
                     Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -256,6 +284,7 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
             }
         });
     }
+
 
 
     /**
@@ -388,4 +417,13 @@ public class TatCaDonHang_FRAGMENT extends Fragment {
         }
         return null;
     }
+    private Address loadSelectedAddress() {
+        SharedPreferences prefs = requireContext().getSharedPreferences("address_prefs", android.content.Context.MODE_PRIVATE);
+        String json = prefs.getString("selected_address", null);
+        if (json != null) {
+            return new Gson().fromJson(json, Address.class);
+        }
+        return null;
+    }
+
 }

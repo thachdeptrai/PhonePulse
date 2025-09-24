@@ -59,6 +59,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         return new OrderViewHolder(view);
     }
 
+
     @Override
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
         if (orderList == null || orderList.isEmpty()) return;
@@ -72,31 +73,46 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         holder.tvOrderTotal.setText("Tổng tiền: " + formatCurrency(order.getFinalPrice()));
 
         // ===== Hiển thị thông tin khách hàng =====
-        SharedPreferences prefs = holder.itemView.getContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
-        String fullname = prefs.getString("fullname", "Chưa có tên");
-        String phone = prefs.getString("phone", "Không có số điện thoại");
-        String address = prefs.getString("address", "Chưa có địa chỉ");
+        String fullname, phone, address;
+
+        if (order.getAddress() != null) {
+            fullname = safeString(order.getAddress().getFullName());
+            phone = safeString(order.getAddress().getPhoneNumber());
+            address = safeString(order.getAddress().getFullAddress());
+        } else {
+            SharedPreferences prefs = holder.itemView.getContext()
+                    .getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+            fullname = prefs.getString("fullname", "Chưa có tên");
+            phone = prefs.getString("phone", "Không có số điện thoại");
+            address = prefs.getString("address", "Chưa có địa chỉ");
+        }
+
 
         holder.tvCustomerName.setText("Khách hàng: " + fullname);
         holder.tvCustomerPhone.setText("SĐT: " + phone);
         holder.tvCustomerAddress.setText("Địa chỉ: " + address);
-
 
         // ===== Trạng thái thanh toán =====
         String paymentStatus = safeString(order.getPaymentStatus()).toLowerCase(Locale.ROOT);
         switch (paymentStatus) {
             case "paid":
                 holder.tvPaymentStatus.setText("Đã thanh toán");
-                holder.tvPaymentStatus.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#4CAF50")));
+                holder.tvPaymentStatus.setBackgroundTintList(
+                        ColorStateList.valueOf(Color.parseColor("#4CAF50"))
+                );
                 break;
             case "refunded":
                 holder.tvPaymentStatus.setText("Hoàn tiền");
-                holder.tvPaymentStatus.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2196F3")));
+                holder.tvPaymentStatus.setBackgroundTintList(
+                        ColorStateList.valueOf(Color.parseColor("#2196F3"))
+                );
                 break;
             case "unpaid":
             default:
                 holder.tvPaymentStatus.setText("Chưa thanh toán");
-                holder.tvPaymentStatus.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#F44336")));
+                holder.tvPaymentStatus.setBackgroundTintList(
+                        ColorStateList.valueOf(Color.parseColor("#F44336"))
+                );
                 break;
         }
 
@@ -104,31 +120,30 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         List<OrderItem> items = order.getItems();
         if (items != null && !items.isEmpty()) {
             if (holder.rvOrderItems.getAdapter() == null) {
-                holder.rvOrderItems.setLayoutManager(new LinearLayoutManager(holder.itemView.getContext()));
+                holder.rvOrderItems.setLayoutManager(
+                        new LinearLayoutManager(holder.itemView.getContext())
+                );
             }
             holder.rvOrderItems.setAdapter(new OrderItemAdapter(items));
         }
 
-        // ===== Xử lý nút hủy đơn và hiển thị/ẩn nút =====
+        // ===== Xử lý nút hủy đơn =====
         String orderStatus = safeString(order.getStatus()).toLowerCase(Locale.ROOT);
         String shippingStatus = safeString(order.getShippingStatus()).toLowerCase(Locale.ROOT);
 
-        // Chỉ hiển thị nút hủy nếu trạng thái là 'pending', 'confirmed' hoặc 'shipping'
-        if (("pending".equals(orderStatus) || "confirmed".equals(orderStatus)) && !"shipped".equals(shippingStatus)) {
+        if (("pending".equals(orderStatus) || "confirmed".equals(orderStatus))
+                && !"shipping".equals(shippingStatus)
+                && !"shipped".equals(shippingStatus)) {
             holder.btnCancelOrder.setVisibility(View.VISIBLE);
-            holder.btnCancelOrder.setOnClickListener(v -> {
-                showCancelBottomSheet(v.getContext(), order.getId());
-            });
-        } else if ("shipping".equals(shippingStatus)) { // Nếu đang giao hàng cũng cho phép hủy
-            holder.btnCancelOrder.setVisibility(View.VISIBLE);
-            holder.btnCancelOrder.setOnClickListener(v -> {
-                showCancelBottomSheet(v.getContext(), order.getId());
-            });
-        }
-        else {
-            holder.btnCancelOrder.setVisibility(View.GONE); // Ẩn nút nếu không thể hủy
+            holder.btnCancelOrder.setOnClickListener(v ->
+                    showCancelBottomSheet(v.getContext(), order.getId())
+            );
+        } else {
+            holder.btnCancelOrder.setVisibility(View.GONE);
+            holder.btnCancelOrder.setOnClickListener(null);
         }
     }
+
 
     // ================== BottomSheet hủy đơn ==================
     private void showCancelBottomSheet(Context context, String orderId) {
